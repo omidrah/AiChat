@@ -1,0 +1,23 @@
+﻿using AiChat.Api.Hubs;
+using AiChat.Application.Interfaces;
+using Microsoft.AspNetCore.SignalR;
+
+namespace AiChat.Api.Contracts
+{
+    public class SignalRChatNotifier: IChatStreamNotifier
+    {
+        private readonly IHubContext<ChatHub> _hub;
+
+        public SignalRChatNotifier(IHubContext<ChatHub> hub)
+        {
+            _hub = hub;
+        }
+
+        public async Task SendChunkAsync(Guid conversationId,string chunk)
+        {
+            await _hub.Clients
+                .Group(conversationId.ToString())
+                .SendAsync("ReceiveChunk", chunk);
+        }
+    }
+}

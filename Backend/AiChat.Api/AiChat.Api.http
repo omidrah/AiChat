@@ -1,0 +1,6 @@
+@AiChat.Api_HostAddress = http://localhost:5122
+
+GET {{AiChat.Api_HostAddress}}/Chat/
+Accept: application/json
+
+###
