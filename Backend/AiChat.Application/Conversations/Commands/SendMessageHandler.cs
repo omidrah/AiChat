@@ -2,7 +2,6 @@
 
 using AiChat.Application.Abstractions;
 using AiChat.Application.Dtos;
-using AiChat.Application.Interfaces;
 using System.Text;
 using System.Text.Json;
 

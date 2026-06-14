@@ -1,4 +1,4 @@
-﻿namespace AiChat.Application.Interfaces
+﻿namespace AiChat.Application.Abstractions
 {
     public interface IChatStreamNotifier
     {

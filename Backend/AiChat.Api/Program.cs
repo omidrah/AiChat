@@ -1,7 +1,6 @@
 using AiChat.Api.Hubs;
 using AiChat.Application.Abstractions;
 using AiChat.Application.Conversations.Commands;
-using AiChat.Application.Interfaces;
 using AiChat.Infrastructure.AI;
 using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;

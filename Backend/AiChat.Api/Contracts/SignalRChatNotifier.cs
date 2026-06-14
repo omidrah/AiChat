@@ -1,5 +1,5 @@
 ﻿using AiChat.Api.Hubs;
-using AiChat.Application.Interfaces;
+using AiChat.Application.Abstractions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace AiChat.Api.Contracts

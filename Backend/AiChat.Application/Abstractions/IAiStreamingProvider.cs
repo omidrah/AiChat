@@ -1,6 +1,6 @@
 ﻿using AiChat.Application.Dtos;
 
-namespace AiChat.Application.Interfaces
+namespace AiChat.Application.Abstractions
 {
     public interface IAiStreamingProvider
     {

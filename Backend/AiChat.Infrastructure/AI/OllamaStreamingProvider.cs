@@ -1,5 +1,5 @@
-﻿using AiChat.Application.Dtos;
-using AiChat.Application.Interfaces;
+﻿using AiChat.Application.Abstractions;
+using AiChat.Application.Dtos;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json;
