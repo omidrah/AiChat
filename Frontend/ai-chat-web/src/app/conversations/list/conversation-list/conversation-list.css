@@ -1,0 +1,28 @@
+.header{
+    padding:10px;
+  }
+  
+  button{
+    width:100%;
+    padding:10px;
+    border:none;
+    background:#4f46e5;
+    color:white;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  
+  .list{
+    margin-top:10px;
+  }
+  
+  .item{
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  
+  .item:hover{
+    background:#f0f2f7;
+  }
+  

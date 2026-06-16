@@ -1,0 +1,14 @@
+<div class="header">
+    <button (click)="create()">گفتگوی جدید</button>
+  </div>
+  
+  <div class="list">
+    <div
+      class="item"
+      *ngFor="let c of conversations"
+      (click)="open(c.id)"
+    >
+      {{c.title}}
+    </div>
+  </div>
+  

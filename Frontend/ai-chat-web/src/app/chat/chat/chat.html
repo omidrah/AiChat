@@ -1,0 +1,28 @@
+<div class="chat-container">
+
+  <div class="messages">
+
+    <div
+      *ngFor="let m of messages"
+      class="msg"
+      [class.user]="m.role==='User'"
+      [class.ai]="m.role==='Assistant'"
+    >
+      {{m.content}}
+    </div>
+
+  </div>
+
+  <div class="input-area">
+
+    <input
+      [(ngModel)]="input"
+      placeholder="پیام خود را بنویس..."
+      (keyup.enter)="send()"
+    />
+
+    <button (click)="send()">ارسال</button>
+
+  </div>
+
+</div>
