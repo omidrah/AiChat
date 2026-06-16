@@ -1,0 +1,32 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AvaloniaApplication1.MainWindow"
+        xmlns:local="using:AvaloniaApplication1" 
+        x:DataType="local:MainWindow"
+        Title="AvaloniaApplication1">
+   <Grid RowDefinitions="*, Auto, Auto" Margin="10">
+        <!-- لیست پیام‌ها -->
+        <ListBox Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}">
+            <ListBox.ItemTemplate>
+                <!-- اضافه کردن DataType در اینجا برای حل خطا -->
+                <DataTemplate x:DataType="local:MessageDto">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="{Binding Role}" FontWeight="Bold" FontSize="10"/>
+                        <TextBlock Text="{Binding Content}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding CreatedAt}" FontSize="8" Foreground="Gray"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <TextBlock Grid.Row="1" x:Name="StatusLabel" FontSize="10" Foreground="Gray" Margin="0,5"/>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="5">
+            <TextBox x:Name="InputBox" Width="380" Watermark="Type your message..."/>
+            <Button Content="Send" Click="OnSendClick" IsDefault="True"/>
+        </StackPanel>
+    </Grid>
+</Window>
