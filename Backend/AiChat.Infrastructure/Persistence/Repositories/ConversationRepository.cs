@@ -13,22 +13,27 @@ namespace AiChat.Infrastructure.Persistence.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task AddAsync(Conversation conversation, CancellationToken cancellationToken = default)
+        public async Task AddAsync(Conversation conversation, CancellationToken ct = default)
         {
-            await _dbContext.Conversations
-                .AddAsync(conversation, cancellationToken);
+            await _dbContext.Conversations.AddAsync(conversation, ct);
         }
 
-        public async Task<Conversation?> GetAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<Conversation?> GetAsync(Guid id, CancellationToken ct = default)
         {
-            return await _dbContext.Conversations.Include(x => x.Messages)                
-                .SingleOrDefaultAsync(c => c.Id == id, cancellationToken);
+            return await _dbContext.Conversations.Include(x => x.Messages)               
+                .SingleOrDefaultAsync(c => c.Id == id, ct);
         }
-
-        public async Task<List<Conversation>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<List<Conversation>> GetPagedAsync(int page,int pageSize, CancellationToken ct)
         {
             return await _dbContext.Conversations
-                .ToListAsync(cancellationToken);
+                .OrderByDescending(x => x.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+        }
+        public async Task<List<Conversation>> GetAllAsync(CancellationToken ct = default)
+        {
+            return await _dbContext.Conversations.ToListAsync(ct);
         }
 
         public Task DeleteAsync(Conversation conversation, CancellationToken ct = default)

@@ -1,10 +1,11 @@
 ﻿using AiChat.Api.Contracts;
-using AiChat.Application.Abstractions;
-using AiChat.Application.Conversations.Commands;
+using AiChat.Application.Conversations.Commands.CreateConversation;
+using AiChat.Application.Conversations.Commands.CreateMessage;
+using AiChat.Application.Conversations.Commands.DeleteConversaion;
+using AiChat.Application.Conversations.Queries.GetConversationList;
+using AiChat.Application.Conversations.Queries.GetConverstaions;
 using AiChat.Application.Dtos;
-using AiChat.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
 
 namespace AiChat.Api.Controllers
 {
@@ -12,26 +13,18 @@ namespace AiChat.Api.Controllers
     [Route("api/conversations")]
     public class ConversationsController : ControllerBase
     {
-        private readonly IConversationRepository _repository;
-
-        public ConversationsController(IConversationRepository repository)
+        public ConversationsController()
         {
-            _repository = repository;
         }
         /// <summary>
         /// generate New Conversation 
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromServices]CreateConversationHandler handler)
         {
-            var conversation = Conversation.CreateConversation($"New Chat on {DateTime.Now}");
-
-            await _repository.AddAsync(conversation);
-
-            await _repository.SaveChangesAsync();
-
-            return Ok(conversation.Id);
+            var id = await handler.HandleAsync( new CreateConversationCommand("New Chat"));
+            return Ok(id);
         }
 
         /// <summary>
@@ -39,10 +32,9 @@ namespace AiChat.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromServices] GetConversationListHandler listhandler)
         {
-            var conversations = await _repository.GetAllAsync();
-
+            var conversations = await listhandler.HandleAsync();
             return Ok(
                 conversations.Select(x =>
                 new ConversationListItemDto
@@ -59,28 +51,14 @@ namespace AiChat.Api.Controllers
         /// <param name="conversationId"></param>
         /// <returns></returns>
         [HttpGet("{conversationId}")]
-        public async Task<IActionResult> GetMessageByConversationId(Guid conversationId)
+        public async Task<IActionResult> GetMessageByConversationId(Guid conversationId, [FromServices] GetConversationHandler getConversationHandler)
         {
-            var conversation =
-                await _repository.GetAsync(conversationId);
+            var conversation = await getConversationHandler.HandleAsync(new GetConversationQuery(conversationId));
 
             if (conversation is null)
                 return NotFound();
 
-            return Ok(
-                new ConversationDetailsDto
-                {
-                    Id = conversation.Id,
-                    Title = conversation.Title,
-                    Messages =
-                        conversation.Messages.OrderBy(x => x.CreatedAt)
-                            .Select(x => new MessageDto
-                            {
-                                Role = x.Role.ToString().ToLower(),
-                                Content = x.Content                              
-                            })
-                            .ToList()
-                });
+            return Ok(conversation);
         }
 
        
@@ -101,18 +79,12 @@ namespace AiChat.Api.Controllers
         }
 
         [HttpDelete("{conversationId}")]
-        public async Task<IActionResult> Delete(Guid conversationId)
+        public async Task<IActionResult> Delete(Guid conversationId, [FromServices] DeleteConversationHandler handler)
         {
-            var conversation =
-                await _repository.GetAsync(conversationId);
+            var result = await handler.HandleAsync(new DeleteConversationCommand(conversationId));
 
-            if (conversation is null)
+            if (!result)
                 return NotFound();
-
-            await _repository.DeleteAsync(
-                conversation);
-
-            await _repository.SaveChangesAsync();
 
             return NoContent();
         }

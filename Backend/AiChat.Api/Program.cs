@@ -1,19 +1,15 @@
 using AiChat.Api.Contracts;
 using AiChat.Api.Hubs;
 using AiChat.Application.Abstractions;
-using AiChat.Application.Conversations.Commands;
+using AiChat.Application.Conversations.Commands.CreateMessage;
 using AiChat.Infrastructure.AI;
 using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;
-using Azure.Core;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle  
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
@@ -25,7 +21,6 @@ builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((c
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
 
-// Fix: Use Configure instead of Configuration.  
 builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
 
 builder.Services.AddDbContext<ChatDbContext>(options =>
@@ -39,12 +34,13 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 });
 builder.Services.AddScoped<IChatStreamNotifier, SignalRChatNotifier>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IConversationTitleGenerator,OllamaConversationTitleGenerator>();
 builder.Services.AddScoped<SendMessageHandler>();
 
 var app = builder.Build();
 
 app.MapHub<ChatHub>("/hubs/chat");
-// Configure the HTTP request pipeline.  
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

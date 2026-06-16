@@ -1,4 +1,4 @@
-﻿namespace AiChat.Application.Conversations.Commands;
+﻿namespace AiChat.Application.Conversations.Commands.CreateMessage;
 
 using AiChat.Application.Abstractions;
 using AiChat.Application.Dtos;
@@ -11,29 +11,39 @@ public class SendMessageHandler
     private readonly IAiProvider _aiProvider;
     private readonly IAiStreamingProvider _aiStreamingProvider;
     private readonly IChatStreamNotifier _notifier;
-        
+    private readonly IConversationTitleGenerator _titleGenerator;
     public SendMessageHandler(
         IConversationRepository repository,
         IAiProvider aiProvider,
         IAiStreamingProvider aiStreamingProvider,
-        IChatStreamNotifier notifier)
+        IChatStreamNotifier notifier,
+        IConversationTitleGenerator titleGenerator)
     {
         _repository = repository;
         _aiProvider = aiProvider;
         _aiStreamingProvider = aiStreamingProvider;
         _notifier = notifier;
+        _titleGenerator = titleGenerator;
     }
 
-    public async Task<string> HandleAsync(SendMessageCommand command,CancellationToken ct = default)
+    public async Task<string> HandleAsync(SendMessageCommand command, CancellationToken ct = default)
     {
-        var conversation =await _repository.GetAsync(command.ConversationId, ct);
+        var conversation = await _repository.GetAsync(command.ConversationId, ct);
 
         if (conversation is null)
         {
-            throw new Exception(
-                "Conversation not found");
+            throw new Exception("Conversation not found");
         }
         conversation.AddMessage(command.Message, Domain.ValueObject.MessageRole.User); // insert user message
+        //تولید خودکار عنوان Conversation
+        if (conversation.Messages.Count == 1)
+        {
+            var title =
+                await _titleGenerator
+                    .GenerateTitleAsync(command.Message);
+
+            conversation.Rename(title);
+        }
 
         await _repository.SaveChangesAsync();
 
@@ -49,7 +59,7 @@ public class SendMessageHandler
 
         // var answer = await _aiProvider.AskAsync(messages);
         //conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant); // insert answer from AI provider 
-    
+
         var answerBuilder = new StringBuilder();
         await _aiStreamingProvider.StreamAsync(messages,
                  async chunk =>
@@ -59,7 +69,7 @@ public class SendMessageHandler
                      await _notifier.SendChunkAsync(
                          conversation.Id,
                          chunk);
-                 });    
+                 });
         var answer = answerBuilder.ToString();
         conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);
         await _repository.SaveChangesAsync();
