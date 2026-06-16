@@ -14,6 +14,7 @@ namespace AiChat.Application.Abstractions
 
         Task<List<Conversation>> GetAllAsync(
             CancellationToken cancellationToken = default);
+        Task DeleteAsync(Conversation conversation, CancellationToken ct = default);
 
         Task SaveChangesAsync(
             CancellationToken cancellationToken = default);

@@ -15,6 +15,7 @@ namespace AiChat.Api.Contracts
 
         public async Task SendChunkAsync(Guid conversationId,string chunk)
         {
+            Console.WriteLine($"Sending chunk = {chunk}");
             await _hub.Clients
                 .Group(conversationId.ToString())
                 .SendAsync("ReceiveChunk", chunk);

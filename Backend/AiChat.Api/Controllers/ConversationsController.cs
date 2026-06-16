@@ -1,6 +1,7 @@
 ﻿using AiChat.Api.Contracts;
 using AiChat.Application.Abstractions;
 using AiChat.Application.Conversations.Commands;
+using AiChat.Application.Dtos;
 using AiChat.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -32,6 +33,7 @@ namespace AiChat.Api.Controllers
 
             return Ok(conversation.Id);
         }
+
         /// <summary>
         /// List All of Converation
         /// </summary>
@@ -41,7 +43,15 @@ namespace AiChat.Api.Controllers
         {
             var conversations = await _repository.GetAllAsync();
 
-            return Ok(conversations);   
+            return Ok(
+                conversations.Select(x =>
+                new ConversationListItemDto
+            {
+                    CreatedAt= x.CreatedAt,
+                    Id= x.Id,
+                    Title= x.Title
+            })
+                );   
         }
         /// <summary>
         /// Get History of Converation 
@@ -58,16 +68,22 @@ namespace AiChat.Api.Controllers
                 return NotFound();
 
             return Ok(
-                conversation.Messages
-                    .OrderBy(x => x.CreatedAt)
-                    .Select(x => new
-                    {
-                        x.Id,
-                        Role = x.Role.ToString(),
-                        x.Content,
-                        x.CreatedAt
-                    }));
+                new ConversationDetailsDto
+                {
+                    Id = conversation.Id,
+                    Title = conversation.Title,
+                    Messages =
+                        conversation.Messages.OrderBy(x => x.CreatedAt)
+                            .Select(x => new MessageDto
+                            {
+                                Role = x.Role.ToString().ToLower(),
+                                Content = x.Content                              
+                            })
+                            .ToList()
+                });
         }
+
+       
         /// <summary>
         /// Add new message from user and Get response from ollama and save in Db
         /// </summary>
@@ -82,6 +98,23 @@ namespace AiChat.Api.Controllers
             var answer = await handler.HandleAsync(new SendMessageCommand(id, request.Message));
 
             return Ok(answer);
+        }
+
+        [HttpDelete("{conversationId}")]
+        public async Task<IActionResult> Delete(Guid conversationId)
+        {
+            var conversation =
+                await _repository.GetAsync(conversationId);
+
+            if (conversation is null)
+                return NotFound();
+
+            await _repository.DeleteAsync(
+                conversation);
+
+            await _repository.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

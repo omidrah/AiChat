@@ -10,22 +10,23 @@ public class SendMessageHandler
     private readonly IConversationRepository _repository;
     private readonly IAiProvider _aiProvider;
     private readonly IAiStreamingProvider _aiStreamingProvider;
+    private readonly IChatStreamNotifier _notifier;
+        
     public SendMessageHandler(
         IConversationRepository repository,
         IAiProvider aiProvider,
-         IAiStreamingProvider aiStreamingProvider)
+        IAiStreamingProvider aiStreamingProvider,
+        IChatStreamNotifier notifier)
     {
         _repository = repository;
         _aiProvider = aiProvider;
         _aiStreamingProvider = aiStreamingProvider;
+        _notifier = notifier;
     }
 
-    public async Task<string> HandleAsync(
-        SendMessageCommand command,
-        CancellationToken cancellationToken = default)
+    public async Task<string> HandleAsync(SendMessageCommand command,CancellationToken ct = default)
     {
-        var conversation =await _repository.GetAsync(
-                command.ConversationId, cancellationToken);
+        var conversation =await _repository.GetAsync(command.ConversationId, ct);
 
         if (conversation is null)
         {
@@ -51,12 +52,14 @@ public class SendMessageHandler
     
         var answerBuilder = new StringBuilder();
         await _aiStreamingProvider.StreamAsync(messages,
-                 chunk =>
+                 async chunk =>
                  {
-                     Console.Write(chunk);
                      answerBuilder.Append(chunk);
-                     return Task.CompletedTask;
-                 });
+
+                     await _notifier.SendChunkAsync(
+                         conversation.Id,
+                         chunk);
+                 });    
         var answer = answerBuilder.ToString();
         conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);
         await _repository.SaveChangesAsync();

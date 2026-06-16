@@ -2,8 +2,6 @@
 {
     public interface IChatStreamNotifier
     {
-        Task SendChunkAsync(
-            Guid conversationId,
-            string chunk);
+        Task SendChunkAsync(Guid conversationId,string chunk);
     }
 }

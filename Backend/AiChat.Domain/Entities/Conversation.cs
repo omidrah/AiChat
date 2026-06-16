@@ -33,5 +33,9 @@ namespace AiChat.Domain.Entities
             var message =Message.CreateMessage(Id, role, content);
             _messages.Add(message);
         }
+        public void Rename(string title)
+        {
+            Title = title;
+        }
     }
 }

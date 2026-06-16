@@ -31,6 +31,13 @@ namespace AiChat.Infrastructure.Persistence.Repositories
                 .ToListAsync(cancellationToken);
         }
 
+        public Task DeleteAsync(Conversation conversation, CancellationToken ct = default)
+        {
+            _dbContext.Conversations.Remove(conversation);
+
+            return Task.CompletedTask;
+        }
+
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);

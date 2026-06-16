@@ -1,3 +1,4 @@
+using AiChat.Api.Contracts;
 using AiChat.Api.Hubs;
 using AiChat.Application.Abstractions;
 using AiChat.Application.Conversations.Commands;
@@ -17,8 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 
-builder.Services.AddHttpClient<IAiProvider, OllamaProvider>();
-builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>();
+builder.Services.AddHttpClient<IAiProvider, OllamaProvider>((client) => {
+    client.Timeout = Timeout.InfiniteTimeSpan;
+});
+builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((client)=> { 
+    client.Timeout = Timeout.InfiniteTimeSpan;
+});
 
 // Fix: Use Configure instead of Configuration.  
 builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
@@ -28,11 +33,11 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
     options.UseSqlite(
         builder.Configuration.GetConnectionString("SqliteConnection"));
 
-    options.EnableSensitiveDataLogging();
+    //options.EnableSensitiveDataLogging();
 
-    options.LogTo(Console.WriteLine);
+    //options.LogTo(Console.WriteLine);
 });
-
+builder.Services.AddScoped<IChatStreamNotifier, SignalRChatNotifier>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<SendMessageHandler>();
 
