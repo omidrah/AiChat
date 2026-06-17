@@ -22,6 +22,38 @@ namespace AiChat.Infrastructure.AI
             _client.BaseAddress = new Uri(_options.BaseUrl);
         }
 
+        public async Task<string> AskAsync(IEnumerable<MessageDto> messages)
+        {
+            var newrequest = new OllamaChatRequest
+            {
+                Model = _options.Model,
+                Messages = messages.ToList(),
+            };
+
+            //var json = System.Text.Json.JsonSerializer.Serialize(newrequest,
+            //                 new JsonSerializerOptions
+            //                 {
+            //                     WriteIndented = true
+            //                 });
+
+            //Console.WriteLine(json);
+
+            var response = await _client.PostAsJsonAsync("/api/chat", newrequest);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
+
+                throw new Exception(
+                    $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
+                );
+            }
+
+            var result =
+                await response.Content.ReadFromJsonAsync<OllamaChatResponse>();
+
+            return result?.Message.Content ?? "";
+        }
         public async Task StreamAsync(IEnumerable<MessageDto> messages, Func<string, Task> onChunk, CancellationToken ct)
         {
             var request = new
@@ -37,10 +69,10 @@ namespace AiChat.Infrastructure.AI
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead, ct);
             // response.EnsureSuccessStatusCode();
-            var responseText = await response.Content.ReadAsStringAsync(ct);
-
             if (!response.IsSuccessStatusCode)
             {
+                var responseText = await response.Content.ReadAsStringAsync(ct);
+
                 throw new Exception(
                     $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
                 );

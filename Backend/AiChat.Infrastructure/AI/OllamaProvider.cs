@@ -25,18 +25,16 @@ namespace AiChat.Infrastructure.AI
                 Messages = messages.ToList(),
             };
 
-            //var json = System.Text.Json.JsonSerializer.Serialize(newrequest,
-            //                 new JsonSerializerOptions
-            //                 {
-            //                     WriteIndented = true
-            //                 });
-
-            //Console.WriteLine(json);
-
             var response = await _client.PostAsJsonAsync("/api/chat", newrequest);
 
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var responseText = await response.Content.ReadAsStringAsync();
 
+                throw new Exception(
+                    $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
+                );
+            }
             var result =
                 await response.Content.ReadFromJsonAsync<OllamaChatResponse>();
 

@@ -1,13 +1,14 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Dtos;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace AiChat.Infrastructure.AI
 {
     public class OllamaConversationTitleGenerator: IConversationTitleGenerator
     {
-        private readonly IAiProvider _provider;
+        private readonly IAiStreamingProvider _provider;
 
-        public OllamaConversationTitleGenerator(IAiProvider provider)
+        public OllamaConversationTitleGenerator(IAiStreamingProvider provider)
         {
             _provider = provider;
         }
@@ -34,8 +35,17 @@ namespace AiChat.Infrastructure.AI
                         Content = firstMessage
                     }
                 };
-
-            return await _provider.AskAsync(messages);
+            try
+            {
+                return await _provider.AskAsync(messages);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Title generation failed: {ex.Message}");
+                return firstMessage.Length > 40
+                    ? firstMessage.Substring(0, 40) + "..."
+                    : firstMessage;
+             }
         }
     }
 }

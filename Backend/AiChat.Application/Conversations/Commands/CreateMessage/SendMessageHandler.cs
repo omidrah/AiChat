@@ -36,12 +36,13 @@ public class SendMessageHandler
         conversation.AddMessage(command.Message, Domain.ValueObject.MessageRole.User); // insert user message
         //تولید خودکار عنوان Conversation
         if (conversation.Messages.Count == 1)
-        {
+        {    
             var title =
-                await _titleGenerator
-                    .GenerateTitleAsync(command.Message);
-
-            conversation.Rename(title);
+                await _titleGenerator.GenerateTitleAsync(command.Message);
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                conversation.Rename(title);
+            }
         }
 
         await _repository.SaveChangesAsync();
