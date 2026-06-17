@@ -33,7 +33,7 @@ namespace AiChat.Infrastructure.Persistence.Repositories
         }
         public async Task<List<Conversation>> GetAllAsync(CancellationToken ct = default)
         {
-            return await _dbContext.Conversations.ToListAsync(ct);
+            return await _dbContext.Conversations.Include(x => x.Messages).OrderByDescending(x => x.UpdatedAt).ToListAsync(ct);
         }
 
         public Task DeleteAsync(Conversation conversation, CancellationToken ct = default)
@@ -43,6 +43,12 @@ namespace AiChat.Infrastructure.Persistence.Repositories
             return Task.CompletedTask;
         }
 
+        public async Task<List<Conversation>>SearchAsync(string text)
+        {
+            return await _dbContext.Conversations
+                .Where(x => x.Title.Contains(text))
+                .ToListAsync();
+        }
         public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             await _dbContext.SaveChangesAsync(cancellationToken);

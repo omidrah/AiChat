@@ -11,7 +11,7 @@ namespace AiChat.Application.Conversations.Commands.RenameConversation
             _repository = repository;
         }
 
-        public async Task HandleAsync(RenameConversationCommand command)
+        public async Task HandleAsync(RenameConversation command)
         {
             var conversation = await _repository.GetAsync(command.conversationId);
 

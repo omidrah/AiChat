@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
-import { ApiService } from '../../../services/api.service';
+import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Conversation } from '../../../models/conversation';
+import { Conversation } from '../../models/conversation';
 
 @Component({
   selector: 'app-conversation-list',

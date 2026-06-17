@@ -1,14 +1,14 @@
 <div class="chat-container">
 
-  <div class="messages">
+  <div class="messages" #scrollContainer>
 
     <div
       *ngFor="let m of messages"
       class="msg"
       [class.user]="m.role==='User'"
       [class.ai]="m.role==='Assistant'"
+      [innerHTML]="render(m.content)"
     >
-      {{m.content}}
     </div>
 
   </div>

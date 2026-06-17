@@ -23,7 +23,7 @@ namespace AiChat.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromServices]CreateConversationHandler handler)
         {
-            var id = await handler.HandleAsync( new CreateConversationCommand("New Chat"));
+            var id = await handler.HandleAsync( new CreateConversation("New Chat"));
             return Ok(id);
         }
 
@@ -81,7 +81,7 @@ namespace AiChat.Api.Controllers
         [HttpDelete("{conversationId}")]
         public async Task<IActionResult> Delete(Guid conversationId, [FromServices] DeleteConversationHandler handler)
         {
-            var result = await handler.HandleAsync(new DeleteConversationCommand(conversationId));
+            var result = await handler.HandleAsync(new DeleteConversation(conversationId));
 
             if (!result)
                 return NotFound();

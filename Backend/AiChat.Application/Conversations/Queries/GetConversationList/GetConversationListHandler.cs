@@ -23,7 +23,8 @@ namespace AiChat.Application.Conversations.Queries.GetConversationList
                     {
                         Id = x.Id,
                         Title = x.Title,
-                        CreatedAt = x.CreatedAt
+                        CreatedAt = x.CreatedAt,
+                        LastMessage = x.Messages.LastOrDefault()?.Content ?? string.Empty,
                     })
                 .ToList();
         }

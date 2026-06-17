@@ -12,7 +12,7 @@ namespace AiChat.Application.Conversations.Commands.CreateConversation
             _repository = repository;
         }
 
-        public async Task<Guid> HandleAsync(CreateConversationCommand command, CancellationToken cancellationToken = default)
+        public async Task<Guid> HandleAsync(CreateConversation command, CancellationToken cancellationToken = default)
         {
             var conversation =Conversation.CreateConversation(command.Title);
 

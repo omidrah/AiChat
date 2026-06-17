@@ -1,7 +1,7 @@
 using AiChat.Api.Contracts;
 using AiChat.Api.Hubs;
+using AiChat.Application;
 using AiChat.Application.Abstractions;
-using AiChat.Application.Conversations.Commands.CreateMessage;
 using AiChat.Infrastructure.AI;
 using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;
@@ -22,6 +22,7 @@ builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((c
 });
 
 builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
+builder.Services.AddApplicationHandler();
 
 builder.Services.AddDbContext<ChatDbContext>(options =>
 {
@@ -35,11 +36,24 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 builder.Services.AddScoped<IChatStreamNotifier, SignalRChatNotifier>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IConversationTitleGenerator,OllamaConversationTitleGenerator>();
-builder.Services.AddScoped<SendMessageHandler>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularClient", policy =>
+    {
+        policy
+             .WithOrigins(
+                "http://localhost:4200",
+                "https://localhost:4200"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+}); 
 
 var app = builder.Build();
 
-app.MapHub<ChatHub>("/hubs/chat");
 
 if (app.Environment.IsDevelopment())
 {
@@ -47,10 +61,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AngularClient");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();

@@ -3,7 +3,6 @@
 using AiChat.Application.Abstractions;
 using AiChat.Application.Dtos;
 using System.Text;
-using System.Text.Json;
 
 public class SendMessageHandler
 {
@@ -69,7 +68,7 @@ public class SendMessageHandler
                      await _notifier.SendChunkAsync(
                          conversation.Id,
                          chunk);
-                 });
+                 },ct);
         var answer = answerBuilder.ToString();
         conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);
         await _repository.SaveChangesAsync();

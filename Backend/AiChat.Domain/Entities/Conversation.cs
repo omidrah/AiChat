@@ -11,6 +11,7 @@ namespace AiChat.Domain.Entities
         public string Title { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
+        public DateTime UpdatedAt { get; private set; }
 
         public IReadOnlyCollection<Message> Messages => _messages.AsReadOnly();
 
@@ -21,6 +22,7 @@ namespace AiChat.Domain.Entities
             Title = title;
 
             CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;    
         }
 
         public static Conversation CreateConversation(string title)
@@ -32,6 +34,7 @@ namespace AiChat.Domain.Entities
         {
             var message =Message.CreateMessage(Id, role, content);
             _messages.Add(message);
+            UpdatedAt = DateTime.UtcNow;
         }
         public void Rename(string title)
         {

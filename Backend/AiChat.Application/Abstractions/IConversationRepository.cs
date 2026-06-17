@@ -13,6 +13,7 @@ namespace AiChat.Application.Abstractions
         Task<List<Conversation>> GetAllAsync(CancellationToken ct = default);
 
         Task DeleteAsync(Conversation conversation, CancellationToken ct = default);
+        Task<List<Conversation>>SearchAsync(string text);
 
         Task SaveChangesAsync(CancellationToken ct = default);
     }

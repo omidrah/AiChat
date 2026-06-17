@@ -1,4 +1,4 @@
 ﻿namespace AiChat.Application.Conversations.Commands.CreateConversation
 {
-    public record CreateConversationCommand(string Title);
+    public record CreateConversation(string Title);
 }

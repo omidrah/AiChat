@@ -11,7 +11,7 @@ namespace AiChat.Application.Conversations.Commands.DeleteConversaion
             _repository = repository;
         }
 
-        public async Task<bool> HandleAsync(DeleteConversationCommand command)
+        public async Task<bool> HandleAsync(DeleteConversation command)
         {
             var conversation =
                 await _repository.GetAsync(command.ConversationId);
