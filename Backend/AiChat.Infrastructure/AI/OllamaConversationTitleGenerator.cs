@@ -3,19 +3,16 @@ using AiChat.Application.Dtos;
 
 namespace AiChat.Infrastructure.AI
 {
-    public class OllamaConversationTitleGenerator
-     : IConversationTitleGenerator
+    public class OllamaConversationTitleGenerator: IConversationTitleGenerator
     {
         private readonly IAiProvider _provider;
 
-        public OllamaConversationTitleGenerator(
-            IAiProvider provider)
+        public OllamaConversationTitleGenerator(IAiProvider provider)
         {
             _provider = provider;
         }
 
-        public async Task<string> GenerateTitleAsync(
-            string firstMessage)
+        public async Task<string> GenerateTitleAsync(string firstMessage)
         {
             var messages =
                 new List<MessageDto>
