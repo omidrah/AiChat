@@ -35,6 +35,8 @@ export class ChatComponent {
 
   @ViewChild('scrollContainer')
   private scrollContainer!: ElementRef;
+  
+  isThinking=false;
 
   messages: Message[] = []
   input = ""
@@ -140,8 +142,11 @@ export class ChatComponent {
     this.scrollToBottom();
     this.input = "";
 
+    this.isThinking=true;
+
     this.api.sendMessage(this.conversationId, msg).subscribe({
       next: () => {
+        this.isThinking=false;
         console.log('Message sent');
       },
       error: err => {

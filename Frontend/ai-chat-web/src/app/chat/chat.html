@@ -16,7 +16,9 @@
     </div>
 
   </div>
-
+  <div  class="typing"  *ngIf="isThinking">
+    DeepSeek is thinking...
+  </div>
   <div class="input-area">
 
     <input [(ngModel)]="input"   placeholder="پیام خود را بنویس..."  (keyup.enter)="send()"  />
