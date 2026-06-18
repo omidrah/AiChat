@@ -6,13 +6,23 @@ public class ChatHub : Hub
 {
         public override async Task OnConnectedAsync()
         {
-            Console.WriteLine( $"Connected : {Context.ConnectionId}");
+             Console.WriteLine($"SignalR connected: {Context.ConnectionId}");
 
-            await base.OnConnectedAsync();
+              await base.OnConnectedAsync();
         }
 
-        public async Task JoinConversation(string conversationId)
+        public override Task OnDisconnectedAsync(Exception? exception)
         {
-            await Groups.AddToGroupAsync( Context.ConnectionId, conversationId);
+            Console.WriteLine($"SignalR disconnected: {Context.ConnectionId}");
+            return base.OnDisconnectedAsync(exception);
         }
+
+         public async Task JoinConversation(string conversationId)
+        {
+            Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
+
+            await Groups.AddToGroupAsync( Context.ConnectionId, conversationId);
+
+            Console.WriteLine($"Connection {Context.ConnectionId} joined group {conversationId}");
+         }
 }

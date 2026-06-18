@@ -18,7 +18,7 @@ namespace AiChat.Api.Contracts
             Console.WriteLine($"Sending chunk = {chunk}");
             await _hub.Clients
                 .Group(conversationId.ToString())
-                .SendAsync("ReceiveChunk", chunk);
+                .SendAsync("ReceiveToken", chunk);
         }
     }
 }

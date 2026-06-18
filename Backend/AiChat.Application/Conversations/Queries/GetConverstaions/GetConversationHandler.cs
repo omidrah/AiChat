@@ -33,7 +33,10 @@ namespace AiChat.Application.Conversations.Queries.GetConverstaions
                                         .ToLower(),
 
                                 Content =
-                                    x.Content
+                                    x.Content,
+                                CreatedAt = x.CreatedAt,
+
+                                Id = conversation.Id
                             })
                         .ToList()
             };

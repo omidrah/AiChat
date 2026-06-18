@@ -37,12 +37,12 @@ namespace AiChat.Api.Controllers
             var conversations = await listhandler.HandleAsync();
             return Ok(
                 conversations.Select(x =>
-                new ConversationListItemDto
-            {
-                    CreatedAt= x.CreatedAt,
-                    Id= x.Id,
-                    Title= x.Title
-            })
+                    new ConversationListItemDto
+                    {
+                            CreatedAt= x.CreatedAt,
+                            Id= x.Id,
+                            Title= x.Title
+                    })
                 );   
         }
         /// <summary>
@@ -75,7 +75,10 @@ namespace AiChat.Api.Controllers
         {
             var answer = await handler.HandleAsync(new SendMessageCommand(id, request.Message));
 
-            return Ok(answer);
+            return Ok(new
+            {
+                success = true
+            });
         }
 
         [HttpDelete("{conversationId}")]

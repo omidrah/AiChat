@@ -1,14 +1,10 @@
-<div class="header">
+  <div class="header">
     <button (click)="create()">گفتگوی جدید</button>
   </div>
   
   <div class="list">
-    <div
-      class="item"
-      *ngFor="let c of conversations"
-      (click)="open(c.id)"
-    >
-      {{c.title}}
+    <div  class="item" (click)="open(c.id)" *ngFor="let c of conversations">
+      {{c.title.substring(0,20)}}
     </div>
   </div>
   

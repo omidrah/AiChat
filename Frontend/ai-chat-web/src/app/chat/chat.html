@@ -3,23 +3,23 @@
   <div class="messages" #scrollContainer>
 
     <div
-      *ngFor="let m of messages"
-      class="msg"
-      [class.user]="m.role==='User'"
-      [class.ai]="m.role==='Assistant'"
-      [innerHTML]="render(m.content)"
-    >
+      *ngFor="let m of messages" class="msg" 
+      [class.user]="m.role==='user'"  [class.ai]="m.role==='assistant'">
+
+      <strong>{{ m.role }}:</strong>
+
+      <div
+        class="message-content"
+        [innerHTML]="render(m.content)">
+      </div>
+
     </div>
 
   </div>
 
   <div class="input-area">
 
-    <input
-      [(ngModel)]="input"
-      placeholder="پیام خود را بنویس..."
-      (keyup.enter)="send()"
-    />
+    <input [(ngModel)]="input"   placeholder="پیام خود را بنویس..."  (keyup.enter)="send()"  />
 
     <button (click)="send()">ارسال</button>
 

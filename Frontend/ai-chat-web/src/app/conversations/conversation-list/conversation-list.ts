@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
-import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Conversation } from '../../models/conversation';
+import { firstValueFrom } from 'rxjs';
+
 
 @Component({
   selector: 'app-conversation-list',
@@ -26,9 +27,14 @@ export class ConversationList {
   }
 
   load(){
-    // this.api.getConversations().subscribe((x: Conversation[])=>{
-    //   this.conversations = x;
-    // });
+    this.api.getConversations().subscribe({
+      next: x => {
+        this.conversations = x;
+      },
+      error: err => {
+        console.error('Failed to load conversations', err);
+      }
+    });
   }
 
   open(id:string){

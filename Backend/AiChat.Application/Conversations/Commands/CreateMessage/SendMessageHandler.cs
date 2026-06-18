@@ -53,7 +53,9 @@ public class SendMessageHandler
                     new MessageDto
                     {
                         Role = x.Role.ToString().ToLower(),
-                        Content = x.Content
+                        Content = x.Content,
+                        Id = x.Id,  
+                        CreatedAt = x.CreatedAt,
                     })
                 .ToList();
 
