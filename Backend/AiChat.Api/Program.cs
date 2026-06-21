@@ -37,33 +37,38 @@ builder.Services.AddScoped<IChatStreamNotifier, SignalRChatNotifier>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IConversationTitleGenerator,OllamaConversationTitleGenerator>();
 
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularClient", policy =>
     {
         policy
-             .WithOrigins(
-                "http://localhost:4200",
-                "https://localhost:4200"
-            )
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials();
+           .AllowCredentials(); //disable in front and back
     });
-}); 
+});
 
 var app = builder.Build();
 
-
-//if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseCors("AngularClient");
 
-app.UseHttpsRedirection();
+//if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+//{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+//}
+
+//if (app.Environment.IsDevelopment())
+//{
+//    app.UseHttpsRedirection();
+//}
 
 app.UseAuthorization();
 

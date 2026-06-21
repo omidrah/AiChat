@@ -1,5 +1,6 @@
 backend publish 
-dotnet publish -o publish -c Release \
+  dotnet publish -o publish -c Release 
+
 front publish 
   ng build --configuration production
 
