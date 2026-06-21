@@ -1,2 +1,110 @@
+backend publish 
+dotnet publish -o publish -c Release \
+front publish 
+  ng build --configuration production
+
+**on server
+
+  sudo apt update
+  sudo apt install aspnetcore-runtime-8.0
+  dotnet --info
+  
+  ** Ollama download and install**
+  curl -fsSL https://ollama.com/install.sh | sh  
+  ollama list
+  **Download models**
+  ollama pull qwen3:4b   | ollama pull deepseek-r1:7b
+  
+  **ساخت فولدرها روی سرور**
+  /opt/aichat/api   
+  /opt/aichat/web
+  
+  
+  ** انتقال فایلها**
+  scp -r publish/* root@server:/opt/aichat/api
+  
+  scp -r dist/ai-chat-web/browser/* root@server:/opt/aichat/web
+  
+  **اجرای بکند
+  cd /opt/aichat/api
+ dotnet AiChat.Api.dll  	
+ for test>>curl http://localhost:7117/swagger
+ 
+ **ساخت سرویس
+ sudo nano /etc/systemd/system/aichat.service
+ 
+[Unit]
+Description=AiChat Api
+
+[Service]
+WorkingDirectory=/opt/aichat/api
+ExecStart=/usr/bin/dotnet AiChat.Api.dll
+
+Restart=always
+
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+User=root
+
+[Install]
+WantedBy=multi-user.target
+
+**فعال سازی سرویس
+
+sudo systemctl daemon-reload
+sudo systemctl enable aichat
+sudo systemctl start aichat
+sudo systemctl status aichat
+
+**نصب nginx
+sudo apt install nginx
+sudo nano /etc/nginx/sites-available/aichat
+server {
+
+    listen 80;
+
+    server_name chat.example.com;
+
+    location / {
+
+        root /opt/aichat/web;
+
+        index index.html;
+
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api {
+
+        proxy_pass http://localhost:5000;
+
+        proxy_http_version 1.1;
+    }
+
+    location /hubs {
+
+        proxy_pass http://localhost:5000;
+
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade $http_upgrade;
+
+        proxy_set_header Connection "Upgrade";
+    }
+}
+**فعال سازی 
+sudo ln -s \
+/etc/nginx/sites-available/aichat \
+/etc/nginx/sites-enabled/
+
+sudo systemctl restart nginx
+
+
+**SSLفعال سازی
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx
+https://chat.example.com
+
+
  #اول مشخصات سیستم را ببین:
 >>ollama ps  
