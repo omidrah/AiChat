@@ -48,7 +48,7 @@ public class SendMessageHandler
         await _repository.SaveChangesAsync();
 
         var messages =
-            conversation.Messages
+            conversation.Messages.TakeLast(20)
                 .Select(x =>
                     new MessageDto
                     {

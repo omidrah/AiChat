@@ -1,28 +1,45 @@
 .header{
-    padding:10px;
-  }
-  
-  button{
-    width:100%;
-    padding:10px;
-    border:none;
-    background:#4f46e5;
-    color:white;
-    border-radius:8px;
-    cursor:pointer;
-  }
-  
-  .list{
-    margin-top:10px;
-  }
-  
-  .item{
-    padding:10px;
-    border-radius:8px;
-    cursor:pointer;
-  }
-  
-  .item:hover{
-    background:#f0f2f7;
-  }
-  
+  padding:12px;
+}
+
+.header button{
+  width:100%;
+  padding:12px;
+
+  background:#343541;
+
+  color:white;
+
+  border:none;
+
+  border-radius:8px;
+
+  cursor:pointer;
+
+  font-size:14px;
+}
+
+.header button:hover{
+  background:#40414f;
+}
+
+.list{
+  padding:10px;
+}
+
+.item{
+  padding:12px;
+  margin-bottom:5px;
+
+  border-radius:8px;
+
+  cursor:pointer;
+
+  color:#ececf1;
+
+  transition:.2s;
+}
+
+.item:hover{
+  background:#343541;
+}

@@ -3,11 +3,12 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { Conversation } from '../models/conversation'
 import { Message } from '../models/message'
+import { environment } from '../../environments/environment'
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
 
-  baseUrl = "https://localhost:7117/api"
+   baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

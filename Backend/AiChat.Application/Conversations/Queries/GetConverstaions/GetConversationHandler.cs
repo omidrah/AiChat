@@ -24,7 +24,7 @@ namespace AiChat.Application.Conversations.Queries.GetConverstaions
                 Id = conversation.Id,
                 Title = conversation.Title,
                 Messages =
-                    conversation.Messages.OrderBy(x=> x.CreatedAt)
+                    conversation.Messages.TakeLast(20).OrderBy(x=> x.CreatedAt)
                         .Select(x =>
                             new MessageDto
                             {
