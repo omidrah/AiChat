@@ -52,7 +52,7 @@ export class SignalRService {
   offReceiveToken() {
     this.hub?.off('ReceiveToken');
   }
-
+ // on every token from backend recieved
   onReceiveToken(callback: (token:string)=>void) {
     if (!this.hub) {
       throw new Error('SignalR hub is not started');
@@ -66,6 +66,15 @@ export class SignalRService {
       callback(token);
     });
   }
+// when stream from backend finished
+  onReceiveCompleted(callback: () => void) {
+    this.hub?.on('ReceiveCompleted', callback);
+  }
+
+  offReceiveCompleted() {
+    this.hub?.off('ReceiveCompleted');
+  }
+
 
   async stop() {
     if (this.hub) {

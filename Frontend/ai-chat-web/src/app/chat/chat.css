@@ -217,3 +217,12 @@
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
   z-index: 20;
 }
+.message-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.send-button:disabled {
+  background: #c7c7c7;
+  cursor: not-allowed;
+}

@@ -94,6 +94,14 @@ export class ChatComponent {
         });
       });
 
+      this.signalr.onReceiveCompleted(() => {
+        this.zone.run(() => {
+          this.isSending = false;
+          this.isThinking = false;
+          this.cdr.detectChanges();
+        });
+      });
+
       await this.signalr.joinConversation(this.conversationId);
       this.isSignalRReady = true;
 
@@ -139,6 +147,7 @@ export class ChatComponent {
 
     this.input = '';
     this.isThinking = true;
+    this.isSending = true;
     this.shouldAutoScroll = true;
 
     if (textarea) {
@@ -154,6 +163,7 @@ export class ChatComponent {
       },
       error: err => {
         this.isThinking = false;
+        this.isSending = false;
         console.error(err);
       }
     });
@@ -226,5 +236,6 @@ export class ChatComponent {
 
   ngOnDestroy() {
     this.signalr.offReceiveToken();
+  this.signalr.offReceiveCompleted();
   }
 }

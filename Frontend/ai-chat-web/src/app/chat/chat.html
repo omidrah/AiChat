@@ -50,7 +50,8 @@
         class="message-input"
         [(ngModel)]="input"
         rows="1"
-        placeholder="پیام خود را بنویسید..."
+        [disabled]="isSending"
+        [placeholder]="isSending ? 'منتظر پایان پاسخ بمانید...' : 'پیام خود را بنویسید...'"
         (input)="autoResizeTextarea(messageInput)"
         (keydown)="handleEnter($event)"
       ></textarea>
