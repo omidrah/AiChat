@@ -19,24 +19,29 @@ app-root{
   height:100vh;
 }
 
-.layout{
-  height:100vh;
-  display:flex;
+.layout {
+  height: 100vh;
+  display: flex;
+  direction: rtl;
 }
 
-.sidebar{
-  width:280px;
-  background:#202123;
-  color:white;
-  border-left:1px solid #2f3136;
+.sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: #202123;
+  color: white;
+  border-left: 1px solid #2f3136;
+  overflow-y: auto;
 }
 
-.chat-area{
-  flex:1;
-  background:#ffffff;
-  display:flex;
-  flex-direction:column;
+.chat-area {
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
 }
+
 
 .theme-btn{
   position:fixed;

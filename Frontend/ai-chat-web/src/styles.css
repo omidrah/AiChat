@@ -1,24 +1,66 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap');
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  direction: rtl;
+  font-family: 'Vazirmatn', Tahoma, Segoe UI, sans-serif;
+  background: #f7f7f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 @import 'highlight.js/styles/github.css';  /*not Dark Mode*/
 @import 'highlight.js/styles/github-dark.css'; /*Dark Mode*/
 
-body.dark{
-    background:#1e1e1e;
-    color:#eee;
-  }
-  
-  body.dark .sidebar{
-    background:#2a2a2a;
-  }
-  
-  body.dark .msg.ai{
-    background:#2f2f2f;
-    border:none;
-  }
-  
-  body.dark input{
-    background:#333;
-    color:white;
-    border:none;
-  }
+body.dark .chat-container {
+  background: #212121;
+  color: #ececec;
+}
+
+body.dark .msg.ai .msg-body {
+  background: #2f2f2f;
+  color: #ececec;
+  border-color: #3a3a3a;
+}
+
+body.dark .msg.ai .msg-avatar {
+  background: #3a3a3a;
+  color: #ececec;
+}
+
+body.dark .input-area {
+  background: linear-gradient(to top, #212121 78%, rgba(33, 33, 33, 0));
+}
+
+body.dark .composer {
+  background: #2f2f2f;
+  border-color: #4a4a4a;
+}
+
+body.dark .message-input {
+  color: #ececec;
+}
+
+body.dark .message-input::placeholder {
+  color: #9ca3af;
+}
+
+body.dark .scroll-bottom-button {
+  background: #2f2f2f;
+  border-color: #4a4a4a;
+  color: #ececec;
+}
+
+body.dark .message-content :not(pre) > code {
+  background: #40414f;
+  color: #f9fafb;
+}
+
   
