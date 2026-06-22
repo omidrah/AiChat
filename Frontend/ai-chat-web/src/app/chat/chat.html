@@ -1,29 +1,70 @@
 <div class="chat-container">
 
-  <div class="messages" #scrollContainer>
+  <div
+    class="messages"
+    #scrollContainer
+    (scroll)="onMessagesScroll()"
+  >
 
     <div
-      *ngFor="let m of messages" class="msg" 
-      [class.user]="m.role==='user'"  [class.ai]="m.role==='assistant'">
+      *ngFor="let m of messages"
+      class="msg"
+      [class.user]="m.role === 'user'"
+      [class.ai]="m.role === 'assistant'"
+    >
 
-      <strong>{{ m.role }}:</strong>
+      <div class="msg-avatar">
+        {{ m.role === 'user' ? 'شما' : 'AI' }}
+      </div>
 
-      <div
-        class="message-content"
-        [innerHTML]="render(m.content)">
+      <div class="msg-body">
+        <div
+          class="message-content"
+          [innerHTML]="render(m.content)"
+        ></div>
       </div>
 
     </div>
 
   </div>
-  <div  class="typing"  *ngIf="isThinking">
-    DeepSeek is thinking...
+
+  <button
+    *ngIf="!shouldAutoScroll"
+    class="scroll-bottom-button"
+    type="button"
+    (click)="enableAutoScrollAndGoBottom()"
+  >
+    رفتن به آخر گفتگو
+  </button>
+
+  <div class="typing" *ngIf="isThinking">
+    هوش مصنوعی در حال فکر کردن است...
   </div>
+
   <div class="input-area">
 
-    <input [(ngModel)]="input"   placeholder="پیام خود را بنویس..."  (keyup.enter)="send()"  />
+    <div class="composer">
 
-    <button (click)="send()">ارسال</button>
+      <textarea
+        #messageInput
+        class="message-input"
+        [(ngModel)]="input"
+        rows="1"
+        placeholder="پیام خود را بنویسید..."
+        (input)="autoResizeTextarea(messageInput)"
+        (keydown)="handleEnter($event)"
+      ></textarea>
+
+      <button
+        class="send-button"
+        type="button"
+        [disabled]="!input.trim() || isSending"
+        (click)="send(messageInput)"
+      >
+        ➤
+      </button>
+
+    </div>
 
   </div>
 

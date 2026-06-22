@@ -1,7 +1,7 @@
-import { Component, ElementRef, NgZone, ViewChild, ChangeDetectorRef  } from '@angular/core';
+import { Component, ElementRef, NgZone, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { SignalRService } from '../services/signalr.service';
-import {  Message } from '../models/message';
+import { Message } from '../models/message';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -10,7 +10,6 @@ import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
 import { ActivatedRoute } from '@angular/router';
 
-// تنظیم markdown + highlight
 marked.use(
   markedHighlight({
     highlight(code, lang) {
@@ -26,24 +25,25 @@ marked.use(
 @Component({
   selector: 'app-chat',
   imports: [CommonModule, FormsModule],
-  standalone:true,
+  standalone: true,
   templateUrl: './chat.html',
   styleUrl: './chat.css',
 })
-
 export class ChatComponent {
 
   @ViewChild('scrollContainer')
-  private scrollContainer!: ElementRef;
-  
-  isThinking=false;
+  private scrollContainer!: ElementRef<HTMLDivElement>;
 
-  messages: Message[] = []
-  input = ""
-  conversationId!: string
-
+  isThinking = false;
   isSending = false;
   isSignalRReady = false;
+
+  shouldAutoScroll = true;
+
+  messages: Message[] = [];
+  input = '';
+  conversationId!: string;
+
   constructor(
     private api: ApiService,
     private signalr: SignalRService,
@@ -52,11 +52,10 @@ export class ChatComponent {
     private cdr: ChangeDetectorRef
   ) {}
 
-
   async ngOnInit() {
-
     this.route.paramMap.subscribe(async params => {
       const id = params.get('id');
+
       if (!id) {
         console.error('Conversation id not found in route');
         return;
@@ -64,105 +63,165 @@ export class ChatComponent {
 
       this.conversationId = id;
 
-      console.log('Current conversation id:', this.conversationId);
-
       await this.signalr.start();
 
       this.signalr.onReceiveToken(token => {
-
-        console.log('TOKEN FROM SIGNALR:', token);  
-  
-        this.zone.run(() => {  // update UI state
+        this.zone.run(() => {
           let lastMessage = this.messages[this.messages.length - 1];
-  
+
           if (!lastMessage || lastMessage.role.toLowerCase() !== 'assistant') {
             this.messages.push({
               role: 'assistant',
               content: token,
               createdAt: new Date()
             });
-  
-            this.scrollToBottom();
+
+            this.cdr.detectChanges();
+            this.scrollToBottomIfNeeded();
             return;
           }
-  
+
           const index = this.messages.length - 1;
-             this.messages = this.messages.map((m, i) => i === index  ? { ...m, content: m.content + token } : m
+
+          this.messages = this.messages.map((m, i) =>
+            i === index
+              ? { ...m, content: m.content + token }
+              : m
           );
 
-          this.cdr.detectChanges(); // همین الان template را دوباره render کن
-          this.scrollToBottom();
+          this.cdr.detectChanges();
+          this.scrollToBottomIfNeeded();
         });
       });
 
       await this.signalr.joinConversation(this.conversationId);
       this.isSignalRReady = true;
 
-      console.log('Joined SignalR group:', this.conversationId);
-
       await this.loadMessages();
-      this.cdr.detectChanges();
-      this.scrollToBottom();
 
+      this.cdr.detectChanges();
+      this.forceScrollToBottom();
     });
   }
 
   async loadMessages() {
-      const result: any = await firstValueFrom(
-        this.api.getMessages(this.conversationId)
-      );
+    const result: any = await firstValueFrom(
+      this.api.getMessages(this.conversationId)
+    );
 
-      console.log('getMessages result:', result);
+    const messagesfromApi = result.messages ?? [];
 
-      const messagesfromApi = result.messages ?? [];
+    this.messages = messagesfromApi.map((m: Message) => ({
+      ...m,
+      createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
+    }));
 
-      this.messages = messagesfromApi.map((m: Message) => ({
-        ...m,
-        createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
-      }));
-
-     this.scrollToBottom();
+    this.forceScrollToBottom();
   }
 
-  send() {
-
+  send(textarea?: HTMLTextAreaElement) {
     const msg = this.input.trim();
-    if (!msg) {return;}
+
+    if (!msg) {
+      return;
+    }
 
     if (!this.isSignalRReady) {
       console.warn('SignalR is not ready yet');
       return;
     }
+
     this.messages.push({
-      role: "user",
+      role: 'user',
       content: msg,
       createdAt: new Date()
     });
 
-    this.scrollToBottom();
-    this.input = "";
+    this.input = '';
+    this.isThinking = true;
+    this.shouldAutoScroll = true;
 
-    this.isThinking=true;
+    if (textarea) {
+      textarea.style.height = 'auto';
+    }
+
+    this.forceScrollToBottom();
 
     this.api.sendMessage(this.conversationId, msg).subscribe({
       next: () => {
-        this.isThinking=false;
+        this.isThinking = false;
         console.log('Message sent');
       },
       error: err => {
+        this.isThinking = false;
         console.error(err);
       }
     });
   }
-  
-  scrollToBottom(){
-    setTimeout(()=>{
-      this.scrollContainer.nativeElement.scrollTop =  this.scrollContainer.nativeElement.scrollHeight;
-    });
+
+  onMessagesScroll(): void {
+    const element = this.scrollContainer?.nativeElement;
+
+    if (!element) {
+      return;
+    }
+
+    const distanceFromBottom =
+      element.scrollHeight - element.scrollTop - element.clientHeight;
+
+    this.shouldAutoScroll = distanceFromBottom < 140;
   }
 
-  render(text:string){
+  scrollToBottomIfNeeded(): void {
+    if (!this.shouldAutoScroll) {
+      return;
+    }
+
+    this.forceScrollToBottom();
+  }
+
+  forceScrollToBottom(): void {
+    setTimeout(() => {
+      const element = this.scrollContainer?.nativeElement;
+
+      if (!element) {
+        return;
+      }
+
+      element.scrollTop = element.scrollHeight;
+    }, 0);
+  }
+
+  enableAutoScrollAndGoBottom(): void {
+    this.shouldAutoScroll = true;
+    this.forceScrollToBottom();
+  }
+
+  render(text: string) {
     return marked.parse(text);
+  }
+
+  autoResizeTextarea(textarea: HTMLTextAreaElement): void {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 220)}px`;
+  }
+
+  handleEnter(event: Event): void {
+    const keyboardEvent = event as KeyboardEvent;
+
+    if (keyboardEvent.key !== 'Enter') {
+      return;
+    }
+
+    if (keyboardEvent.shiftKey) {
+      return;
+    }
+
+    keyboardEvent.preventDefault();
+
+    if (this.input?.trim() && !this.isSending) {
+      this.send();
+    }
   }
 
   ngOnDestroy() {
