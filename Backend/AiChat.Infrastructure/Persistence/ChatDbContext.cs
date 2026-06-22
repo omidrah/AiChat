@@ -10,7 +10,7 @@ namespace AiChat.Infrastructure.Persistence
             : base(options)
         {
         }
-
+        public DbSet<User> Users { get; set; }
         public DbSet<Conversation> Conversations =>  Set<Conversation>();
         public DbSet<Message> Messages => Set<Message>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)

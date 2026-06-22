@@ -1,4 +1,6 @@
-﻿using AiChat.Application.Conversations.Commands.CreateConversation;
+﻿using AiChat.Application.Authentications.Commands.Login;
+using AiChat.Application.Authentications.Queries.GetCurrentUser;
+using AiChat.Application.Conversations.Commands.CreateConversation;
 using AiChat.Application.Conversations.Commands.CreateMessage;
 using AiChat.Application.Conversations.Commands.DeleteConversaion;
 using AiChat.Application.Conversations.Commands.RenameConversation;
@@ -18,6 +20,8 @@ public static class DependencyInjection
         services.AddScoped<GetConversationListHandler>();
         services.AddScoped<SendMessageHandler>();
         services.AddScoped<RenameConversationHandler>();
+        services.AddScoped<GetCurrentUserQueryHandler>();
+        services.AddScoped<LoginCommandHandler>();
 
         return services;
     }

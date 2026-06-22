@@ -8,6 +8,8 @@ namespace AiChat.Domain.Entities
 
         public Guid Id { get; private set; }
 
+        public string UserId { get;  private set; }
+        public string UserName { get; private set; } 
         public string Title { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
