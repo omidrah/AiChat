@@ -5,12 +5,14 @@ using AiChat.Application.Conversations.Commands.DeleteConversaion;
 using AiChat.Application.Conversations.Queries.GetConversationList;
 using AiChat.Application.Conversations.Queries.GetConverstaions;
 using AiChat.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AiChat.Api.Controllers
 {
     [ApiController]
     [Route("api/conversations")]
+    [Authorize]
     public class ConversationsController : ControllerBase
     {
         public ConversationsController()
