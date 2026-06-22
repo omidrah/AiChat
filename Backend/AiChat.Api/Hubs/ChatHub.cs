@@ -7,7 +7,6 @@ public class ChatHub : Hub
         public override async Task OnConnectedAsync()
         {
              Console.WriteLine($"SignalR connected: {Context.ConnectionId}");
-
               await base.OnConnectedAsync();
         }
 
@@ -19,10 +18,10 @@ public class ChatHub : Hub
 
          public async Task JoinConversation(string conversationId)
         {
-            Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
+            // Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
 
             await Groups.AddToGroupAsync( Context.ConnectionId, conversationId);
 
-            Console.WriteLine($"Connection {Context.ConnectionId} joined group {conversationId}");
+            // Console.WriteLine($"Connection {Context.ConnectionId} joined group {conversationId}");
          }
 }

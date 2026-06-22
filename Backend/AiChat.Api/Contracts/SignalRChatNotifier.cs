@@ -20,5 +20,14 @@ namespace AiChat.Api.Contracts
                 .Group(conversationId.ToString())
                 .SendAsync("ReceiveToken", chunk);
         }
+        public async Task CompleteAsync(Guid conversationId)
+        {
+            Console.WriteLine($"Message from Ai is completed = {conversationId}");
+
+            await _hub.Clients
+                .Group(conversationId.ToString())
+                .SendAsync("ReceiveCompleted");
+        }
+
     }
 }
