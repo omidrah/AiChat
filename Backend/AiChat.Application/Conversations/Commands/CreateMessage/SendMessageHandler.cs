@@ -2,6 +2,7 @@
 
 using AiChat.Application.Abstractions;
 using AiChat.Application.Dtos;
+using AiChat.Domain.Entities;
 using System.Text;
 
 public class SendMessageHandler
@@ -63,7 +64,9 @@ public class SendMessageHandler
         //conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant); // insert answer from AI provider 
 
         var answerBuilder = new StringBuilder();
-        await _aiStreamingProvider.StreamAsync(messages,
+        try
+        {
+            await _aiStreamingProvider.StreamAsync(messages,
                  async chunk =>
                  {
                      answerBuilder.Append(chunk);
@@ -71,7 +74,14 @@ public class SendMessageHandler
                      await _notifier.SendChunkAsync(
                          conversation.Id,
                          chunk);
-                 },ct);
+                 }, ct);
+        }
+        finally //این باعث می‌شود حتی اگر Ollama خطا بدهد، frontend برای همیشه قفل نماند.
+
+        {
+            // بعد از اتمام پاسخ از سمت مدل هوش مصنوعی، از طریق سیگنال ار به فرانت اعلام میکنیم
+            await _notifier.CompleteAsync(command.ConversationId);
+        }
         var answer = answerBuilder.ToString();
         conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);
         await _repository.SaveChangesAsync();
