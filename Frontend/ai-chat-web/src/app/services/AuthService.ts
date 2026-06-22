@@ -24,7 +24,7 @@ export class AuthService {
     }
 
     getMe() {
-        return this.http.get(`${this.api}/me`);
+        return this.http.get(`${this.baseUrl}/me`);
     }
 
     getToken() {
