@@ -3,6 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
+export interface LoginResult {
+  accessToken: string;
+  refreshToken: string;
+  userName: string;
+  expiresAt: string;
+}
+
+export interface RefreshResult {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
@@ -15,12 +28,39 @@ export class AuthService {
     }
 
     login(userName: string, password: string) {
-        return this.http.post<any>(`${this.baseUrl}/auth/login`, { userName, password })
-            .pipe(
-                tap(res => {
-                    localStorage.setItem('token', res.accessToken);
-                })
-            );
+        return this.http.post<LoginResult>(`${this.baseUrl}/auth/login`, { userName, password })
+        .pipe(
+            tap(res => this.storeTokens(res))
+        );
+    }
+
+    refresh() {
+        const refreshToken = this.getRefreshToken();
+
+        return this.http.post<RefreshResult>(`${this.baseUrl}/auth/refresh`, { refreshToken })
+        .pipe(
+            tap(res => this.storeTokens(res))
+        );
+    }
+ 
+    getRefreshToken() {
+        return localStorage.getItem('refreshToken');
+    }
+
+    isLoggedIn() {
+        return !!this.getToken() && !!this.getRefreshToken();
+    }
+
+    logout() {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('accessTokenExpiresAt');
+    }
+
+    private storeTokens(res: LoginResult | RefreshResult) {
+        localStorage.setItem('accessToken', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
+        localStorage.setItem('accessTokenExpiresAt', res.expiresAt);
     }
 
     getMe() {
@@ -29,9 +69,5 @@ export class AuthService {
 
     getToken() {
         return localStorage.getItem('token');
-    }
-
-    logout() {
-        localStorage.removeItem('token');
     }
 }

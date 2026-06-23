@@ -1,9 +1,12 @@
 import * as signalR from '@microsoft/signalr'
 import { Injectable } from '@angular/core'
 import { environment } from '../../environments/environment';
+import { AuthService } from './AuthService';
 
 @Injectable({ providedIn: 'root' })
 export class SignalRService {
+
+   constructor(private auth: AuthService) {}
 
   private hub?: signalR.HubConnection;
 
@@ -14,9 +17,7 @@ export class SignalRService {
     }
 
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl(environment.hubUrl
-          //  ,{withCredentials: true}
-      )
+      .withUrl(environment.hubUrl,  {  accessTokenFactory: () => this.auth.getToken() ?? '' } )
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
       .build();
@@ -45,7 +46,7 @@ export class SignalRService {
 
       await this.hub.invoke("JoinConversation", conversationId);
       
-      console.log('Joined conversation group:', conversationId);
+      // console.log('Joined conversation group:', conversationId);
 
   }
 
@@ -57,17 +58,18 @@ export class SignalRService {
     if (!this.hub) {
       throw new Error('SignalR hub is not started');
     }
-    console.log('Registering ReceiveToken handler');
+    //console.log('Registering ReceiveToken handler');
 
     this.hub.off('ReceiveToken'); //previous connection remove
 
-    this.hub.on('ReceiveToken', token => {
-      console.log('SignalR ReceiveToken:', token);
-      callback(token);
+    this.hub.on('ReceiveToken', chunk => {
+      //console.log('SignalR ReceiveToken:', token);
+      callback(chunk);
     });
   }
 // when stream from backend finished
   onReceiveCompleted(callback: () => void) {
+    this.hub?.off('ReceiveCompleted');    
     this.hub?.on('ReceiveCompleted', callback);
   }
 

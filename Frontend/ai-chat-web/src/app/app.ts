@@ -28,18 +28,20 @@ export class App {
     else
       document.body.classList.remove("dark");
   }
-  ngOnInit(){
-
-    this.auth.getMode().subscribe(x=>{
-
-      if(x.mode === "Local"){
+ngOnInit() {
+  this.auth.getMode().subscribe(x => {
+    if (x.mode === 'Local') {
+      if (this.auth.isLoggedIn()) {
+        this.router.navigate(['/chat']);
+      } else {
         this.router.navigate(['/login']);
       }
-      else{
-        this.router.navigate(['/chat']);
-      }
 
-    });
-  }
+      return;
+    }
+
+    this.router.navigate(['/chat']);
+  });
+}
 
 }

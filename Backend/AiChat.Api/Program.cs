@@ -20,6 +20,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 var authMode = builder.Configuration["Authentication:Mode"] ?? "Local";
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Authentication:Jwt"));
+builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
 
 builder.Services.AddHttpContextAccessor();
 
@@ -38,7 +40,7 @@ else
         .AddJwtBearer(options =>
         {
             var jwtOptions = builder.Configuration
-                        .GetSection("Jwt")
+                        .GetSection("Authentication:Jwt")
                         .Get<JwtOptions>();
             
             options.RequireHttpsMetadata = false;
@@ -94,7 +96,6 @@ builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((c
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
 
-builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
 builder.Services.AddApplicationHandler();
 
 builder.Services.AddDbContext<ChatDbContext>(options =>

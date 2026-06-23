@@ -4,6 +4,7 @@ import { LoginComponent } from './pages/login/login';
 
 export const routes: Routes = [
    { path: 'chat/:id', component: ChatComponent },
-    {path: 'login', component: LoginComponent}
-
+    {path: 'login', component: LoginComponent},
+ { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login' }
 ];

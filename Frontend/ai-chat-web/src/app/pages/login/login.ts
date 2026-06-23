@@ -3,6 +3,8 @@
   import { Router } from '@angular/router';
   import { FormsModule } from '@angular/forms';
   import { CommonModule } from '@angular/common';
+import { ApiService } from '../../services/api.service';
+import { firstValueFrom } from 'rxjs';
   @Component({
     selector: 'app-login',
     templateUrl: './login.html',
@@ -17,21 +19,22 @@
 
     constructor(
       private auth: AuthService,
+      private api: ApiService,
       private router: Router
     ) {}
 
-    login() {
-
+   async login() {
       this.error = '';
 
-      this.auth.login(this.userName, this.password)
-        .subscribe({
-          next: () => {
-            this.router.navigate(['/chat']);
-          },
-          error: () => {
-            this.error = 'Login failed';
-          }
-        });
+      try {
+        await firstValueFrom(this.auth.login(this.userName, this.password));
+
+        const conversationId = await firstValueFrom(this.api.createConversation());
+
+        this.router.navigate(['/chat', conversationId]);
+      } catch {
+        this.error = 'Login failed';
+      }
     }
+    
   }
