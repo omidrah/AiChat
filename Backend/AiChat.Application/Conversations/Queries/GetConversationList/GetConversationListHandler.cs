@@ -1,5 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Dtos;
+using AiChat.Application.Conversations.Dtos;
 
 namespace AiChat.Application.Conversations.Queries.GetConversationList
 {
@@ -12,10 +12,10 @@ namespace AiChat.Application.Conversations.Queries.GetConversationList
             _repository = repository;
         }
 
-        public async Task<List<ConversationListItemDto>> HandleAsync()
+        public async Task<List<ConversationListItemDto>> HandleAsync(GetConversationListQuery getConversationList, CancellationToken ct = default)
         {
             var conversations =
-                await _repository.GetAllAsync();
+                await _repository.GetAllConversationsForUserAsync(getConversationList.UserId, ct);
 
             return conversations
                 .Select(x =>

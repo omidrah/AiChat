@@ -1,6 +1,4 @@
-﻿using AiChat.Domain.ValueObject;
-
-namespace AiChat.Application.Dtos
+﻿namespace AiChat.Application.Conversations.Dtos
 {
     public class MessageDto
     {

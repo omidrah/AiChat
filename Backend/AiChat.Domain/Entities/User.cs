@@ -15,6 +15,8 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public List<string> Roles { get; set; } = new();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
     }
 
 }

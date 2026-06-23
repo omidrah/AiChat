@@ -8,7 +8,8 @@ namespace AiChat.Domain.Entities
 
         public Guid Id { get; private set; }
 
-        public string UserId { get;  private set; }
+        public Guid UserId { get;  private set; }
+
         public string UserName { get; private set; } 
         public string Title { get; private set; }
 
@@ -17,19 +18,19 @@ namespace AiChat.Domain.Entities
 
         public IReadOnlyCollection<Message> Messages => _messages.AsReadOnly();
 
-        private Conversation(string title)
+        private Conversation(Guid userId, string title)
         {
             Id = Guid.NewGuid();
-
+            UserId = userId;
             Title = title;
 
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;    
         }
 
-        public static Conversation CreateConversation(string title)
+        public static Conversation CreateConversation(Guid userId, string title)
         {
-            return new Conversation(title);            
+            return new Conversation(userId,title);            
         }
 
         public void AddMessage(string content,MessageRole role)

@@ -1,5 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Dtos;
+using AiChat.Application.Conversations.Dtos;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace AiChat.Infrastructure.AI

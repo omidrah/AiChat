@@ -13,14 +13,14 @@ namespace AiChat.Api.Contracts
             _hub = hub;
         }
 
-        public async Task SendChunkAsync(Guid conversationId,string chunk)
+        public async Task SendChunkAsync(Guid conversationId, Guid userId, string chunk)
         {
             Console.WriteLine($"Sending chunk = {chunk}");
             await _hub.Clients
-                .Group(conversationId.ToString())
+                 .Group($"conversation:{conversationId}:user:{userId}")
                 .SendAsync("ReceiveToken", chunk);
         }
-        public async Task CompleteAsync(Guid conversationId)
+        public async Task CompleteAsync(Guid conversationId, Guid userId)
         {
             Console.WriteLine($"Message from Ai is completed = {conversationId}");
 

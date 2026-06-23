@@ -2,8 +2,8 @@
 {
     public interface IChatStreamNotifier
     {
-        Task SendChunkAsync(Guid conversationId,string chunk);
-        Task CompleteAsync(Guid conversationId);
+        Task SendChunkAsync(Guid conversationId, Guid userId, string chunk);
+        Task CompleteAsync(Guid conversationId, Guid userId);
 
     }
 }

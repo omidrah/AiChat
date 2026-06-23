@@ -11,11 +11,11 @@ export class AuthService {
     constructor(private http: HttpClient) { }
 
     getMode() {
-        return this.http.get<{ mode: string }>(`${this.baseUrl}/mode`);
+        return this.http.get<{ mode: string }>(`${this.baseUrl}/auth/mode`);
     }
 
     login(userName: string, password: string) {
-        return this.http.post<any>(`${this.baseUrl}/login`, { userName, password })
+        return this.http.post<any>(`${this.baseUrl}/auth/login`, { userName, password })
             .pipe(
                 tap(res => {
                     localStorage.setItem('token', res.accessToken);
@@ -24,7 +24,7 @@ export class AuthService {
     }
 
     getMe() {
-        return this.http.get(`${this.baseUrl}/me`);
+        return this.http.get(`${this.baseUrl}/auth/me`);
     }
 
     getToken() {

@@ -17,6 +17,7 @@ namespace AiChat.Application.Authentications.Queries.GetCurrentUser
 
             if (user is null)
                 throw new UnauthorizedAccessException();
+
              return await Task.Run(() => {
                  return new CurrentUserDto
                  {

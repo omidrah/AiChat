@@ -1,4 +1,4 @@
-﻿using AiChat.Application.Dtos;
+﻿using AiChat.Application.Conversations.Dtos;
 
 namespace AiChat.Infrastructure.AI
 {

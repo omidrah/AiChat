@@ -11,6 +11,37 @@ namespace AiChat.Api.Services
         {
             _httpContextAccessor = httpContextAccessor;
         }
+        public Guid? UserId
+        {
+            get
+            {
+                var user = _httpContextAccessor.HttpContext?.User;
+
+                var id =
+                    user?.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                    user?.FindFirstValue("sub") ??
+                    user?.FindFirstValue("userId");
+
+                return Guid.TryParse(id, out var userId) ? userId : null;
+            }
+        }
+
+        public string? UserName
+        {
+            get
+            {
+                var user = _httpContextAccessor.HttpContext?.User;
+
+                return
+                    user?.Identity?.Name ??
+                    user?.FindFirstValue(ClaimTypes.Name) ??
+                    user?.FindFirstValue("name") ??
+                    user?.FindFirstValue("unique_name");
+            }
+        }
+
+        public bool IsAuthenticated =>
+            _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true;
 
         public CurrentUser? GetCurrentUser()
         {

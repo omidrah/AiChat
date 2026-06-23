@@ -1,4 +1,4 @@
 ﻿namespace AiChat.Application.Conversations.Queries.GetConverstaions;
    
-public sealed record GetConversationQuery(Guid ConversationId);
+public sealed record GetConversationQuery(Guid ConversationId, Guid UserId);
 

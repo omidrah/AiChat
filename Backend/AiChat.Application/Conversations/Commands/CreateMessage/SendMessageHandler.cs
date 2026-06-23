@@ -1,8 +1,8 @@
 ﻿namespace AiChat.Application.Conversations.Commands.CreateMessage;
 
 using AiChat.Application.Abstractions;
-using AiChat.Application.Dtos;
-using AiChat.Domain.Entities;
+using AiChat.Application.Common.Auth;
+using AiChat.Application.Conversations.Dtos;
 using System.Text;
 
 public class SendMessageHandler
@@ -28,7 +28,8 @@ public class SendMessageHandler
 
     public async Task<string> HandleAsync(SendMessageCommand command, CancellationToken ct = default)
     {
-        var conversation = await _repository.GetAsync(command.ConversationId, ct);
+
+        var conversation = await _repository.GetConversationForUserAsync(command.ConversationId, command.UserId, ct);
 
         if (conversation is null)
         {
@@ -70,17 +71,14 @@ public class SendMessageHandler
                  async chunk =>
                  {
                      answerBuilder.Append(chunk);
-
-                     await _notifier.SendChunkAsync(
-                         conversation.Id,
-                         chunk);
+                     await _notifier.SendChunkAsync(conversation.Id, command.UserId, chunk);
                  }, ct);
         }
         finally //این باعث می‌شود حتی اگر Ollama خطا بدهد، frontend برای همیشه قفل نماند.
 
         {
             // بعد از اتمام پاسخ از سمت مدل هوش مصنوعی، از طریق سیگنال ار به فرانت اعلام میکنیم
-            await _notifier.CompleteAsync(command.ConversationId);
+            await _notifier.CompleteAsync(command.ConversationId, command.UserId);
         }
         var answer = answerBuilder.ToString();
         conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);

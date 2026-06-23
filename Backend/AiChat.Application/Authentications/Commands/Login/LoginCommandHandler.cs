@@ -1,25 +1,31 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Authentications.Dtos;
-using AiChat.Application.Common.Auth;
+using AiChat.Domain.Entities;
 
 namespace AiChat.Application.Authentications.Commands.Login
 {
     public class LoginCommandHandler
     {
         private readonly IUserRepository _users;
+        private readonly IRefreshTokenRepository _refreshTokens;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher _passwordHasher;
 
-        public LoginCommandHandler(IUserRepository users,ITokenService tokenService, IPasswordHasher passwordHasher)
+        public LoginCommandHandler(
+            IUserRepository users,
+            IRefreshTokenRepository refreshTokens,
+            ITokenService tokenService,
+            IPasswordHasher passwordHasher)
         {
             _users = users;
+            _refreshTokens = refreshTokens;
             _tokenService = tokenService;
             _passwordHasher = passwordHasher;
         }
 
         public async Task<LoginResultDto?> HandleAsync(LoginCommand command, CancellationToken ct)
         {
-            var user = await _users.GetByUserNameAsync(command.UserName);
+            var user = await _users.GetByUserNameAsync(command.UserName,ct);
 
             if (user is null)
                 return null;
@@ -29,16 +35,27 @@ namespace AiChat.Application.Authentications.Commands.Login
             if (!isValid)
                 return null;
 
-            var token = _tokenService.CreateToken(
-                user.Id.ToString(),
-                user.UserName,
-                user.Roles);
+            var (accessToken, accessTokenExpiresAt) = _tokenService.GenerateAccessToken(user, user.Roles);
+            var (refreshToken, refreshTokenExpiresAt) =  _tokenService.GenerateRefreshToken();
+
+            var refreshTokenHash = _tokenService.HashRefreshToken(refreshToken);
+
+            await _refreshTokens.AddAsync(new RefreshToken
+            {
+                UserId = user.Id,
+                TokenHash = refreshTokenHash,
+                ExpiresAt = refreshTokenExpiresAt,
+                CreatedAt = DateTime.UtcNow
+            }, ct);
+
+            await _refreshTokens.SaveChangesAsync(ct);
 
             return new LoginResultDto
             {
-                AccessToken = token,
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
                 UserName = user.UserName,
-                ExpiresAt = DateTime.UtcNow.AddHours(8)
+                ExpiresAt = accessTokenExpiresAt
             };
         }
     }

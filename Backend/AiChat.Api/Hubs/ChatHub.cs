@@ -1,28 +1,55 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AiChat.Application.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 namespace AiChat.Api.Hubs;
 [Authorize]
 public class ChatHub : Hub
 {
-        public override async Task OnConnectedAsync()
-        {
-             Console.WriteLine($"SignalR connected: {Context.ConnectionId}");
-              await base.OnConnectedAsync();
-        }
+    private readonly IConversationRepository _conversations;
 
-        public override Task OnDisconnectedAsync(Exception? exception)
-        {
-            Console.WriteLine($"SignalR disconnected: {Context.ConnectionId}");
-            return base.OnDisconnectedAsync(exception);
-        }
+    public ChatHub(IConversationRepository conversations)
+    {
+        _conversations = conversations;
+    }
 
-         public async Task JoinConversation(string conversationId)
-        {
-            // Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
+    public override async Task OnConnectedAsync()
+    {
+        Console.WriteLine($"SignalR connected: {Context.ConnectionId}");
+        await base.OnConnectedAsync();
+    }
 
-            await Groups.AddToGroupAsync( Context.ConnectionId, conversationId);
+    public override Task OnDisconnectedAsync(Exception? exception)
+    {
+        Console.WriteLine($"SignalR disconnected: {Context.ConnectionId}");
+        return base.OnDisconnectedAsync(exception);
+    }
 
-            // Console.WriteLine($"Connection {Context.ConnectionId} joined group {conversationId}");
-         }
+    public async Task JoinConversation(Guid conversationId)
+    {
+        // Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
+        var userIdClaim =
+               Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
+               Context.User?.FindFirst("sub")?.Value ??
+               Context.User?.FindFirst("userId")?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            throw new HubException("Unauthorized");
+
+        var conversation = await _conversations.GetConversationForUserAsync(
+            conversationId,
+            userId,
+            Context.ConnectionAborted);
+
+        if (conversation is null)
+            throw new HubException("Conversation not found");
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, GetConversationGroupName(conversationId, userId));
+
+    }
+    private static string GetConversationGroupName(Guid conversationId, Guid userId)
+    {
+        return $"conversation:{conversationId}:user:{userId}";
+    }
 }

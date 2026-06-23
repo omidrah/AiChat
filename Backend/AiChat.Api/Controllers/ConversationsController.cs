@@ -1,10 +1,13 @@
 ﻿using AiChat.Api.Contracts;
+using AiChat.Application.Common.Auth;
 using AiChat.Application.Conversations.Commands.CreateConversation;
 using AiChat.Application.Conversations.Commands.CreateMessage;
 using AiChat.Application.Conversations.Commands.DeleteConversaion;
+using AiChat.Application.Conversations.Dtos;
 using AiChat.Application.Conversations.Queries.GetConversationList;
 using AiChat.Application.Conversations.Queries.GetConverstaions;
-using AiChat.Application.Dtos;
+using AiChat.Domain.Entities;
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,8 +18,11 @@ namespace AiChat.Api.Controllers
     [Authorize]
     public class ConversationsController : ControllerBase
     {
-        public ConversationsController()
+        private readonly ICurrentUserService _currentUser;
+
+        public ConversationsController(ICurrentUserService currentUser)
         {
+            _currentUser = currentUser;
         }
         /// <summary>
         /// generate New Conversation 
@@ -25,7 +31,11 @@ namespace AiChat.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromServices]CreateConversationHandler handler)
         {
-            var id = await handler.HandleAsync( new CreateConversation("New Chat"));
+            if (_currentUser.UserId is not Guid userId)
+                return Unauthorized();
+            var createConversationCommand = new CreateConversationCommand(userId, "New Chat");
+
+            var id = await handler.HandleAsync(createConversationCommand);
             return Ok(id);
         }
 
@@ -34,9 +44,14 @@ namespace AiChat.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromServices] GetConversationListHandler listhandler)
+        public async Task<IActionResult> GetAll([FromServices] GetConversationListHandler getConversationListHandler)
         {
-            var conversations = await listhandler.HandleAsync();
+            if (_currentUser.UserId is not Guid userId)
+                return Unauthorized();
+
+            var getConversationListCommand = new GetConversationListQuery(userId);
+
+            var conversations = await getConversationListHandler.HandleAsync(getConversationListCommand);
             return Ok(
                 conversations.Select(x =>
                     new ConversationListItemDto
@@ -55,7 +70,11 @@ namespace AiChat.Api.Controllers
         [HttpGet("{conversationId}")]
         public async Task<IActionResult> GetMessageByConversationId(Guid conversationId, [FromServices] GetConversationHandler getConversationHandler)
         {
-            var conversation = await getConversationHandler.HandleAsync(new GetConversationQuery(conversationId));
+            if(_currentUser.UserId is not Guid userId)
+                return Unauthorized();
+
+            var getConversation = new GetConversationQuery(conversationId,userId);
+            var conversation = await getConversationHandler.HandleAsync(getConversation);
 
             if (conversation is null)
                 return NotFound();
@@ -63,19 +82,25 @@ namespace AiChat.Api.Controllers
             return Ok(conversation);
         }
 
-       
+
         /// <summary>
         /// Add new message from user and Get response from ollama and save in Db
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
         /// <param name="request"></param>
         /// <param name="handler"></param>
         /// <returns></returns>
-        [HttpPost("{id}/messages")]
-        public async Task<IActionResult> SendMessage(Guid id,  [FromBody] SendMessageRequest request,
-                                 [FromServices] SendMessageHandler handler)
+        [HttpPost("{conversationId}/messages")]
+        public async Task<IActionResult> SendMessage(Guid conversationId, 
+            [FromBody] SendMessageRequest request,
+            [FromServices] SendMessageHandler handler)
         {
-            var answer = await handler.HandleAsync(new SendMessageCommand(id, request.Message));
+            if (_currentUser.UserId is not Guid userId)
+                return Unauthorized();
+
+            var command = new SendMessageCommand(conversationId, userId, request.Message);
+
+            var answer = await handler.HandleAsync(command);
 
             return Ok(new
             {
@@ -86,7 +111,12 @@ namespace AiChat.Api.Controllers
         [HttpDelete("{conversationId}")]
         public async Task<IActionResult> Delete(Guid conversationId, [FromServices] DeleteConversationHandler handler)
         {
-            var result = await handler.HandleAsync(new DeleteConversation(conversationId));
+            if (_currentUser.UserId is not Guid userId)
+                return Unauthorized();
+
+            var deleteConversation = new DeleteConversation(conversationId,userId);
+
+            var result = await handler.HandleAsync(deleteConversation);
 
             if (!result)
                 return NotFound();

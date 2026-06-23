@@ -1,5 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Dtos;
+using AiChat.Application.Conversations.Dtos;
 
 namespace AiChat.Application.Conversations.Queries.GetConverstaions
 {

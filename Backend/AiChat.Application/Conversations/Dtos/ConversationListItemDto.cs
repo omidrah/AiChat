@@ -1,4 +1,4 @@
-﻿namespace AiChat.Application.Dtos
+﻿namespace AiChat.Application.Conversations.Dtos
 {
     public class ConversationListItemDto
     {

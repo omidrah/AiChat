@@ -11,19 +11,16 @@ namespace AiChat.Application.Conversations.Commands.DeleteConversaion
             _repository = repository;
         }
 
-        public async Task<bool> HandleAsync(DeleteConversation command)
+        public async Task<bool> HandleAsync(DeleteConversation command, CancellationToken ct = default)
         {
-            var conversation =
-                await _repository.GetAsync(command.ConversationId);
+            var result =
+                await _repository.DeleteConversationByUserAsync(command.ConversationId, command.UserId, ct);
 
-            if (conversation is null)
-                return false;
-
-            await _repository.DeleteAsync(conversation);
-
-            await _repository.SaveChangesAsync();
-
-            return true;
+            if (result)
+            {
+                await _repository.SaveChangesAsync();
+            }
+            return result;
         }
     }
 }

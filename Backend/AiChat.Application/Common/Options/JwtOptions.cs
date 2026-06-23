@@ -2,10 +2,11 @@
 {
     public sealed class JwtOptions
     {
-        public string Issuer { get; set; } = "";
-        public string Audience { get; set; } = "";
-        public string Secret { get; set; } = "";
-        public int ExpiresMinutes { get; set; } = 480;
+        public string Issuer { get; set; } = default!;
+        public string Audience { get; set; } = default!;
+        public string Key { get; set; } = default!;
+        public int AccessTokenMinutes { get; set; }
+        public int RefreshTokenDays { get; set; }
     }
 
 }

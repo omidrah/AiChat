@@ -4,6 +4,7 @@ using AiChat.Api.Services;
 using AiChat.Application;
 using AiChat.Application.Abstractions;
 using AiChat.Application.Common.Auth;
+using AiChat.Application.Common.Options;
 using AiChat.Infrastructure.AI;
 using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;
@@ -32,29 +33,28 @@ if (authMode.Equals("Windows", StringComparison.OrdinalIgnoreCase))
 }
 else
 {
-    var jwtSecret = builder.Configuration["Authentication:Jwt:Secret"];
-
-    if (string.IsNullOrWhiteSpace(jwtSecret))
-        throw new InvalidOperationException("JWT Secret is missing.");
-
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
+            var jwtOptions = builder.Configuration
+                        .GetSection("Jwt")
+                        .Get<JwtOptions>();
+            
             options.RequireHttpsMetadata = false;
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = builder.Configuration["Authentication:Jwt:Issuer"],
+                ValidIssuer = jwtOptions!.Issuer,
 
                 ValidateAudience = true,
-                ValidAudience = builder.Configuration["Authentication:Jwt:Audience"],
+                ValidAudience = jwtOptions.Audience,
 
                 ValidateIssuerSigningKey = true,
+
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtSecret)
-                ),
+                    Encoding.UTF8.GetBytes(jwtOptions.Key)),
 
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(2)
@@ -81,7 +81,6 @@ else
 }
 
 builder.Services.AddAuthorization();
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -110,7 +109,7 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 builder.Services.AddScoped<IChatStreamNotifier, SignalRChatNotifier>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IConversationTitleGenerator,OllamaConversationTitleGenerator>();
-
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();

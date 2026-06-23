@@ -30,7 +30,7 @@ namespace AiChat.Infrastructure.Persistence.Repositories
         }
 
         public async Task<User?> GetByUserNameAsync(string userName, CancellationToken ct = default)
-        {
+        {   
             return await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == userName && x.IsActive,ct);
         }
     }
