@@ -33,7 +33,7 @@ namespace AiChat.Api.Controllers
         {
             if (_currentUser.UserId is not Guid userId)
                 return Unauthorized();
-            var createConversationCommand = new CreateConversationCommand(userId, "New Chat");
+            var createConversationCommand = new CreateConversationCommand(userId, _currentUser.UserName!, "New Chat");
 
             var id = await handler.HandleAsync(createConversationCommand);
             return Ok(id);

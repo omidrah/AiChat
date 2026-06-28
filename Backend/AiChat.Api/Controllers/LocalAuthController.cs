@@ -6,6 +6,7 @@ namespace AiChat.Api.Controllers
 {
     [ApiController]
     [Route("api/auth")]
+    [AllowAnonymous]
     public class LocalAuthController : ControllerBase
     {
         public LocalAuthController()

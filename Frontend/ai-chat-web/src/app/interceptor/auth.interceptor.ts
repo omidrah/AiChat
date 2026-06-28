@@ -4,7 +4,7 @@ import { AuthService } from '../services/AuthService';
 import { catchError, switchMap, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-
+  console.log("INTERCEPTOR");
   const auth = inject(AuthService);
   const token = auth.getToken();
 

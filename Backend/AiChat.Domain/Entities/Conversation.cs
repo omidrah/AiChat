@@ -18,19 +18,19 @@ namespace AiChat.Domain.Entities
 
         public IReadOnlyCollection<Message> Messages => _messages.AsReadOnly();
 
-        private Conversation(Guid userId, string title)
+        private Conversation(Guid userId,string userName, string title)
         {
             Id = Guid.NewGuid();
             UserId = userId;
             Title = title;
-
+            UserName = userName;
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;    
         }
 
-        public static Conversation CreateConversation(Guid userId, string title)
+        public static Conversation CreateConversation(Guid userId,string userName, string title)
         {
-            return new Conversation(userId,title);            
+            return new Conversation(userId, userName,title);            
         }
 
         public void AddMessage(string content,MessageRole role)
