@@ -17,7 +17,7 @@ namespace AiChat.Application.Conversations.Commands.CreateConversation
 
         public async Task<Guid> HandleAsync(CreateConversationCommand createConversationCommand, CancellationToken ct = default)
         {            
-            var conversation =Conversation.CreateConversation(createConversationCommand.UserId,createConversationCommand.Username, createConversationCommand.Title);
+            var conversation =Conversation.CreateConversation(createConversationCommand.UserId, createConversationCommand.Username, createConversationCommand.Title);
 
             await _repository.AddAsync(conversation, ct);
 

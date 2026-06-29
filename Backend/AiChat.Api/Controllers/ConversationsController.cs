@@ -6,8 +6,6 @@ using AiChat.Application.Conversations.Commands.DeleteConversaion;
 using AiChat.Application.Conversations.Dtos;
 using AiChat.Application.Conversations.Queries.GetConversationList;
 using AiChat.Application.Conversations.Queries.GetConverstaions;
-using AiChat.Domain.Entities;
-using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

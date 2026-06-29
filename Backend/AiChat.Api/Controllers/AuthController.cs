@@ -1,8 +1,6 @@
 ﻿using AiChat.Application.Authentications.Queries.GetCurrentUser;
-using AiChat.Application.Conversations.Commands.CreateConversation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace AiChat.Api.Controllers
 {
