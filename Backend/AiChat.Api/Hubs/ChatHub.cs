@@ -17,12 +17,17 @@ public class ChatHub : Hub
     public override async Task OnConnectedAsync()
     {
         Console.WriteLine($"SignalR connected: {Context.ConnectionId}");
+        Console.WriteLine(Context.UserIdentifier);
+
+        Console.WriteLine(Context.User?.Identity?.Name);
+
         await base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
         Console.WriteLine($"SignalR disconnected: {Context.ConnectionId}");
+        Console.WriteLine(exception?.Message);
         return base.OnDisconnectedAsync(exception);
     }
 

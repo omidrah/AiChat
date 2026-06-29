@@ -25,7 +25,7 @@ namespace AiChat.Api.Contracts
             Console.WriteLine($"Message from Ai is completed = {conversationId}");
 
             await _hub.Clients
-                .Group(conversationId.ToString())
+                .Group($"conversation:{conversationId}:user:{userId}")
                 .SendAsync("ReceiveCompleted");
         }
 
