@@ -1,21 +1,22 @@
 *{
     box-sizing:border-box;
 }
-
+body{
+    background:red !important;
+}
 .login-page{
 
-    direction: rtl;
-
-    width:100vw;
-    height:100vh;
+    position:fixed;
+    inset:0;
 
     display:flex;
     justify-content:center;
     align-items:center;
 
+    direction:rtl;
+
     background:#f3f5f8;
 }
-
 .login-card{
 
     width:420px;
