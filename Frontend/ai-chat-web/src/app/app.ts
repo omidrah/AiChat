@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { ConversationList } from './conversations/conversation-list/conversation-list';
 import { AuthService } from './services/AuthService';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './services/api.service';
+import { ConversationList } from './conversations/conversation-list/conversation-list';
 
 @Component({
   selector: 'app-root',

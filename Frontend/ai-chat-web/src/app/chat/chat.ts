@@ -53,36 +53,24 @@ export class ChatComponent {
   ) {}
 
   async ngOnInit() {
-    this.route.paramMap.subscribe(async params => {
+    await this.route.paramMap.subscribe(async params => {
       const id = params.get('id');
+      if (!id)  return;
 
-      if (!id) {
-        console.error('Conversation id not found in route');
-        return;
-      }
-
-      this.conversationId = id;
-
-      await this.signalr.start();
+      await this.openConversation(id);
 
       this.signalr.onReceiveToken(token => {
         this.zone.run(() => {
           let lastMessage = this.messages[this.messages.length - 1];
 
           if (!lastMessage || lastMessage.role.toLowerCase() !== 'assistant') {
-            this.messages.push({
-              role: 'assistant',
-              content: token,
-              createdAt: new Date()
-            });
-
+            this.messages.push({role: 'assistant', content: token, createdAt: new Date() });
             this.cdr.detectChanges();
             this.scrollToBottomIfNeeded();
             return;
           }
 
           const index = this.messages.length - 1;
-
           this.messages = this.messages.map((m, i) =>
             i === index
               ? { ...m, content: m.content + token }
@@ -102,14 +90,17 @@ export class ChatComponent {
         });
       });
 
-      await this.signalr.joinConversation(this.conversationId);
-      this.isSignalRReady = true;
-
-      await this.loadMessages();
-
       this.cdr.detectChanges();
       this.forceScrollToBottom();
     });
+  }
+
+  private async openConversation(id:string){
+     this.conversationId = id;
+    await this.signalr.start();
+    await this.signalr.joinConversation(id);
+    this.isSignalRReady = true;
+    await this.loadMessages();
   }
 
   async loadMessages() {
@@ -236,6 +227,6 @@ export class ChatComponent {
 
   ngOnDestroy() {
     this.signalr.offReceiveToken();
-  this.signalr.offReceiveCompleted();
+    this.signalr.offReceiveCompleted();
   }
 }

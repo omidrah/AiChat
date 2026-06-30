@@ -17,10 +17,12 @@ export class ConversationList {
 
   conversations: Conversation[] = [];
 
-  constructor(private api:ApiService, private router:Router){
-    this.load();
+  constructor(private api:ApiService, private router:Router){  
   }
 
+  ngOnInit() {
+      this.load();
+  }
   async create(){
     const id = await firstValueFrom(this.api.createConversation());
     this.router.navigate(['/chat',id]);

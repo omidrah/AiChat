@@ -4,15 +4,15 @@ import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface LoginResult {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
   userName: string;
   expiresAt: string;
 }
 
 export interface RefreshResult {
-  accessToken: string;
-  refreshToken: string;
+  access_token: string;
+  refresh_token: string;
   expiresAt: string;
 }
 
@@ -44,7 +44,7 @@ export class AuthService {
     }
  
     getRefreshToken() {
-        return localStorage.getItem('refreshToken');
+        return localStorage.getItem('refresh_token');
     }
 
     isLoggedIn() {
@@ -52,14 +52,14 @@ export class AuthService {
     }
 
     logout() {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         localStorage.removeItem('accessTokenExpiresAt');
     }
 
     private storeTokens(res: LoginResult | RefreshResult) {
-        localStorage.setItem('accessToken', res.accessToken);
-        localStorage.setItem('refreshToken', res.refreshToken);
+        localStorage.setItem('access_token', res.access_token);
+        localStorage.setItem('refresh_token', res.refresh_token);
         localStorage.setItem('accessTokenExpiresAt', res.expiresAt);
     }
 
@@ -68,6 +68,6 @@ export class AuthService {
     }
 
     getToken() {
-        return localStorage.getItem('accessToken');
+        return localStorage.getItem('access_token');
     }
 }

@@ -66,7 +66,7 @@ else
             {
                 OnMessageReceived = context =>
                 {
-                    var accessToken = context.Request.Query["accessToken"];
+                    var accessToken = context.Request.Query["access_token"];
 
                     var path = context.HttpContext.Request.Path;
 

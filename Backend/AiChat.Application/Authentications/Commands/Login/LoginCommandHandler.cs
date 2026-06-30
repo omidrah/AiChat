@@ -52,8 +52,8 @@ namespace AiChat.Application.Authentications.Commands.Login
 
             return new LoginResultDto
             {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
+                access_token = accessToken,
+                refresh_token = refreshToken,
                 UserName = user.UserName,
                 ExpiresAt = accessTokenExpiresAt
             };
