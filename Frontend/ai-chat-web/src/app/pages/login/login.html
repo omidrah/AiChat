@@ -1,25 +1,42 @@
-<div class="login-box">
+<div class="login-page">
 
-  <h2>Login</h2>
+  <div class="login-card">
 
-  <input
-    type="text"
-    placeholder="Username"
-    [(ngModel)]="userName"
-  />
+    <h1>AI Chat</h1>
 
-  <input
-    type="password"
-    placeholder="Password"
-    [(ngModel)]="password"
-  />
+    <p class="subtitle">
+      ورود به سامانه
+    </p>
 
-  <button (click)="login()">
-    Login
-  </button>
+    <div class="form-group">
+      <label>نام کاربری</label>
 
-  <div *ngIf="error">
-    {{error}}
+      <input
+        type="text"
+        [(ngModel)]="userName"
+        placeholder="نام کاربری">
+    </div>
+
+    <div class="form-group">
+      <label>رمز عبور</label>
+
+      <input
+        type="password"
+        [(ngModel)]="password"
+        placeholder="رمز عبور">
+    </div>
+
+    <button
+      (click)="login()"
+      class="login-btn">
+
+      ورود
+    </button>
+
+    <div class="error" *ngIf="error">
+      {{error}}
+    </div>
+
   </div>
 
 </div>

@@ -4,13 +4,14 @@ import { AuthService } from './services/AuthService';
 import { firstValueFrom } from 'rxjs';
 import { ApiService } from './services/api.service';
 import { ConversationList } from './conversations/conversation-list/conversation-list';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ConversationList],
+  imports: [CommonModule, RouterOutlet, ConversationList],
   templateUrl: './app.html',
   styleUrl: './app.css',
-
+  standalone: true,
 })
 
 export class App {
@@ -19,7 +20,7 @@ export class App {
 
   constructor(private auth: AuthService, private api: ApiService, private router: Router) { }
 
-  dark = false;
+   dark = false;
 
   toggleTheme() {
     this.dark = !this.dark;
@@ -30,6 +31,10 @@ export class App {
       document.body.classList.remove("dark");
   }
 
+  get isLoginPage(): boolean {
+    return this.router.url.startsWith('/login');
+  }
+  
   async ngOnInit() {
 
     const mode = await firstValueFrom(this.auth.getMode());

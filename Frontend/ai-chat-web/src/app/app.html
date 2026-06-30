@@ -1,16 +1,21 @@
+<div class="layout" *ngIf="!isLoginPage">
+
+    <button class="theme-btn" (click)="toggleTheme()">
+        🌙
+    </button>
+
+    <aside class="sidebar">
+        <app-conversation-list></app-conversation-list>
+    </aside>
+
+    <main class="chat-area">
+        <router-outlet></router-outlet>
+    </main>
+
+</div>
 
 <div class="layout">
-    <button class="theme-btn" (click)="toggleTheme()">
-    🌙
-    </button>
-    
-    <aside class="sidebar">
-      <app-conversation-list></app-conversation-list>
-    </aside>
-  
     <main class="chat-area">
-      <router-outlet></router-outlet>
+        <router-outlet *ngIf="isLoginPage"></router-outlet>
     </main>
-  
-  </div>
-  
+</div>
