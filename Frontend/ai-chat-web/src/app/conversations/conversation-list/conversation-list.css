@@ -154,14 +154,13 @@
 
     display:none;
 
-    margin-right:auto;
-
-    gap:4px;
 }
 
-.conversation-item:hover .actions{
+.conversation-item:hover .actions,
+.conversation-item.editing .actions{
 
     display:flex;
+
 }
 
 .actions button{
@@ -190,8 +189,6 @@
 }
 
 .rename-input{
-
-    flex:1;
 
     background:#2f3136;
 

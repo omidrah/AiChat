@@ -24,7 +24,10 @@
 
   <div class="conversation-list">
 
-    <div class="conversation-item" [class.active]="c.id === selectedId" *ngFor="let c of conversations"    (click)="open(c.id)">
+    <div class="conversation-item" 
+      [class.active]="c.id === selectedId"
+      [class.editing]="editingId===c.id" 
+      *ngFor="let c of conversations;trackBy:trackConversation"    (click)="open(c.id)">
       
       <span class="icon">💬</span>
       
@@ -44,7 +47,7 @@
 
         <ng-container *ngIf="editingId===c.id">
     
-            <button class="ok-btn" (click)="saveRename(c);$event.stopPropagation()">    
+            <button class="ok-btn" (click)="$event.stopPropagation();saveRename(c);">    
                 ✔    
             </button>
     
@@ -71,10 +74,10 @@
           <div>حذف گفتگو؟</div>
 
           <div class="popup-buttons">
-              <button   class="cancel"   (click)="confirmDeleteId=''">
+              <button   class="cancel"   (click)="confirmDeleteId=''; $event.stopPropagation()">
                   لغو
               </button>
-              <button   class="delete"  (click)="delete(c)">
+              <button   class="delete"  (click)="delete(c); $event.stopPropagation()">
                   حذف
               </button>
           </div>

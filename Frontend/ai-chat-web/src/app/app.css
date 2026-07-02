@@ -123,7 +123,7 @@ app-root{
 
 .sidebar{
 
-    width:280px;
+    width:380px;
     transition:width .25s;
     overflow:hidden;    
     background: #202123;

@@ -2,9 +2,9 @@ import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/AuthService';
 import { firstValueFrom } from 'rxjs';
-import { ApiService } from './services/api.service';
 import { ConversationList } from './conversations/conversation-list/conversation-list';
 import { CommonModule } from '@angular/common';
+import { ConversationStore } from './store/conversation.store';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +20,7 @@ export class App {
   
   sidebarCollapsed = false;
   dark = false;
-  constructor(private auth: AuthService, private api: ApiService, private router: Router) { }
+  constructor(private auth: AuthService, private store: ConversationStore, private router: Router) { }
 
   toggleTheme() {
     this.dark = !this.dark;
@@ -50,7 +50,8 @@ export class App {
 
     try {
 
-      const conversations = await firstValueFrom(this.api.getConversations());
+      await firstValueFrom(this.store.load());    
+      const conversations = this.store.value;
 
       if (conversations.length > 0) {
 
@@ -62,12 +63,8 @@ export class App {
         return;
       }
 
-      const id = await firstValueFrom(this.api.createConversation());
-
-      this.router.navigate([
-        '/chat',
-        id
-      ]);
+      const id = await this.store.create();
+      this.router.navigate(['/chat',id]);
 
     }
     catch {
