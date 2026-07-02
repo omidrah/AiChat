@@ -34,7 +34,7 @@ export class SignalRService {
       .withUrl(environment.hubUrl,  {  
          accessTokenFactory: () => {      
               const token = this.auth.getToken();
-              console.log("SignalR Token:", token);
+              // console.log("SignalR Token:", token);
               return token ?? '';
           }
        } )

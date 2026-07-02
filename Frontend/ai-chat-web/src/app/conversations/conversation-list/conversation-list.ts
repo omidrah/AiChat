@@ -3,7 +3,7 @@ import { ApiService } from '../../services/api.service';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Conversation } from '../../models/conversation';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../services/AuthService';
 import { Input } from '@angular/core';
 import { ConversationEventsService } from '../../services/conversation-events.service';
@@ -28,22 +28,29 @@ export class ConversationList {
   selectedId = '';
   conversations: Conversation[] = [];
   userName = '';
+  private destroy$ = new Subject<void>();
 
   constructor(private api:ApiService, private router:Router, private auth: AuthService,     private events: ConversationEventsService){ }
 
   ngOnInit() {
 
       this.userName = this.auth.getUserName();
-      this.load();
-      this.events.refresh$ .subscribe(() => this.load());
-      
+      this.events.refresh$.pipe(takeUntil(this.destroy$)).subscribe(()=>this.load());
+
       this.router.events.subscribe(() => {
-        const url = this.router.url;
-        const parts = url.split('/');
-        this.selectedId = parts[2] ?? '';
-    });
+          const url = this.router.url;
+          const parts = url.split('/');
+          this.selectedId = parts[2] ?? '';
+      });
+
   }
 
+  ngOnDestroy(){
+
+      this.destroy$.next();
+      this.destroy$.complete();
+
+  }
   async create(){
     const id = await firstValueFrom(this.api.createConversation());
     this.events.refresh();
@@ -53,38 +60,38 @@ export class ConversationList {
   showDelete(c:Conversation){
       this.confirmDeleteId=c.id;
   }
+
   delete(c:Conversation){
-
       this.api.deleteConversation(c.id).subscribe({
-
           next:()=>{
 
               this.confirmDeleteId='';
-
-              const deletedId=c.id;
-
-              this.conversations= this.conversations.filter(x=>x.id!==deletedId);
-              this.events.refresh();
-
-                if(this.selectedId===deletedId){
-
-                    if(this.conversations.length){
-
-                        this.router.navigate(['/chat', this.conversations[0].id]);
-
-                    }else{
-
-                        this.create();
-
-                    }
-
-                }
-
+              this.loadAfterDelete(c.id);
           }
-
       });
   }
 
+  loadAfterDelete(deletedId:string){
+      this.api.getConversations()
+          .subscribe({
+              next:list=>{
+                  this.conversations=list;
+                  if(this.selectedId===deletedId){
+                      if(list.length){
+                          this.router.navigate([
+                              '/chat',
+                              list[0].id
+                          ]);
+                      }
+                      else{
+
+                          this.create();
+                      }
+
+                  }
+              }
+          });
+  }
   load(){
     this.api.getConversations().subscribe({
       next: x => {
