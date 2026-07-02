@@ -124,10 +124,22 @@ namespace AiChat.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Rename(RenameConversationRequest request,
-            [FromServices] RenameConversationHandler handler, CancellationToken ct)
+        public async Task<IActionResult> Rename(
+            Guid id,
+            [FromBody] RenameConversationRequest request,
+            [FromServices] RenameConversationHandler handler,
+            CancellationToken ct)
         {
-            await handler.HandleAsync(new RenameConversationCommand(request.conversationId,  request.conversationTitle),  ct);
+
+            if (_currentUser.UserId is not Guid userId)
+                return Unauthorized();
+
+            await handler.HandleAsync(
+                new RenameConversationCommand(
+                        id,
+                        userId,
+                        request.Title),
+                ct);
 
             return NoContent();
         }

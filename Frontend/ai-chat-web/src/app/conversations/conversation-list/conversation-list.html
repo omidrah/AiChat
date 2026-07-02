@@ -15,10 +15,8 @@
     </div>
 
     <button class="new-chat-btn" (click)="create()">
-
       <span *ngIf="collapsed">＋</span>
       <span *ngIf="!collapsed"> + گفتگوی جدید </span>
-
     </button>
 
   </div>
@@ -38,44 +36,47 @@
           (keydown.enter)="saveRename(c)"
           (keydown.escape)="cancelRename()">
 
-      <span
-          *ngIf="editingId !== c.id && !collapsed"
-          class="title">
-
+      <span *ngIf="editingId !== c.id && !collapsed" class="title">
           {{ c.title }}
-
       </span>
       
       <div class="actions">
-        <button (click)="rename(c,$event)">✏️</button>
-        <button (click)="showDelete(c,$event)">🗑️</button>
-      </div>
-      
-      <div
-          class="delete-popup"
-          *ngIf="confirmDeleteId===c.id"
-          (click)="$event.stopPropagation()">
 
+        <ng-container *ngIf="editingId===c.id">
+    
+            <button class="ok-btn" (click)="saveRename(c);$event.stopPropagation()">    
+                ✔    
+            </button>
+    
+            <button class="cancel-btn" (click)="cancelRename();$event.stopPropagation()">    
+                ✖    
+            </button>
+    
+        </ng-container>
+    
+        <ng-container *ngIf="editingId!==c.id">
+    
+            <button  (click)="rename(c,$event)">    
+                ✏️    
+            </button>
+    
+            <button (click)="showDelete(c);$event.stopPropagation()">    
+                🗑️    
+            </button>
+    
+        </ng-container>
+    
+    </div>
+      <div class="delete-popup" *ngIf="confirmDeleteId===c.id" (click)="$event.stopPropagation()">
           <div>حذف گفتگو؟</div>
 
           <div class="popup-buttons">
-
-              <button
-                  class="cancel"
-                  (click)="confirmDeleteId=''">
-
+              <button   class="cancel"   (click)="confirmDeleteId=''">
                   لغو
-
               </button>
-
-              <button
-                  class="delete"
-                  (click)="delete(c)">
-
+              <button   class="delete"  (click)="delete(c)">
                   حذف
-
               </button>
-
           </div>
 
       </div>

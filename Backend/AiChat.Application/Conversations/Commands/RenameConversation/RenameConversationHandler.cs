@@ -13,12 +13,7 @@ namespace AiChat.Application.Conversations.Commands.RenameConversation
 
         public async Task HandleAsync(RenameConversationCommand command, CancellationToken ct = default)
         {
-            var conversation = await _repository.GetAsync(command.conversationId,ct);
-
-            if (conversation is null)
-                throw new Exception("Not Found");
-
-            conversation.Rename(command.newTitle);
+            await _repository.RenameAsync(command.conversationId,command.userId,command.newtitle,ct);
 
             await _repository.SaveChangesAsync();
         }

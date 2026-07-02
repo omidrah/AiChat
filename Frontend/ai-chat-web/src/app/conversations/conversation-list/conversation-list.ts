@@ -50,12 +50,8 @@ export class ConversationList {
     this.router.navigate(['/chat',id]);
   }
 
-  showDelete(c:Conversation,event:MouseEvent){
-
-      event.stopPropagation();
-
+  showDelete(c:Conversation){
       this.confirmDeleteId=c.id;
-
   }
   delete(c:Conversation){
 
@@ -65,21 +61,16 @@ export class ConversationList {
 
               this.confirmDeleteId='';
 
-              this.events.refresh();
-
               const deletedId=c.id;
 
-              this.conversations=
-                    this.conversations.filter(x=>x.id!==deletedId);
+              this.conversations= this.conversations.filter(x=>x.id!==deletedId);
+              this.events.refresh();
 
                 if(this.selectedId===deletedId){
 
                     if(this.conversations.length){
 
-                        this.router.navigate([
-                            '/chat',
-                            this.conversations[0].id
-                        ]);
+                        this.router.navigate(['/chat', this.conversations[0].id]);
 
                     }else{
 
@@ -92,7 +83,6 @@ export class ConversationList {
           }
 
       });
-
   }
 
   load(){
@@ -112,6 +102,15 @@ export class ConversationList {
 
       this.editingId = c.id;
       this.editingTitle = c.title;
+
+      setTimeout(() => {
+        const input = document.querySelector(
+            '.rename-input'
+        ) as HTMLInputElement;
+
+        input?.focus();
+        input?.select();
+    });
   }
 
   saveRename(c: Conversation) {
@@ -132,6 +131,8 @@ export class ConversationList {
                 c.title = title;
 
                 this.editingId = '';
+                this.events.refresh();
+
 
             },
             error: err => {

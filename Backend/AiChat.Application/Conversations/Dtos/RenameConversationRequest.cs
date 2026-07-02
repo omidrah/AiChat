@@ -1,3 +1,3 @@
 ﻿namespace AiChat.Application.Conversations.Dtos;
 
-public sealed record RenameConversationRequest(Guid conversationId, string conversationTitle);
+public sealed record RenameConversationRequest(string Title);
