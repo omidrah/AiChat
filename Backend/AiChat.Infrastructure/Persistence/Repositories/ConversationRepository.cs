@@ -82,5 +82,19 @@ namespace AiChat.Infrastructure.Persistence.Repositories
             _dbContext.Conversations.Remove(conversation);
             return true;
         }
+
+        public async Task RenameAsync(Guid conversationId, Guid userId, string newtitle, CancellationToken ct)
+        {
+            var conversation = await _dbContext.Conversations
+                .FirstOrDefaultAsync(x =>
+                    x.Id == conversationId &&
+                    x.UserId == userId,
+                    ct);
+
+            if (conversation == null)
+                throw new Exception("Conversation not found");
+
+            conversation.Rename(newtitle);
+        }
     }
 }

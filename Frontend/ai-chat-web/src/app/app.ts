@@ -17,10 +17,10 @@ import { CommonModule } from '@angular/common';
 export class App {
 
   protected readonly title = signal('ai-chat-web');
-
+  
+  sidebarCollapsed = false;
+  dark = false;
   constructor(private auth: AuthService, private api: ApiService, private router: Router) { }
-
-   dark = false;
 
   toggleTheme() {
     this.dark = !this.dark;
@@ -31,6 +31,10 @@ export class App {
       document.body.classList.remove("dark");
   }
 
+  toggleSidebar() {
+    this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+  
   get isLoginPage(): boolean {
     return this.router.url.startsWith('/login');
   }

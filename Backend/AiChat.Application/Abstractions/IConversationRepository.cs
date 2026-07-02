@@ -22,6 +22,7 @@ namespace AiChat.Application.Abstractions
 
         Task<bool> DeleteConversationByUserAsync(Guid conversationId, Guid userId, CancellationToken ct);
 
+        Task RenameAsync(Guid conversationId, Guid userId, string title,CancellationToken ct);
 
         Task SaveChangesAsync(CancellationToken ct = default);
     }

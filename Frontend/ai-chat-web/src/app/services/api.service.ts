@@ -36,4 +36,23 @@ export class ApiService {
       { message }
     );
   }
+
+  deleteConversation(id:string){
+
+    return this.http.delete(
+        `${this.baseUrl}/conversations/${id}`
+    );
+
+  }
+
+   renameConversation(id:string, title:string){
+
+    return this.http.put(
+       `${this.baseUrl}/conversations/${id}`, 
+       {
+        title
+      }
+    );
+
+  }
 }

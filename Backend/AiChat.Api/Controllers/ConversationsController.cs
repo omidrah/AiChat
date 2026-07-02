@@ -3,6 +3,7 @@ using AiChat.Application.Common.Auth;
 using AiChat.Application.Conversations.Commands.CreateConversation;
 using AiChat.Application.Conversations.Commands.CreateMessage;
 using AiChat.Application.Conversations.Commands.DeleteConversaion;
+using AiChat.Application.Conversations.Commands.RenameConversation;
 using AiChat.Application.Conversations.Dtos;
 using AiChat.Application.Conversations.Queries.GetConversationList;
 using AiChat.Application.Conversations.Queries.GetConverstaions;
@@ -118,6 +119,15 @@ namespace AiChat.Api.Controllers
 
             if (!result)
                 return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Rename(RenameConversationRequest request,
+            [FromServices] RenameConversationHandler handler, CancellationToken ct)
+        {
+            await handler.HandleAsync(new RenameConversationCommand(request.conversationId,  request.conversationTitle),  ct);
 
             return NoContent();
         }

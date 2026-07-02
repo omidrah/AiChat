@@ -1,10 +1,97 @@
-  <div class="header">
-    <button (click)="create()">گفتگوی جدید</button>
-  </div>
-  
-  <div class="list">
-    <div  class="item" (click)="open(c.id)" *ngFor="let c of conversations">
-      {{c.title.substring(0,20)}}
+<div class="sidebar-container">
+
+  <div class="sidebar-header">
+
+    <div class="logo">
+
+      <span *ngIf="!collapsed">
+        🤖 AI Chat
+      </span>
+
+      <span *ngIf="collapsed">
+        🤖
+      </span>
+
     </div>
+
+    <button class="new-chat-btn" (click)="create()">
+
+      <span *ngIf="collapsed">＋</span>
+      <span *ngIf="!collapsed"> + گفتگوی جدید </span>
+
+    </button>
+
   </div>
-  
+
+
+  <div class="conversation-list">
+
+    <div class="conversation-item" [class.active]="c.id === selectedId" *ngFor="let c of conversations"    (click)="open(c.id)">
+      
+      <span class="icon">💬</span>
+      
+      <input
+          *ngIf="editingId === c.id"
+          class="rename-input"
+          [(ngModel)]="editingTitle"
+          (click)="$event.stopPropagation()"
+          (keydown.enter)="saveRename(c)"
+          (keydown.escape)="cancelRename()">
+
+      <span
+          *ngIf="editingId !== c.id && !collapsed"
+          class="title">
+
+          {{ c.title }}
+
+      </span>
+      
+      <div class="actions">
+        <button (click)="rename(c,$event)">✏️</button>
+        <button (click)="showDelete(c,$event)">🗑️</button>
+      </div>
+      
+      <div
+          class="delete-popup"
+          *ngIf="confirmDeleteId===c.id"
+          (click)="$event.stopPropagation()">
+
+          <div>حذف گفتگو؟</div>
+
+          <div class="popup-buttons">
+
+              <button
+                  class="cancel"
+                  (click)="confirmDeleteId=''">
+
+                  لغو
+
+              </button>
+
+              <button
+                  class="delete"
+                  (click)="delete(c)">
+
+                  حذف
+
+              </button>
+
+          </div>
+
+      </div>
+    </div>
+
+  </div>
+
+
+  <div class="sidebar-footer">
+    <span *ngIf="collapsed">👤</span>
+
+    <span *ngIf="!collapsed">👤 {{userName}} </span>
+
+    <button class="logout-btn" (click)="logout()">
+      خروج
+    </button>
+  </div>
+
+</div>

@@ -1,17 +1,40 @@
 <div class="layout" *ngIf="!isLoginPage">
 
-    <button class="theme-btn" (click)="toggleTheme()">
-        🌙
-    </button>
-
-    <aside class="sidebar">
-        <app-conversation-list></app-conversation-list>
+    <aside class="sidebar"   [class.collapsed]="sidebarCollapsed">
+        <app-conversation-list [collapsed]="sidebarCollapsed" ></app-conversation-list>
     </aside>
+     <div class="content">
 
-    <main class="chat-area">
-        <router-outlet></router-outlet>
-    </main>
+        <header class="topbar">
 
+            <div class="topbar-left">
+
+                <button class="menu-btn" (click)="toggleSidebar()">
+                    ☰
+                </button>
+            </div>
+
+            <div class="topbar-right">
+
+                <button
+                    class="theme-btn"
+                    (click)="toggleTheme()">
+
+                    🌙
+
+                </button>
+
+            </div>
+
+        </header>
+
+        <main class="chat-area">
+
+            <router-outlet></router-outlet>
+
+        </main>
+
+    </div>
 </div>
 
 

@@ -11,9 +11,9 @@ namespace AiChat.Application.Conversations.Commands.RenameConversation
             _repository = repository;
         }
 
-        public async Task HandleAsync(RenameConversation command)
+        public async Task HandleAsync(RenameConversationCommand command, CancellationToken ct = default)
         {
-            var conversation = await _repository.GetAsync(command.conversationId);
+            var conversation = await _repository.GetAsync(command.conversationId,ct);
 
             if (conversation is null)
                 throw new Exception("Not Found");

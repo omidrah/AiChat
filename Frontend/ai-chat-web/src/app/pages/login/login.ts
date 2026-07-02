@@ -5,6 +5,7 @@
   import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { firstValueFrom } from 'rxjs';
+import { ConversationEventsService } from '../../services/conversation-events.service';
   @Component({
     selector: 'app-login',
     templateUrl: './login.html',
@@ -21,7 +22,8 @@ import { firstValueFrom } from 'rxjs';
     constructor(
       private auth: AuthService,
       private api: ApiService,
-      private router: Router
+      private router: Router,
+      private events: ConversationEventsService
     ) {}
 
    async login() {
@@ -29,9 +31,8 @@ import { firstValueFrom } from 'rxjs';
 
       try {
         await firstValueFrom(this.auth.login(this.userName, this.password));
-
         const conversationId = await firstValueFrom(this.api.createConversation());
-
+        this.events.refresh();
         this.router.navigate(['/chat', conversationId]);
       } catch {
         this.error = 'Login failed';

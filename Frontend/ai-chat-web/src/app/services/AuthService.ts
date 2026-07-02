@@ -70,4 +70,18 @@ export class AuthService {
     getToken() {
         return localStorage.getItem('access_token');
     }
+
+    getUserName() {
+
+        const token = this.getToken();
+
+        if (!token)
+            return '';
+
+        const payload = JSON.parse(atob(token.split('.')[1]));
+
+        return payload[
+            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
+        ];
+    }
 }
