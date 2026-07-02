@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Conversation } from '../../models/conversation';
 import { AuthService } from '../../services/AuthService';
 import { Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConversationStore } from '../../store/conversation.store';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-conversation-list',
@@ -18,7 +20,7 @@ export class ConversationList {
 
   @Input()
   collapsed = false;
-
+  private destroyRef = inject(DestroyRef);
   editingId = '';
   editingTitle = '';
   confirmDeleteId = '';
@@ -30,14 +32,24 @@ export class ConversationList {
 
   ngOnInit() {
     this.userName = this.auth.getUserName();
-    this.store.conversations$
-      .subscribe(x => {
-        this.conversations = [...x];
-      });
 
-    this.updateSelectedConversation();
-    this.router.events.subscribe(() => {
-      this.updateSelectedConversation();
+    this.store.conversations$
+    .pipe(takeUntilDestroyed(this.destroyRef))
+    .subscribe(x => { this.conversations = x; });
+
+    if (this.store.value.length === 0) {
+
+      this.store.load().subscribe();
+
+    }
+
+   this.router.events.pipe(
+     filter(e => e instanceof NavigationEnd),
+     takeUntilDestroyed(this.destroyRef)).
+     subscribe(() => {
+      
+      this.selectedId =
+           this.router.url.split('/')[2] ?? '';
     });
 
   }
@@ -47,49 +59,36 @@ export class ConversationList {
     this.router.navigate(['/chat', id]);
   }
 
-  private updateSelectedConversation() {
-
-    const parts = this.router.url.split('/');
-    this.selectedId = parts[2] ?? '';
-  }
-
   showDelete(c: Conversation) {
     this.confirmDeleteId = c.id;
   }
 
-  delete(c: Conversation) {
+  
+  async delete(c:Conversation){
 
-    this.confirmDeleteId = '';
+      this.confirmDeleteId='';
 
-    this.store.delete(c.id)
-      .subscribe({
+      const nextId =
+          await this.store.deleteAndNavigate(
 
-        next: () => {
+              c.id,
+              this.selectedId
 
-          const currentId = this.router.url.split('/')[2];
+          );
 
-          if (currentId !== c.id)
-            return;
+      if(nextId){
 
-          const list = this.store.value;
-
-          if (list.length) {
-
-            this.router.navigate([
+          this.router.navigate([
               '/chat',
-              list[0].id
-            ]);
+              nextId
+          ]);
 
-          }
-          else {
+      }
+      else{
 
-            this.create();
+          this.create();
 
-          }
-
-        }
-
-      });
+      }
 
   }
 
@@ -115,23 +114,16 @@ export class ConversationList {
   }
 
 
-  saveRename(c: Conversation) {
+  async saveRename(c: Conversation) {
 
     const title = this.editingTitle.trim();
 
     if (!title)
       return;
+    await this.store.rename( c.id, title);
 
-    this.store.rename(c.id, title)
-      .subscribe({
-
-        next: () => {
-
-          this.editingId = '';
-
-        }
-
-      });
+    this.editingId='';
+    this.editingTitle='';
 
   }
 

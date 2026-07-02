@@ -27,27 +27,23 @@ export class LoginComponent {
   async login() {
     this.error = '';
 
-    try {
-      await firstValueFrom(this.auth.login(this.userName, this.password));
-      await firstValueFrom(this.store.load());
+    await firstValueFrom(this.auth.login(this.userName, this.password));
+    await firstValueFrom(this.store.load());
 
-      const list = this.store.value;
+    const list = this.store.value;
 
-      if (list.length) {
-      
-          this.router.navigate(['/chat', list[0].id]);
-      
-      }
-      else{
-      
-          const id = await this.store.create();      
-          this.router.navigate(['/chat', id]);
-      
-      }
-    } 
-    catch {
-      this.error = 'Login failed';
+    if (list.length) {
+
+      this.router.navigate(['/chat', list[0].id]);
+
     }
+    else {
+
+      const id = await this.store.create();
+      this.router.navigate(['/chat', id]);
+
+    }
+
   }
 
 }

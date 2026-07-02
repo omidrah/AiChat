@@ -39,15 +39,40 @@ export class ConversationStore{
         return id;
     }
 
-    rename(id: string, title: string) {
 
-        return this.api
-            .renameConversation(id, title)
-            .pipe(
+    deleteAndNavigate(id: string, currentId: string): Promise<string | null> {
     
-                switchMap(() => this.load())
+        return firstValueFrom(
+            this.delete(id)
+        ).then(() => {
     
-            );
+            const list = this.value;
+    
+            if (!list.length)
+                return null;
+    
+            if (currentId !== id)
+                return currentId;
+    
+            return list[0].id;
+        });
+    
+    }
+   
+    async rename(id:string,title:string){
+
+        await firstValueFrom(
+            this.api.renameConversation(id,title)
+        );
+    
+        const list=this.value.map(x=>
+    
+            x.id===id
+                ? {...x,title}
+                :x
+        );
+    
+        this.conversationsSubject.next(list);
     
     }
 
