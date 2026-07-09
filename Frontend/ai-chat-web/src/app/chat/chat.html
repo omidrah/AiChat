@@ -7,7 +7,7 @@
   >
 
     <div
-      *ngFor="let m of messages"
+      *ngFor="let m of messages()"
       class="msg"
       [class.user]="m.role === 'user'"
       [class.ai]="m.role === 'assistant'"
@@ -37,7 +37,7 @@
     رفتن به آخر گفتگو
   </button>
 
-  <div class="typing" *ngIf="isThinking">
+  <div class="typing" *ngIf="isThinking()">
     هوش مصنوعی در حال فکر کردن است...
   </div>
 
@@ -50,8 +50,8 @@
         class="message-input"
         [(ngModel)]="input"
         rows="1"
-        [disabled]="isSending"
-        [placeholder]="isSending ? 'منتظر پایان پاسخ بمانید...' : 'پیام خود را بنویسید...'"
+        [disabled]="isSending()"
+        [placeholder]="isSending() ? 'منتظر پایان پاسخ بمانید...' : 'پیام خود را بنویسید...'"
         (input)="autoResizeTextarea(messageInput)"
         (keydown)="handleEnter($event)"
       ></textarea>
@@ -59,7 +59,7 @@
       <button
         class="send-button"
         type="button"
-        [disabled]="!input.trim() || isSending"
+        [disabled]="!input.trim() || isSending()"
         (click)="send(messageInput)"
       >
         ➤

@@ -27,7 +27,7 @@
     <div class="conversation-item" 
       [class.active]="c.id === selectedId"
       [class.editing]="editingId===c.id" 
-      *ngFor="let c of conversations;trackBy:trackConversation"    (click)="open(c.id)">
+      *ngFor="let c of conversations();trackBy:trackConversation"    (click)="open(c.id)">
       
       <span class="icon">💬</span>
       

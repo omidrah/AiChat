@@ -1,4 +1,4 @@
-import { Component, ElementRef, NgZone, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, ViewChild , signal} from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { SignalRService } from '../services/signalr.service';
 import { Message } from '../models/message';
@@ -34,64 +34,74 @@ export class ChatComponent {
   @ViewChild('scrollContainer')
   private scrollContainer!: ElementRef<HTMLDivElement>;
 
-  isThinking = false;
-  isSending = false;
-  isSignalRReady = false;
-
-  shouldAutoScroll = true;
-
-  messages: Message[] = [];
+  isThinking =  signal(false);
+  isSending =  signal(false);
+  isSignalRReady =  signal(false);
   input = '';
   conversationId!: string;
+  shouldAutoScroll = true;
+  messages = signal<Message[]>([]);
 
   constructor(
     private api: ApiService,
     private signalr: SignalRService,
-    private zone: NgZone,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private route: ActivatedRoute  ) {}
 
-  async ngOnInit() {
-    await this.route.paramMap.subscribe(async params => {
+  ngOnInit() {
+    
+    this.route.paramMap.subscribe(async params => {
+      
       const id = params.get('id');
       if (!id)  return;
 
       await this.openConversation(id);
 
-      this.signalr.onReceiveToken(token => {
-        this.zone.run(() => {
-          let lastMessage = this.messages[this.messages.length - 1];
+      this.registerSignalRHandlers();
 
-          if (!lastMessage || lastMessage.role.toLowerCase() !== 'assistant') {
-            this.messages.push({role: 'assistant', content: token, createdAt: new Date() });
-            this.cdr.detectChanges();
-            this.scrollToBottomIfNeeded();
-            return;
-          }
-
-          const index = this.messages.length - 1;
-          this.messages = this.messages.map((m, i) =>
-            i === index
-              ? { ...m, content: m.content + token }
-              : m
-          );
-
-          this.cdr.detectChanges();
-          this.scrollToBottomIfNeeded();
-        });
-      });
-
-      this.signalr.onReceiveCompleted(() => {
-        this.zone.run(() => {
-          this.isSending = false;
-          this.isThinking = false;
-          this.cdr.detectChanges();
-        });
-      });
-
-      this.cdr.detectChanges();
       this.forceScrollToBottom();
+    });
+  }
+
+  private registerSignalRHandlers() {
+
+    this.signalr.onReceiveToken(token => {
+      const current = this.messages();
+      const lastMessage = current[current.length - 1];
+
+      if (!lastMessage || lastMessage.role.toLowerCase() !== 'assistant') {
+
+        this.messages.update(list => [
+          ...list,
+          { role: 'assistant', content: token, createdAt: new Date() }
+        ]);
+
+        this.scrollToBottomIfNeeded();
+
+        return;
+      }
+
+      const index = current.length - 1;
+
+      this.messages.update(list => list.map((m, i) => i === index
+
+        ? {
+          ...m,
+          content: m.content + token
+        }
+
+        : m
+
+      )
+      );
+
+      this.scrollToBottomIfNeeded();
+    });
+
+    this.signalr.onReceiveCompleted(() => {
+
+      this.isSending.set(false);
+
+      this.isThinking.set(false);
     });
   }
 
@@ -99,7 +109,7 @@ export class ChatComponent {
      this.conversationId = id;
     await this.signalr.start();
     await this.signalr.joinConversation(id);
-    this.isSignalRReady = true;
+    this.isSignalRReady.set(true);
     await this.loadMessages();
   }
 
@@ -110,10 +120,12 @@ export class ChatComponent {
 
     const messagesfromApi = result.messages ?? [];
 
-    this.messages = messagesfromApi.map((m: Message) => ({
+    this.messages.set(
+      
+      messagesfromApi.map((m: Message) => ({
       ...m,
       createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
-    }));
+      })))
 
     this.forceScrollToBottom();
   }
@@ -121,24 +133,30 @@ export class ChatComponent {
   send(textarea?: HTMLTextAreaElement) {
     const msg = this.input.trim();
 
-    if (!msg) {
-      return;
-    }
+    if (!msg) { return;}
 
-    if (!this.isSignalRReady) {
+    if (!this.isSignalRReady()) {
       console.warn('SignalR is not ready yet');
       return;
     }
 
-    this.messages.push({
-      role: 'user',
-      content: msg,
-      createdAt: new Date()
-    });
+    this.messages.update(list => [
+        ...list,
+
+        {
+          role:'user',
+          content:msg,
+          createdAt:new Date()
+        }
+
+    ]);
 
     this.input = '';
-    this.isThinking = true;
-    this.isSending = true;
+    
+    this.isThinking.set(true);
+
+    this.isSending.set(true);
+
     this.shouldAutoScroll = true;
 
     if (textarea) {
@@ -149,12 +167,13 @@ export class ChatComponent {
 
     this.api.sendMessage(this.conversationId, msg).subscribe({
       next: () => {
-        this.isThinking = false;
         console.log('Message sent');
       },
       error: err => {
-        this.isThinking = false;
-        this.isSending = false;
+        this.isThinking.set(false);
+
+        this.isSending.set(false);
+
         console.error(err);
       }
     });
@@ -220,7 +239,7 @@ export class ChatComponent {
 
     keyboardEvent.preventDefault();
 
-    if (this.input?.trim() && !this.isSending) {
+    if (this.input?.trim() && !this.isSending()) {
       this.send();
     }
   }

@@ -33,7 +33,7 @@ export class LoginComponent {
     const list = this.store.value;
 
     if (list.length) {
-
+      
       this.router.navigate(['/chat', list[0].id]);
 
     }

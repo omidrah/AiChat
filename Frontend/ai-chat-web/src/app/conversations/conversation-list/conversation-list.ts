@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Conversation } from '../../models/conversation';
@@ -7,49 +7,40 @@ import { Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConversationStore } from '../../store/conversation.store';
 import { filter } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-conversation-list',
   imports: [CommonModule, FormsModule],
   standalone: true,
   templateUrl: './conversation-list.html',
-  styleUrl: './conversation-list.css',
+  styleUrl: './conversation-list.css'
 })
 export class ConversationList {
 
   @Input()
   collapsed = false;
-  private destroyRef = inject(DestroyRef);
   editingId = '';
   editingTitle = '';
   confirmDeleteId = '';
   selectedId = '';
-  conversations: Conversation[] = [];
   userName = '';
+
+  conversations = this.store.conversations;
 
   constructor(private router: Router, private auth: AuthService, private store: ConversationStore) { }
 
   ngOnInit() {
     this.userName = this.auth.getUserName();
+   
+    this.router.events
+    .pipe(
+        filter(e => e instanceof NavigationEnd)
+    )
+    .subscribe(()=>{
 
-    this.store.conversations$
-    .pipe(takeUntilDestroyed(this.destroyRef))
-    .subscribe(x => { this.conversations = x; });
+        this.selectedId =
+            this.router.url.split('/')[2] ?? '';
 
-    if (this.store.value.length === 0) {
-
-      this.store.load().subscribe();
-
-    }
-
-   this.router.events.pipe(
-     filter(e => e instanceof NavigationEnd),
-     takeUntilDestroyed(this.destroyRef)).
-     subscribe(() => {
-      
-      this.selectedId =
-           this.router.url.split('/')[2] ?? '';
     });
 
   }
@@ -62,18 +53,14 @@ export class ConversationList {
   showDelete(c: Conversation) {
     this.confirmDeleteId = c.id;
   }
-
   
   async delete(c:Conversation){
 
       this.confirmDeleteId='';
-
       const nextId =
           await this.store.deleteAndNavigate(
-
               c.id,
               this.selectedId
-
           );
 
       if(nextId){
@@ -82,14 +69,11 @@ export class ConversationList {
               '/chat',
               nextId
           ]);
-
       }
       else{
 
           this.create();
-
       }
-
   }
 
   rename(c: Conversation, event: MouseEvent) {

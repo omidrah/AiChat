@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { Injectable, signal  } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { tap , switchMap} from 'rxjs/operators';
 import { Conversation } from '../models/conversation';
 import { ApiService } from '../services/api.service';
@@ -9,8 +9,8 @@ import { ApiService } from '../services/api.service';
 })
 export class ConversationStore{
 
-    private conversationsSubject =    new BehaviorSubject<Conversation[]>([]);
-    conversations$ =  this.conversationsSubject.asObservable();
+    private conversationsState  = signal<Conversation[]>([]);
+    conversations = this.conversationsState.asReadonly();
     constructor(private api:ApiService){ }
 
     load() {
@@ -18,12 +18,15 @@ export class ConversationStore{
         return this.api
             .getConversations()
             .pipe(
-                tap(list => this.conversationsSubject.next(list))
+                tap(list => {    
+                    this.conversationsState .set(list);
+                })
             );
     }
 
     get value(){
-        return this.conversationsSubject.value;
+        
+        return this.conversationsState ();
     }
     
     async create(): Promise<string> {
@@ -42,9 +45,7 @@ export class ConversationStore{
 
     deleteAndNavigate(id: string, currentId: string): Promise<string | null> {
     
-        return firstValueFrom(
-            this.delete(id)
-        ).then(() => {
+        return firstValueFrom(this.delete(id)).then(() => {
     
             const list = this.value;
     
@@ -65,14 +66,11 @@ export class ConversationStore{
             this.api.renameConversation(id,title)
         );
     
-        const list=this.value.map(x=>
-    
-            x.id===id
-                ? {...x,title}
-                :x
+        const list= this.value.map(
+            x=>   x.id===id ? {...x,title}:x
         );
     
-        this.conversationsSubject.next(list);
+        this.conversationsState .set(list);
     
     }
 
@@ -80,11 +78,8 @@ export class ConversationStore{
 
         return this.api
             .deleteConversation(id)
-            .pipe(
-    
-                switchMap(() => this.load())
-    
-            );
-    
+            .pipe(    
+                switchMap(() => this.load())    
+            );    
     }
 }
