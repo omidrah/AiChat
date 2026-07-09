@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Conversation } from '../../models/conversation';
@@ -25,9 +25,13 @@ export class ConversationList {
   selectedId = '';
   userName = '';
 
-  conversations = this.store.conversations;
 
-  constructor(private router: Router, private auth: AuthService, private store: ConversationStore) { }
+  private router = inject(Router);
+  private auth = inject(AuthService);
+  private store = inject(ConversationStore);
+
+
+  conversations = this.store.conversations;
 
   ngOnInit() {
     this.userName = this.auth.getUserName();
