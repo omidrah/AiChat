@@ -13,9 +13,7 @@ namespace AiChat.Application.Abstractions
 
         Task SaveChangesAsync(CancellationToken ct = default);
 
-        Task<User?> FindByExternalIdAsync(
-    AuthenticationProviderEnum provider,
-    string externalId,
-    CancellationToken ct = default);
+        Task<User?> FindByExternalIdAsync(AuthenticationProviderEnum provider, string externalId, CancellationToken ct = default);
+
     }
 }

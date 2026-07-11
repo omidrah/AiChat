@@ -27,14 +27,26 @@ namespace AiChat.Api.Services
 
 
             // تشخیص نوع احراز هویت
-            var provider = identity.AuthenticationType switch
+            //NameIdentifier = User.Id(Guid)  =>jwt
+            //Identity.Name = DOMAIN\User => Active(windows)
+            var jwtUserId =   
+            principal.FindFirstValue(ClaimTypes.NameIdentifier)
+            ??
+            principal.FindFirstValue("sub")
+            ??
+            principal.FindFirstValue("userId");
+
+            AuthenticationProviderEnum provider;
+
+            if (Guid.TryParse(jwtUserId, out _))
             {
-                "Bearer" => AuthenticationProviderEnum.Local,
-                "Negotiate" => AuthenticationProviderEnum.Windows,
-                "NTLM" => AuthenticationProviderEnum.Windows,
-                _ => throw new UnauthorizedAccessException(
-                    $"Unsupported authentication type '{identity.AuthenticationType}'.")
-            };
+                provider = AuthenticationProviderEnum.Local;
+            }
+            else
+            {
+                provider = AuthenticationProviderEnum.Windows;
+            }
+
 
             var userName =
                 principal.FindFirstValue(ClaimTypes.Name) ??

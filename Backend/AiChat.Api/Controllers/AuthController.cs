@@ -15,7 +15,7 @@ namespace AiChat.Api.Controllers
             _configuration = configuration;
         }
 
-        [Authorize]
+        [Authorize(Policy = "UserPolicy")]
         [HttpGet("me")]
         public async Task<IActionResult> Me([FromServices] GetCurrentUserQueryHandler handler , CancellationToken ct)
         {

@@ -1,6 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Common.Auth;
-using AiChat.Application.Common.Enums;
 using AiChat.Domain.Entities;
 
 namespace AiChat.Api.Services
@@ -30,103 +29,37 @@ namespace AiChat.Api.Services
                 throw new UnauthorizedAccessException();
 
 
-
-            // -----------------------------
-            // Local JWT
-            // -----------------------------
-            if (current.AuthProvider == AuthenticationProviderEnum.Local)
-            {
-                if (!Guid.TryParse(
-                    current.ExternalId,
-                    out var userId))
-                {
-                    throw new UnauthorizedAccessException(
-                        "Invalid user id in token.");
-                }
+            var user = await _userRepository.FindByExternalIdAsync(current.AuthProvider, current.ExternalId, ct);
 
 
-                var user =
-                    await _userRepository
-                        .GetByIdAsync(userId, ct);
-
-
-                if (user == null)
-                {
-                    throw new UnauthorizedAccessException(
-                        "User does not exist.");
-                }
-
-
+            if (user != null)
                 return user;
-            }
 
 
-
-            // -----------------------------
-            // Windows Authentication
-            // -----------------------------
-            if (current.AuthProvider == AuthenticationProviderEnum.Windows)
+            user = new User
             {
+                Id = Guid.NewGuid(),
 
-                var user =
-                    await _userRepository
-                        .FindByExternalIdAsync(
-                            AuthenticationProviderEnum.Windows,
-                            current.ExternalId,
-                            ct);
+                UserName =
+                current.UserName,
 
-                if (user != null)
-                    return user;
+                DisplayName =
+                current.DisplayName,
 
-                // اولین ورود Windows User
-                user = new User
-                {
-                    Id = Guid.NewGuid(),
+                ExternalId =
+                current.ExternalId,
 
-                    UserName = ExtractUserName(
-                        current.UserName),
+                AuthProvider =
+                current.AuthProvider.ToString(),
 
-                    DisplayName = current.DisplayName,
+                IsActive = true
+            };
 
-                    ExternalId = current.ExternalId,
+            await _userRepository.AddAsync(user, ct);
 
-                    AuthProvider =
-                        AuthenticationProviderEnum.Windows
-                        .ToString(),
+            await _userRepository.SaveChangesAsync(ct);
 
-                    IsActive = true
-                };
-
-
-                await _userRepository.AddAsync(
-                    user,
-                    ct);
-
-
-                await _userRepository.SaveChangesAsync(ct);
-
-
-                return user;
-            }
-
-
-            throw new UnauthorizedAccessException(
-                "Unsupported authentication provider.");
-        }
-
-
-
-        private static string ExtractUserName(
-            string userName)
-        {
-            // COMPANY\omid
-            // تبدیل به omid
-
-            var index = userName.LastIndexOf('\\');
-
-            return index >= 0
-                ? userName[(index + 1)..]
-                : userName;
+            return user;
         }
     }
 }

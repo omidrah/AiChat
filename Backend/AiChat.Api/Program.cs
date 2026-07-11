@@ -27,63 +27,75 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-if (authMode.Equals("Windows", StringComparison.OrdinalIgnoreCase))
-{
-    builder.Services
-        .AddAuthentication(NegotiateDefaults.AuthenticationScheme)
-        .AddNegotiate();
-}
-else
-{
-    builder.Services
-        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            var jwtOptions = builder.Configuration
-                        .GetSection("Authentication:Jwt")
-                        .Get<JwtOptions>();
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        var jwtOptions = builder.Configuration
+                    .GetSection("Authentication:Jwt")
+                    .Get<JwtOptions>();
             
-            options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = false;
 
-            options.TokenValidationParameters = new TokenValidationParameters
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions!.Issuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+
+            ValidateIssuerSigningKey = true,
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtOptions.Key)),
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(2)
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
             {
-                ValidateIssuer = true,
-                ValidIssuer = jwtOptions!.Issuer,
+                // Console.WriteLine($"Path = {context.Request.Path}");
+                //  Console.WriteLine($"Query = {context.Request.QueryString}");
 
-                ValidateAudience = true,
-                ValidAudience = jwtOptions.Audience,
+                var accessToken = context.Request.Query["access_token"];
 
-                ValidateIssuerSigningKey = true,
+                var path = context.HttpContext.Request.Path;
 
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(jwtOptions.Key)),
-
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(2)
-            };
-
-            options.Events = new JwtBearerEvents
-            {
-                OnMessageReceived = context =>
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs/chat"))
                 {
-                    Console.WriteLine($"Path = {context.Request.Path}");
-                    Console.WriteLine($"Query = {context.Request.QueryString}");
-
-                    var accessToken = context.Request.Query["access_token"];
-
-                    var path = context.HttpContext.Request.Path;
-
-                    if (!string.IsNullOrEmpty(accessToken) &&
-                        path.StartsWithSegments("/hubs/chat"))
-                    {
-                        context.Token = accessToken;
-                    }
-
-                    return Task.CompletedTask;
+                    context.Token = accessToken;
                 }
-            };
+
+                return Task.CompletedTask;
+            }
+        };
+    })
+    .AddNegotiate();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserPolicy",
+        policy =>
+        {
+            policy
+                .AddAuthenticationSchemes(
+                    JwtBearerDefaults.AuthenticationScheme,
+                    NegotiateDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser();
         });
-}
+});
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();

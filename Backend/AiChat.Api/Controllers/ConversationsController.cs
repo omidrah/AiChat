@@ -14,7 +14,7 @@ namespace AiChat.Api.Controllers
 {
     [ApiController]
     [Route("api/conversations")]
-    [Authorize]
+    [Authorize(Policy = "UserPolicy")]
     public class ConversationsController : ControllerBase
     {
         private readonly IUserResolver userResolver;

@@ -1,4 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
+using AiChat.Application.Common.Enums;
 using AiChat.Application.Common.Options;
 using AiChat.Domain.Entities;
 using Microsoft.Extensions.Options;
@@ -6,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.Xml;
 using System.Text;
 
 namespace AiChat.Api.Services;
@@ -29,7 +31,8 @@ public sealed class JwtTokenService : ITokenService
 
             // استاندارد JWT
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("auth_provider",AuthenticationProviderEnum.Local.ToString())
         };
 
         foreach (var role in roles)
@@ -70,7 +73,7 @@ public sealed class JwtTokenService : ITokenService
         var expires = DateTime.UtcNow
             .AddDays(_options.RefreshTokenDays);
 
-        return (token, expires);
+        return (token,expires);
     }
 
     // ✅ HASH REFRESH TOKEN قبل از ذخیره در DB
