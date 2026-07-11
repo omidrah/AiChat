@@ -20,9 +20,21 @@ export interface RefreshResult {
 export class AuthService {
 
     baseUrl = environment.apiUrl;
+    private mode = '';
 
     constructor(private http: HttpClient) { }
 
+    setMode(mode:string)
+    {
+        this.mode = mode;
+        localStorage.setItem('auth_mode', mode);
+    }
+
+    getAuthMode()
+    {
+        return this.mode ||  localStorage.getItem('auth_mode') || '';
+    }
+    
     getMode() {
         return this.http.get<{ mode: string }>(`${this.baseUrl}/auth/mode`);
     }

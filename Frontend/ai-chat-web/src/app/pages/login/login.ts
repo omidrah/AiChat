@@ -18,7 +18,7 @@ export class LoginComponent {
   password = '';
   error = '';
   mode ='local';
-  
+
   constructor(
     private auth: AuthService,
     private router: Router,
@@ -27,8 +27,9 @@ export class LoginComponent {
 
   async ngOnInit() {
 
-    const mode =
-        await firstValueFrom(this.auth.getMode());
+    const mode = await firstValueFrom(this.auth.getMode());
+    
+    this.auth.setMode(this.mode);
 
     if(mode.mode === 'Windows'){
 
