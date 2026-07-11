@@ -19,7 +19,7 @@ namespace AiChat.Api.Controllers
     {
         private readonly IUserResolver userResolver;
 
-        public ConversationsController(IUserResolver userResolver) => userResolver = userResolver;
+        public ConversationsController(IUserResolver userResolver) => this.userResolver = userResolver;
 
         [HttpPost]
         public async Task<IActionResult> Create([FromServices]CreateConversationHandler handler, CancellationToken ct)

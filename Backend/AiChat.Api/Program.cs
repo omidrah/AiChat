@@ -129,7 +129,7 @@ builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+builder.Services.AddScoped<IUserResolver, UserResolver>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
