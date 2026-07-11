@@ -164,7 +164,7 @@ app.UseCors("AngularClient");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers().RequireAuthorization();
+app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();
 
 app.Run();

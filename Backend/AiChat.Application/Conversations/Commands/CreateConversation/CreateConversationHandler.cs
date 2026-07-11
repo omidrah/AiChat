@@ -7,12 +7,10 @@ namespace AiChat.Application.Conversations.Commands.CreateConversation
     public class CreateConversationHandler
     {
         private readonly IConversationRepository _repository;
-        private readonly ICurrentUserService _currentUser;
 
-        public CreateConversationHandler(IConversationRepository repository, ICurrentUserService currentUser)
+        public CreateConversationHandler(IConversationRepository repository)
         {
             _repository = repository;
-            _currentUser = currentUser;
         }
 
         public async Task<Guid> HandleAsync(CreateConversationCommand createConversationCommand, CancellationToken ct = default)

@@ -1,4 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
+using AiChat.Application.Common.Enums;
 using AiChat.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,16 @@ namespace AiChat.Infrastructure.Persistence.Repositories
         public async Task<User?> GetByUserNameAsync(string userName, CancellationToken ct = default)
         {   
             return await _dbContext.Users.SingleOrDefaultAsync(x => x.UserName == userName && x.IsActive,ct);
+        }
+
+        public async Task<User?> FindByExternalIdAsync(AuthenticationProviderEnum authenticationProvider,  string externalId, CancellationToken ct = default)
+        {
+            return await _dbContext.Users
+                .SingleOrDefaultAsync(x =>
+                    x.AuthProvider == authenticationProvider.ToString() &&
+                    x.ExternalId == externalId &&
+                    x.IsActive,
+                    ct);
         }
     }
 }

@@ -1,39 +1,41 @@
-<div class="login-page">
+<div *ngIf="mode==='Local'">
 
-    <div class="login-card">
+    <div class="login-page">
 
-        <h1>AI Chat</h1>
+        <div class="login-card">
 
-        <p class="subtitle">
-            لطفاً وارد حساب کاربری شوید
-        </p>
+            <h1>AI Chat</h1>
 
-        <div class="form-group">
-            <label>نام کاربری</label>
+            <p class="subtitle">
+                لطفاً وارد حساب کاربری شوید
+            </p>
 
-            <input
-                [(ngModel)]="userName"
-                type="text">
-        </div>
+            <div class="form-group">
+                <label>نام کاربری</label>
 
-        <div class="form-group">
-            <label>رمز عبور</label>
+                <input [(ngModel)]="userName" type="text">
+            </div>
 
-            <input
-                [(ngModel)]="password"
-                type="password">
-        </div>
+            <div class="form-group">
+                <label>رمز عبور</label>
 
-        <button
-            class="login-btn"
-            (click)="login()">
-            ورود
-        </button>
+                <input [(ngModel)]="password" type="password">
+            </div>
 
-        <div class="error" *ngIf="error">
-            {{error}}
+            <button class="login-btn" (click)="login()">
+                ورود
+            </button>
+
+            <div class="error" *ngIf="error">
+                {{error}}
+            </div>
+
         </div>
 
     </div>
+</div>
+<div *ngIf="mode==='Windows'">
+
+    در حال ورود...
 
 </div>

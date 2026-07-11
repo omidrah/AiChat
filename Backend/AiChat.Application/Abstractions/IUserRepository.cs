@@ -1,4 +1,5 @@
-﻿using AiChat.Domain.Entities;
+﻿using AiChat.Application.Common.Enums;
+using AiChat.Domain.Entities;
 
 namespace AiChat.Application.Abstractions
 {
@@ -11,5 +12,10 @@ namespace AiChat.Application.Abstractions
         Task AddAsync(User user, CancellationToken ct = default);
 
         Task SaveChangesAsync(CancellationToken ct = default);
+
+        Task<User?> FindByExternalIdAsync(
+    AuthenticationProviderEnum provider,
+    string externalId,
+    CancellationToken ct = default);
     }
 }

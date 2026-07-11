@@ -1,4 +1,5 @@
 ﻿using AiChat.Application.Common.Auth;
+using AiChat.Application.Common.Enums;
 using System.Security.Claims;
 
 namespace AiChat.Api.Services
@@ -11,61 +12,70 @@ namespace AiChat.Api.Services
         {
             _httpContextAccessor = httpContextAccessor;
         }
-        public Guid? UserId
-        {
-            get
-            {
-                var user = _httpContextAccessor.HttpContext?.User;
+        private ClaimsPrincipal? Principal =>  _httpContextAccessor.HttpContext?.User; 
 
-                var id =
-                    user?.FindFirstValue(ClaimTypes.NameIdentifier) ??
-                    user?.FindFirstValue("sub") ??
-                    user?.FindFirstValue("userId");
-
-                return Guid.TryParse(id, out var userId) ? userId : null;
-            }
-        }
-
-        public string? UserName
-        {
-            get
-            {
-                var user = _httpContextAccessor.HttpContext?.User;
-
-                return
-                    user?.Identity?.Name ??
-                    user?.FindFirstValue(ClaimTypes.Name) ??
-                    user?.FindFirstValue("name") ??
-                    user?.FindFirstValue("unique_name");
-            }
-        }
-
-        public bool IsAuthenticated =>
-            _httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true;
+        public bool IsAuthenticated =>  Principal?.Identity?.IsAuthenticated == true;
 
         public CurrentUser? GetCurrentUser()
         {
-            var principal = _httpContextAccessor.HttpContext?.User;
+            var principal = Principal;
 
             if (principal?.Identity?.IsAuthenticated != true)
                 return null;
 
-            var userName = principal.Identity.Name;
+            var identity = principal.Identity;
+
+
+            // تشخیص نوع احراز هویت
+            var provider = identity.AuthenticationType switch
+            {
+                "Bearer" => AuthenticationProviderEnum.Local,
+                "Negotiate" => AuthenticationProviderEnum.Windows,
+                "NTLM" => AuthenticationProviderEnum.Windows,
+                _ => throw new UnauthorizedAccessException(
+                    $"Unsupported authentication type '{identity.AuthenticationType}'.")
+            };
+
+            var userName =
+                principal.FindFirstValue(ClaimTypes.Name) ??
+                principal.FindFirstValue("name") ??
+                identity.Name;
+
 
             if (string.IsNullOrWhiteSpace(userName))
-                return null;
+                throw new UnauthorizedAccessException("User name was not found.");      
+
+            string externalId;
+
+            if (provider == AuthenticationProviderEnum.Local)
+            {
+                // JWT صادر شده توسط خود AiChat
+
+                externalId =
+                    principal.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                    principal.FindFirstValue("sub") ??
+                    principal.FindFirstValue("userId") ??
+                    throw new UnauthorizedAccessException("JWT does not contain user id.");
+            }
+            else
+            {
+                // Windows Authentication
+
+                externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows identity name was not found."); 
+            }
 
             var roles = principal.Claims
-                .Where(x => x.Type == ClaimTypes.Role)
-                .Select(x => x.Value)
-                .ToArray();
+           .Where(x => x.Type == ClaimTypes.Role)
+           .Select(x => x.Value)
+           .ToArray();
+
 
             return new CurrentUser
             {
-                UserId = principal.FindFirstValue(ClaimTypes.NameIdentifier) ?? userName,
+                AuthProvider = provider,
+                ExternalId = externalId,
                 UserName = userName,
                 DisplayName = principal.FindFirstValue(ClaimTypes.GivenName) ?? userName,
-                AuthType = principal.Identity.AuthenticationType ?? "",
                 Roles = roles
             };
         }

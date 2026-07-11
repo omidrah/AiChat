@@ -4,6 +4,7 @@ namespace AiChat.Domain.Entities
 {
     public class Conversation
     {
+
         private readonly List<Message> _messages = [];
 
         public Guid Id { get; private set; }
@@ -11,9 +12,11 @@ namespace AiChat.Domain.Entities
         public Guid UserId { get;  private set; }
 
         public string UserName { get; private set; } 
+
         public string Title { get; private set; }
 
         public DateTime CreatedAt { get; private set; }
+
         public DateTime UpdatedAt { get; private set; }
 
         public IReadOnlyCollection<Message> Messages => _messages.AsReadOnly();

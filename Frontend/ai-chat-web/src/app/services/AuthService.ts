@@ -27,6 +27,16 @@ export class AuthService {
         return this.http.get<{ mode: string }>(`${this.baseUrl}/auth/mode`);
     }
 
+    windowsLogin() {
+            return this.http.get(
+                `${this.baseUrl}/auth/me`,
+                {
+                    withCredentials:true
+                }
+            );
+
+        }
+    
     login(userName: string, password: string) {
         return this.http.post<LoginResult>(`${this.baseUrl}/auth/login`, { userName, password })
         .pipe(

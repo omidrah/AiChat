@@ -18,16 +18,14 @@ namespace AiChat.Application.Authentications.Queries.GetCurrentUser
             if (user is null)
                 throw new UnauthorizedAccessException();
 
-             return await Task.Run(() => {
-                 return new CurrentUserDto
-                 {
-                     UserId = user.UserId,
-                     UserName = user.UserName,
-                     DisplayName = user.DisplayName,
-                     AuthType = user.AuthType,
-                     Roles = user.Roles
-                 };
-            });
+            return new CurrentUserDto
+            {
+                AuthProvider = user.AuthProvider,
+                ExternalId = user.ExternalId,
+                UserName = user.UserName,
+                DisplayName = user.DisplayName,
+                Roles = user.Roles
+            };
         }
     }
 }

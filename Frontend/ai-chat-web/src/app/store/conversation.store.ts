@@ -26,7 +26,7 @@ export class ConversationStore{
 
     get value(){
         
-        return this.conversationsState ();
+        return this.conversationsState();
     }
     
     async create(): Promise<string> {

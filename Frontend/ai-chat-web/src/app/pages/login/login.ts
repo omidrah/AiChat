@@ -17,14 +17,61 @@ export class LoginComponent {
   userName = '';
   password = '';
   error = '';
-
+  mode ='local';
+  
   constructor(
     private auth: AuthService,
     private router: Router,
     private store: ConversationStore
   ) { }
 
-  async login() {
+  async ngOnInit() {
+
+    const mode =
+        await firstValueFrom(this.auth.getMode());
+
+    if(mode.mode === 'Windows'){
+
+        await this.windowsLogin();
+
+    }
+
+}
+
+async windowsLogin() {
+
+    await firstValueFrom(
+        this.auth.windowsLogin()
+    );
+
+    await firstValueFrom(
+        this.store.load()
+    );
+
+    const list = this.store.value;
+
+    if(list.length){
+
+        this.router.navigate([
+            '/chat',
+            list[0].id
+        ]);
+
+    }else{
+
+        const id =
+            await this.store.create();
+
+        this.router.navigate([
+            '/chat',
+            id
+        ]);
+
+    }
+
+}
+
+async login() {
     this.error = '';
 
     await firstValueFrom(this.auth.login(this.userName, this.password));
