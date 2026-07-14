@@ -3,7 +3,7 @@
     public sealed class ActiveDirectoryOptions
     {
         public string Domain { get; set; } = "";
-        public string? Server { get; set; }
+        public string[] Servers { get; set; } = [];
         public string? Container { get; set; }
     }
 
