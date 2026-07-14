@@ -2,7 +2,6 @@
 
 using AiChat.Application.Abstractions;
 using AiChat.Application.Conversations.Dtos;
-using AiChat.Domain.Entities;
 using Microsoft.Extensions.Options;
 using System.DirectoryServices.AccountManagement;
 
@@ -11,7 +10,9 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
     private readonly ActiveDirectoryOptions _options;
     private readonly ILogger<ActiveDirectoryAuthService> _logger;
 
-    public ActiveDirectoryAuthService(IOptions<ActiveDirectoryOptions> options, ILogger<ActiveDirectoryAuthService> logger)
+    public ActiveDirectoryAuthService(
+        IOptions<ActiveDirectoryOptions> options,
+        ILogger<ActiveDirectoryAuthService> logger)
     {
         _options = options.Value;
         _logger = logger;
@@ -22,53 +23,95 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
         string password,
         CancellationToken ct = default)
     {
+        var servers = _options.Servers is { Length: > 0 }
+            ? _options.Servers
+            : [_options.Domain];
 
-        var targets = _options.Servers?.Length > 0
-                    ? _options.Servers
-                    : new[] { _options.Domain };
-        
-        foreach (var server in targets)
+        foreach (var server in servers)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
-                using PrincipalContext context = string.IsNullOrWhiteSpace(_options.Container)
-                    ? new PrincipalContext(ContextType.Domain, server)
-                    : new PrincipalContext(ContextType.Domain, server, _options.Container);
+                _logger.LogInformation(
+                    "Validating AD user {UserName} against {Server}",
+                    userName,
+                    server);
 
+                using var context = string.IsNullOrWhiteSpace(_options.Container)
+                    ? new PrincipalContext(
+                        ContextType.Domain,
+                        server)
+                    : new PrincipalContext(
+                        ContextType.Domain,
+                        server,
+                        _options.Container);
 
-                bool isValid = context.ValidateCredentials(userName, password); //connecto ad server
+                var isValid = context.ValidateCredentials(
+                    userName,
+                    password,
+                    ContextOptions.Negotiate);
 
                 if (!isValid)
-                    return Task.FromResult<ActiveDirectoryUserInfo?>(null);
-
-                var activedirectoryUser = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, userName); //get user info from ad server
-
-                if (activedirectoryUser is null)
                 {
-                    _logger.LogWarning($"Credentials validated on AD target {server}, but user {userName} was not found.");
+                    _logger.LogWarning(
+                        "AD credentials rejected for {UserName} by {Server}",
+                        userName,
+                        server);
 
                     continue;
                 }
 
-                var samAccountName = activedirectoryUser.SamAccountName ?? userName;
+                using var adUser = UserPrincipal.FindByIdentity(
+                    context,
+                    IdentityType.SamAccountName,
+                    userName);
 
-                var info = new ActiveDirectoryUserInfo
+                if (adUser is null)
                 {
-                    UserName = samAccountName,
-                    DisplayName = activedirectoryUser.DisplayName ?? userName,
-                    ExternalId = $"{_options.Domain}\\{samAccountName}"
-                };
+                    _logger.LogWarning(
+                        "AD authenticated {UserName}, but its user object was not found on {Server}",
+                        userName,
+                        server);
 
-                return Task.FromResult<ActiveDirectoryUserInfo?>(info);               
+                    continue;
+                }
+
+                var samAccountName = adUser.SamAccountName ?? userName;
+
+                return Task.FromResult<ActiveDirectoryUserInfo?>(
+                    new ActiveDirectoryUserInfo
+                    {
+                        UserName = samAccountName,
+                        DisplayName = adUser.DisplayName ?? samAccountName,
+                        ExternalId = $"{_options.Domain}\\{samAccountName}"
+                    });
+            }
+            catch (PrincipalServerDownException ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Cannot connect to AD server {Server}",
+                    server);
+            }
+            catch (PrincipalOperationException ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "AD operation failed on {Server} for {UserName}",
+                    server,
+                    userName);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Active Directory server failed: {server}");
+                _logger.LogError(
+                    ex,
+                    "Unexpected AD error on {Server} for {UserName}",
+                    server,
+                    userName);
             }
         }
 
-        return Task.FromResult<ActiveDirectoryUserInfo?>(default);
+        return Task.FromResult<ActiveDirectoryUserInfo?>(null);
     }
 }
