@@ -1,5 +1,6 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Common.Auth;
+using AiChat.Application.Common.Enums;
 using AiChat.Domain.Entities;
 
 namespace AiChat.Api.Services
@@ -24,34 +25,31 @@ namespace AiChat.Api.Services
             var current =
                 _currentUserService.GetCurrentUser();
 
-
             if (current == null)
                 throw new UnauthorizedAccessException();
 
+            if (current.AuthProvider == AuthenticationProviderEnum.Local)
+            {
+                var localUser = await _userRepository.GetByIdAsync(current.UserId!.Value, ct);
 
-            var user = await _userRepository.FindByExternalIdAsync(current.AuthProvider, current.ExternalId, ct);
+                if (localUser is null || !localUser.IsActive)
+                    throw new UnauthorizedAccessException("Local user was not found.");
 
+                return localUser;
+            }
+
+            var user = await _userRepository.FindByExternalIdAsync(current.AuthProvider, current.ExternalId!, ct);
 
             if (user != null)
                 return user;
 
-
             user = new User
             {
                 Id = Guid.NewGuid(),
-
-                UserName =
-                current.UserName,
-
-                DisplayName =
-                current.DisplayName,
-
-                ExternalId =
-                current.ExternalId,
-
-                AuthProvider =
-                current.AuthProvider.ToString(),
-
+                UserName =current.UserName,
+                DisplayName = current.DisplayName,
+                ExternalId = current.ExternalId,
+                AuthProvider = current.AuthProvider.ToString(),
                 IsActive = true
             };
 

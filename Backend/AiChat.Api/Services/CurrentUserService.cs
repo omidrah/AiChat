@@ -39,37 +39,42 @@ namespace AiChat.Api.Services
 
 
             if (string.IsNullOrWhiteSpace(userName))
-                throw new UnauthorizedAccessException("User name was not found.");      
+                throw new UnauthorizedAccessException("User name was not found.");
 
-            string externalId;
+            string? externalId = null; //in AD mode
+            Guid? userId = null; //in local mode
 
             if (provider == AuthenticationProviderEnum.Local)
             {
                 // JWT صادر شده توسط خود AiChat
 
-                externalId =
+                var userIdInClaim =
                     principal.FindFirstValue(ClaimTypes.NameIdentifier) ??
                     principal.FindFirstValue("sub") ??
                     principal.FindFirstValue("userId") ??
                     throw new UnauthorizedAccessException("JWT does not contain user id.");
+
+                if(!Guid.TryParse(userIdInClaim, out var parsedUserId))
+                    throw new UnauthorizedAccessException("JWT user id is invalid.");
+                userId = parsedUserId;
             }
             else
             {
                 // Active Dirctory Authentication
-
                 externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows Active Dirctory identity name was not found."); 
             }
 
             var roles = principal.Claims
-           .Where(x => x.Type == ClaimTypes.Role)
-           .Select(x => x.Value)
-           .ToArray();
+                   .Where(x => x.Type == ClaimTypes.Role)
+                   .Select(x => x.Value)
+                   .ToArray();
 
 
             return new CurrentUser
             {
                 AuthProvider = provider,
-                ExternalId = externalId,
+                UserId = userId,
+                ExternalId = externalId!,
                 UserName = userName,
                 DisplayName = principal.FindFirstValue(ClaimTypes.GivenName) ?? userName,
                 Roles = roles

@@ -36,7 +36,7 @@ export class LoginComponent {
             const result = await firstValueFrom(this.auth.getMode());
             const backendMode = (result.mode || '').toLowerCase();
 
-            this.mode = backendMode === 'windowsintegrated' || backendMode === 'windows'
+            this.mode = (backendMode === 'windowsintegrated' || backendMode === 'windows')
                 ? 'windows'
                 : 'form';
 
@@ -87,7 +87,6 @@ export class LoginComponent {
                 this.router.navigate(['/chat', list[0].id]);
             }
             else {
-
                 const id = await this.store.create();
                 this.router.navigate(['/chat', id]);
             }
