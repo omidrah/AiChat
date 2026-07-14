@@ -1,4 +1,4 @@
-<div *ngIf="mode==='Local'">
+<div *ngIf="mode==='form'">
 
     <div class="login-page">
 
@@ -9,16 +9,13 @@
             <p class="subtitle">
                 لطفاً وارد حساب کاربری شوید
             </p>
-
             <div class="form-group">
                 <label>نام کاربری</label>
-
                 <input [(ngModel)]="userName" type="text">
             </div>
 
             <div class="form-group">
                 <label>رمز عبور</label>
-
                 <input [(ngModel)]="password" type="password">
             </div>
 
@@ -34,7 +31,7 @@
 
     </div>
 </div>
-<div *ngIf="mode==='Windows'">
+<div *ngIf="mode==='windows'">
 
     در حال ورود...
 

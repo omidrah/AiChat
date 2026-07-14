@@ -3,7 +3,8 @@ namespace AiChat.Application.Common.Enums
 {
     public enum AuthenticationProviderEnum
     {
-        Local,
-        Windows
+        Local, //لاگین با username/password دیتابیس خودت
+        ActiveDirectory, //لاگین با فرم، ولی username/password در AD چک می‌شود
+        WindowsIntegrated //بدون فرم، با Negotiate و هویت ویندوز کاربر
     }
 }

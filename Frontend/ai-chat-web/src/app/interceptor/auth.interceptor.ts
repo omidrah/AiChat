@@ -21,7 +21,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       }
     });
   }
-  else if (mode === 'Windows') {
+  else if (mode === 'windows') {
     req = req.clone({
       withCredentials: true
     });
@@ -29,6 +29,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+     
+      if (mode === 'windows') {
+        return throwError(() => error);
+      }
+      
       if (error.status !== 401 || isAuthRequest || !auth.getRefreshToken()) {
         return throwError(() => error);
       }

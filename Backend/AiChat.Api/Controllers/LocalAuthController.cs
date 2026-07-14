@@ -1,4 +1,5 @@
 ﻿using AiChat.Application.Authentications.Commands.Login;
+using AiChat.Application.Authentications.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,16 +10,25 @@ namespace AiChat.Api.Controllers
     [AllowAnonymous]
     public class LocalAuthController : ControllerBase
     {
-        public LocalAuthController()
+        private readonly IConfiguration _configuration;
+
+        public LocalAuthController(IConfiguration configuration)
         {
+            _configuration = configuration;
         }
 
-        [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromServices]LoginCommandHandler handler, [FromBody]LoginCommand command,
+        public async Task<IActionResult> Login(
+            [FromServices] ActiveDirectoryLoginHandler adHandler,
+            [FromServices]LoginCommandHandler handler,
+            [FromBody]LoginCommand command,
             CancellationToken ct)
         {
-            var result = await handler.HandleAsync(command, ct);
+            var mode = _configuration["Authentication:Mode"] ?? "Local";
+
+            LoginResultDto? result = mode.Equals("ActiveDirectory", StringComparison.OrdinalIgnoreCase)
+            ? await adHandler.HandleAsync(command, ct)
+            : await handler.HandleAsync(command, ct);
 
             if (result is null)
                 return Unauthorized();

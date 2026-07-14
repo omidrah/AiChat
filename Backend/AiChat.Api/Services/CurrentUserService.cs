@@ -17,7 +17,7 @@ namespace AiChat.Api.Services
         public bool IsAuthenticated =>  Principal?.Identity?.IsAuthenticated == true;
 
         public CurrentUser? GetCurrentUser()
-        {
+        {   
             var principal = Principal;
 
             if (principal?.Identity?.IsAuthenticated != true)
@@ -25,28 +25,12 @@ namespace AiChat.Api.Services
 
             var identity = principal.Identity;
 
+            var providerValue = principal.FindFirstValue("auth_provider");
 
-            // تشخیص نوع احراز هویت
-            //NameIdentifier = User.Id(Guid)  =>jwt
-            //Identity.Name = DOMAIN\User => Active(windows)
-            var jwtUserId =   
-            principal.FindFirstValue(ClaimTypes.NameIdentifier)
-            ??
-            principal.FindFirstValue("sub")
-            ??
-            principal.FindFirstValue("userId");
-
-            AuthenticationProviderEnum provider;
-
-            if (Guid.TryParse(jwtUserId, out _))
+            if (!Enum.TryParse<AuthenticationProviderEnum>(providerValue, true, out var provider))
             {
                 provider = AuthenticationProviderEnum.Local;
             }
-            else
-            {
-                provider = AuthenticationProviderEnum.Windows;
-            }
-
 
             var userName =
                 principal.FindFirstValue(ClaimTypes.Name) ??
@@ -71,9 +55,9 @@ namespace AiChat.Api.Services
             }
             else
             {
-                // Windows Authentication
+                // Active Dirctory Authentication
 
-                externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows identity name was not found."); 
+                externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows Active Dirctory identity name was not found."); 
             }
 
             var roles = principal.Claims

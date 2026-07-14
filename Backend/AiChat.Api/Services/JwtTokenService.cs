@@ -32,7 +32,7 @@ public sealed class JwtTokenService : ITokenService
             // استاندارد JWT
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("auth_provider",AuthenticationProviderEnum.Local.ToString())
+            new Claim("auth_provider", user.AuthProvider!.ToString() ?? AuthenticationProviderEnum.Local.ToString())
         };
 
         foreach (var role in roles)

@@ -5,6 +5,7 @@ using AiChat.Application;
 using AiChat.Application.Abstractions;
 using AiChat.Application.Common.Auth;
 using AiChat.Application.Common.Options;
+using AiChat.Application.Conversations.Dtos;
 using AiChat.Infrastructure.AI;
 using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;
@@ -21,19 +22,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 var authMode = builder.Configuration["Authentication:Mode"] ?? "Local";
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Authentication:Jwt"));
+builder.Services.Configure<ActiveDirectoryOptions>(  builder.Configuration.GetSection("Authentication:ActiveDirectory"));
+
 builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
 
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<IActiveDirectoryAuthService, ActiveDirectoryAuthService>();
 
 builder.Services
     .AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme =
-            JwtBearerDefaults.AuthenticationScheme;
-
-        options.DefaultChallengeScheme =
             JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
@@ -41,7 +42,7 @@ builder.Services
         var jwtOptions = builder.Configuration
                     .GetSection("Authentication:Jwt")
                     .Get<JwtOptions>();
-            
+
         options.RequireHttpsMetadata = false;
 
         options.TokenValidationParameters = new TokenValidationParameters
@@ -81,8 +82,8 @@ builder.Services
                 return Task.CompletedTask;
             }
         };
-    })
-    .AddNegotiate();
+    });
+  //  .AddNegotiate();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -156,7 +157,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
-    await DbSeeder.SeedAsync(db, hasher);
+    await DbSeeder.SeedAsync(db, hasher, authMode);
 }
 
 

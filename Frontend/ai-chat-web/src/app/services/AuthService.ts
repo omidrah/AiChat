@@ -21,13 +21,13 @@ export class AuthService {
 
     baseUrl = environment.apiUrl;
     private mode = '';
-
     constructor(private http: HttpClient) { }
 
     setMode(mode:string)
     {
-        this.mode = mode;
-        localStorage.setItem('auth_mode', mode);
+        const normalized = mode.toLowerCase();
+        this.mode = normalized;
+        localStorage.setItem('auth_mode', normalized);
     }
 
     getAuthMode()
@@ -40,15 +40,11 @@ export class AuthService {
     }
 
     windowsLogin() {
-            return this.http.get(
-                `${this.baseUrl}/auth/me`,
-                {
-                    withCredentials:true
-                }
-            );
+        return this.http.get(`${this.baseUrl}/auth/me`, {
+        withCredentials: true
+        });
+    }
 
-        }
-    
     login(userName: string, password: string) {
         return this.http.post<LoginResult>(`${this.baseUrl}/auth/login`, { userName, password })
         .pipe(
@@ -60,9 +56,7 @@ export class AuthService {
         const refreshToken = this.getRefreshToken();
 
         return this.http.post<RefreshResult>(`${this.baseUrl}/auth/refresh`, { refreshToken })
-        .pipe(
-            tap(res => this.storeTokens(res))
-        );
+        .pipe(tap(res => this.storeTokens(res)));
     }
  
     getRefreshToken() {
@@ -77,6 +71,7 @@ export class AuthService {
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('accessTokenExpiresAt');
+        localStorage.removeItem('auth_mode');
     }
 
     private storeTokens(res: LoginResult | RefreshResult) {
@@ -96,14 +91,14 @@ export class AuthService {
     getUserName() {
 
         const token = this.getToken();
-
-        if (!token)
-            return '';
+        if (!token)  return '';
 
         const payload = JSON.parse(atob(token.split('.')[1]));
 
-        return payload[
-            'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
-        ];
+       return (
+        payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+        payload['name'] ||
+        ''
+        );
     }
 }
