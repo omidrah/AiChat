@@ -34,8 +34,8 @@ builder.Services.AddScoped<IActiveDirectoryAuthService, ActiveDirectoryAuthServi
 builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultAuthenticateScheme =
-            JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
@@ -92,13 +92,13 @@ builder.Services.AddAuthorization(options =>
         {
             policy
                 .AddAuthenticationSchemes(
-                    JwtBearerDefaults.AuthenticationScheme,
-                    NegotiateDefaults.AuthenticationScheme)
+                    JwtBearerDefaults.AuthenticationScheme
+                    //,NegotiateDefaults.AuthenticationScheme
+                    )
                 .RequireAuthenticatedUser();
         });
 });
 
-builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
