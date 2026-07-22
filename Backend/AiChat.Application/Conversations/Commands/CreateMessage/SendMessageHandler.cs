@@ -1,7 +1,6 @@
 ﻿namespace AiChat.Application.Conversations.Commands.CreateMessage;
 
 using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Auth;
 using AiChat.Application.Conversations.Dtos;
 using System.Text;
 
@@ -35,7 +34,9 @@ public class SendMessageHandler
         {
             throw new Exception("Conversation not found");
         }
+
         conversation.AddMessage(command.Message, Domain.ValueObject.MessageRole.User); // insert user message
+
         //تولید خودکار عنوان Conversation
         if (conversation.Messages.Count == 1)
         {    

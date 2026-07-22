@@ -21,6 +21,8 @@ namespace AiChat.Api.Services
 
         public async Task<User> GetCurrentUserAsync(
             CancellationToken ct = default)
+        
+        
         {
             var current =
                 _currentUserService.GetCurrentUser();
