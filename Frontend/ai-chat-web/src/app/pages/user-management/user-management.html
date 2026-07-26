@@ -1,0 +1,100 @@
+<div class="users-page">
+  <div class="users-card">
+
+    <div class="users-header">
+      <div>
+        <h2>مدیریت کاربران</h2>
+        <p>ایجاد، ویرایش و حذف کاربران سیستم</p>
+      </div>
+
+      <button class="add-btn" (click)="startCreate()">
+        + کاربر جدید
+      </button>
+    </div>
+
+    <div class="users-toolbar">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="جستجو بر اساس نام کاربری..."
+        [(ngModel)]="searchTerm"
+      />
+    </div>
+
+    <div class="form-card" *ngIf="showForm">
+      <h3>{{ editingUserId ? 'ویرایش کاربر' : 'افزودن کاربر' }}</h3>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>نام کاربری</label>
+          <input type="text" [(ngModel)]="form.username" />
+        </div>
+
+        <div class="form-group">
+          <label>نام نمایشی</label>
+          <input type="text" [(ngModel)]="form.displayName" />
+        </div>
+
+        <div class="form-group">
+          <label>نقش</label>
+          <select [(ngModel)]="form.role">
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>رمز عبور</label>
+          <input type="password" [(ngModel)]="form.password" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="save-btn" (click)="saveUser()">ذخیره</button>
+        <button class="cancel-btn" (click)="cancelForm()">انصراف</button>
+      </div>
+
+      <div class="error-box" *ngIf="error">
+        {{ error }}
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>نام کاربری</th>
+            <th>نام نمایشی</th>
+            <th>نقش</th>
+            <th>عملیات</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let user of filteredUsers()">
+            <td>{{ user.username }}</td>
+            <td>{{ user.displayName }}</td>
+            <td>
+              <span class="role-badge" [class.admin]="user.role === 'Admin'">
+                {{ user.role }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="edit-btn" (click)="editUser(user)">ویرایش</button>
+                <button class="delete-btn" (click)="deleteUser(user.id)">حذف</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredUsers().length === 0">
+            <td colspan="4" class="empty-state">
+              کاربری یافت نشد.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

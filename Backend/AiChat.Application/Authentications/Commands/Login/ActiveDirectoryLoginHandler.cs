@@ -37,19 +37,15 @@ public sealed class ActiveDirectoryLoginHandler
 
         if (user is null)
         {
-            user = new User
-            {
-                Id = Guid.NewGuid(),
-                UserName = adUser.UserName,
-                DisplayName = adUser.DisplayName,
-                ExternalId = adUser.ExternalId,
-                AuthProvider = "ActiveDirectory",
-                IsActive = true,
-                PasswordHash = "",
-                Roles = new List<string>()
-            };
+            user = User.CreateUser
+            (
+                adUser.UserName,
+                null,
+                adUser.ExternalId,
+                "ActiveDirectory"
+            );
 
-            await _users.AddAsync(user, ct);
+            _users.Add(user);
             await _users.SaveChangesAsync(ct);
         }
 

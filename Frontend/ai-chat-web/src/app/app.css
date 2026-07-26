@@ -33,21 +33,27 @@ app-root{
   flex-direction: column;
 }
 
+.menu-btn,
+.theme-btn,
+.users-btn {
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
 
-.theme-btn{
-  position:fixed;
-  top:15px;
-  left:15px;
+.menu-btn,
+.theme-btn {
+  width: 42px;
+  height: 42px;
+  background: #f3f4f6;
+  font-size: 18px;
+}
 
-  width:40px;
-  height:40px;
-
-  border:none;
-  border-radius:50%;
-
-  cursor:pointer;
-
-  z-index:999;
+.menu-btn:hover,
+.theme-btn:hover {
+  background: #e5e7eb;
 }
 
 .content{
@@ -71,47 +77,26 @@ app-root{
 
     align-items:center;
 
-    padding:0 25px;
+    padding:0 16px;
 
     background:white;
 
     border-bottom:1px solid #ececec;
 }
 
-.topbar-left{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
+.topbar-left,
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.menu-btn{
-
-    border:none;
-
-    background:none;
-
-    font-size:22px;
-
-    cursor:pointer;
-}
 
 .title{
 
     font-size:22px;
 
     font-weight:700;
-}
-
-.topbar-right{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
 }
 
 .chat-area{
@@ -135,4 +120,20 @@ app-root{
 .sidebar.collapsed{
 
     width:70px;
+}
+
+.users-btn {
+  height: 42px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.users-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
 }

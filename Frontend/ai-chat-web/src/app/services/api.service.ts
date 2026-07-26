@@ -8,15 +8,15 @@ import { environment } from '../../environments/environment'
 @Injectable({ providedIn: 'root' })
 export class ApiService {
 
-   baseUrl = environment.apiUrl;
+  baseUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   createConversation(): Observable<string> {
     return this.http.post<string>(`${this.baseUrl}/conversations`, {})
   }
 
-  getConversations() :Observable<Conversation[]> {
+  getConversations(): Observable<Conversation[]> {
     return this.http.get<Conversation[]>(`${this.baseUrl}/conversations`)
   }
 
@@ -25,8 +25,8 @@ export class ApiService {
       `${this.baseUrl}/conversations/${conversationId}`
     );
   }
-  
-  getMessages(conversationId: string) :Observable<Message[]> {
+
+  getMessages(conversationId: string): Observable<Message[]> {
     return this.http.get<Message[]>(`${this.baseUrl}/conversations/${conversationId}`)
   }
 
@@ -37,22 +37,40 @@ export class ApiService {
     );
   }
 
-  deleteConversation(id:string){
+  deleteConversation(id: string) {
 
     return this.http.delete(
-        `${this.baseUrl}/conversations/${id}`
+      `${this.baseUrl}/conversations/${id}`
     );
 
   }
 
-   renameConversation(id:string, title:string){
+  renameConversation(id: string, title: string) {
 
     return this.http.put(
-       `${this.baseUrl}/conversations/${id}`, 
-       {
+      `${this.baseUrl}/conversations/${id}`,
+      {
         title
       }
     );
 
   }
+
+
+  getUsers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/users`);
+  }
+
+  createUser(user: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/users`, user);
+  }
+
+  updateUser(id: string, user: any): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/users/${id}`, user);
+  }
+
+  deleteUser(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/users/${id}`);
+  }
+
 }

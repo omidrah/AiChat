@@ -1,9 +1,9 @@
 <div class="layout" *ngIf="!isLoginPage">
 
-    <aside class="sidebar"   [class.collapsed]="sidebarCollapsed">
-        <app-conversation-list [collapsed]="sidebarCollapsed" ></app-conversation-list>
+    <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
+        <app-conversation-list [collapsed]="sidebarCollapsed"></app-conversation-list>
     </aside>
-     <div class="content">
+    <div class="content">
 
         <header class="topbar">
 
@@ -14,17 +14,11 @@
                 </button>
             </div>
 
-            <div class="topbar-right">
+        <div class="topbar-right">
+            <button class="theme-btn" (click)="toggleTheme()">🌙</button>
+            <button class="users-btn" (click)="usersRoute()">مدیریت کاربران</button>
+        </div>
 
-                <button
-                    class="theme-btn"
-                    (click)="toggleTheme()">
-
-                    🌙
-
-                </button>
-
-            </div>
 
         </header>
 

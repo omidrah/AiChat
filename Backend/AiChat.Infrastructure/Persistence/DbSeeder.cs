@@ -15,15 +15,13 @@ namespace AiChat.Infrastructure.Persistence
             {
                 provider = AuthenticationProviderEnum.Local;
             }
-            var user = new User
-            {
-                AuthProvider = provider.ToString(),
-                Id = Guid.NewGuid(),
-                UserName = "admin",
-                PasswordHash = hasher.Hash("123456"),
-                DisplayName = "Administrator",
-                CreatedAt = DateTime.UtcNow
-            };
+            var user = User.CreateUser
+            (                
+                "admin",
+                hasher.Hash("123456"),
+                null,
+                provider.ToString()
+            );
 
             db.Users.Add(user);
 

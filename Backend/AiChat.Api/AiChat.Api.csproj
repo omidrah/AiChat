@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AiChat.Infrastructure\AiChat.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

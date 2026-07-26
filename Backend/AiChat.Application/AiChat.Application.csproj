@@ -18,6 +18,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AiChat.Domain\AiChat.Domain.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Users\Queries\GetUser\" />
   </ItemGroup>
 
 </Project>

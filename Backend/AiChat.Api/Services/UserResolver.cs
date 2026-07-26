@@ -10,7 +10,6 @@ namespace AiChat.Api.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IUserRepository _userRepository;
 
-
         public UserResolver(
             ICurrentUserService currentUserService,
             IUserRepository userRepository)
@@ -20,9 +19,7 @@ namespace AiChat.Api.Services
         }
 
         public async Task<User> GetCurrentUserAsync(
-            CancellationToken ct = default)
-        
-        
+            CancellationToken ct = default)                
         {
             var current =
                 _currentUserService.GetCurrentUser();
@@ -45,17 +42,13 @@ namespace AiChat.Api.Services
             if (user != null)
                 return user;
 
-            user = new User
-            {
-                Id = Guid.NewGuid(),
-                UserName =current.UserName,
-                DisplayName = current.DisplayName,
-                ExternalId = current.ExternalId,
-                AuthProvider = current.AuthProvider.ToString(),
-                IsActive = true
-            };
+            user = User.CreateUser(
+                current.UserName,
+                null,
+                current.ExternalId ?? null,
+                current.AuthProvider.ToString());
 
-            await _userRepository.AddAsync(user, ct);
+            _userRepository.Add(user);
 
             await _userRepository.SaveChangesAsync(ct);
 

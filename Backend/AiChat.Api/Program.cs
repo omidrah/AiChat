@@ -6,6 +6,10 @@ using AiChat.Application.Abstractions;
 using AiChat.Application.Common.Auth;
 using AiChat.Application.Common.Options;
 using AiChat.Application.Conversations.Dtos;
+using AiChat.Application.Users.Commands.CreateUser;
+using AiChat.Application.Users.Commands.DeleteUser;
+using AiChat.Application.Users.Commands.UpdateUser;
+using AiChat.Application.Users.Queries.GetAllUsers;
 using AiChat.Infrastructure.AI;
 using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;
@@ -131,6 +135,11 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserResolver, UserResolver>();
+
+builder.Services.AddScoped<CreateUserHandler>();
+builder.Services.AddScoped<UpdateUserHandler>();
+builder.Services.AddScoped<DeleteUserHandler>();
+builder.Services.AddScoped<GetUsersHandler>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")

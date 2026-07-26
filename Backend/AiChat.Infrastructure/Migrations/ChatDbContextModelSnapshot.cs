@@ -42,7 +42,7 @@ namespace AiChat.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Conversations");
+                    b.ToTable("Conversations", (string)null);
                 });
 
             modelBuilder.Entity("AiChat.Domain.Entities.Message", b =>
@@ -67,7 +67,7 @@ namespace AiChat.Infrastructure.Migrations
 
                     b.HasIndex("ConversationId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("AiChat.Domain.Entities.RefreshToken", b =>
@@ -103,7 +103,7 @@ namespace AiChat.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("AiChat.Domain.Entities.User", b =>
@@ -141,7 +141,7 @@ namespace AiChat.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("AiChat.Domain.Entities.Message", b =>

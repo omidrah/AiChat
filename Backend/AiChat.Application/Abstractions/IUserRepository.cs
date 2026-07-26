@@ -9,7 +9,9 @@ namespace AiChat.Application.Abstractions
 
         Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
-        Task AddAsync(User user, CancellationToken ct = default);
+        Task<List<User>> GetAllAsync(CancellationToken ct = default);
+
+        void Add(User user);
 
         Task SaveChangesAsync(CancellationToken ct = default);
 

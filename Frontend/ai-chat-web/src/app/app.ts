@@ -27,7 +27,10 @@ export class App {
     else
       document.body.classList.remove("dark");
   }
-
+  
+  usersRoute(){
+    this.router.navigate(['/users']);
+  }
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
