@@ -17,22 +17,18 @@
     </div>
 
     <div class="users-toolbar">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="جستجو بر اساس نام کاربری یا روش احراز هویت..."
-        [(ngModel)]="searchTerm"
-      />
+      <input type="text" class="search-input" placeholder="جستجو بر اساس نام کاربری یا روش احراز هویت..."
+        [(ngModel)]="searchTerm" />
     </div>
-    
-<div class="error-box" *ngIf="error">
-  <div class="error-message">
-    <span>{{ error }}</span>
-    <button class="retry-btn" (click)="loadUsers()">
-      🔄 تلاش مجدد
-    </button>
-  </div>
-</div>
+
+    <div class="error-box" *ngIf="error">
+      <div class="error-message">
+        <span>{{ error }}</span>
+        <button class="retry-btn" (click)="loadUsers()">
+          🔄 تلاش مجدد
+        </button>
+      </div>
+    </div>
 
 
     <!-- فرم افزودن / ویرایش کاربر -->
@@ -64,7 +60,8 @@
         </div>
 
         <!-- فیلد وضعیت فعال/غیرفعال (فقط در حالت ویرایش معنی‌دارتر است ولی در ایجاد هم می‌تواند باشد) -->
-        <div class="form-group checkbox-group" style="flex-direction: row; align-items: center; gap: 8px; margin-top: 25px;">
+        <div class="form-group checkbox-group"
+          style="flex-direction: row; align-items: center; gap: 8px; margin-top: 25px;">
           <input type="checkbox" id="isActive" [(ngModel)]="form.isActive" />
           <label for="isActive" style="margin-bottom: 0; cursor: pointer;">کاربر فعال باشد</label>
         </div>
@@ -73,9 +70,9 @@
       <div class="form-actions">
         <button class="save-btn" (click)="saveUser()">ذخیره</button>
         <button class="cancel-btn" (click)="cancelForm()">انصراف</button>
-      </div>    
+      </div>
     </div>
- 
+
     <div *ngIf="isLoading">در حال بارگذاری کاربران...</div>
 
     <!-- جدول کاربران -->

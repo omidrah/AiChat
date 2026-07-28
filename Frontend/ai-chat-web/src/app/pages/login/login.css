@@ -130,3 +130,99 @@ body{
 
     text-align:center;
 }
+
+/* افکت فیلدهای نامعتبر */
+.invalid-field {
+  border-color: #e53e3e !important;
+  background-color: #fff5f5;
+}
+
+/* متن خطای زیر هر فیلد */
+.field-error {
+  color: #e53e3e;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* جعبه خطای بالای فرم */
+.error-box {
+  background-color: #fff5f5;
+  border: 1px solid #feb2b2;
+  color: #c53030;
+  padding: 10px 15px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* دکمه با قابلیت نمایش لودینگ */
+.login-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background-color: #3182ce;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.2s ease-in-out;
+}
+
+.login-btn:hover:not(:disabled) {
+  background-color: #2b6cb0;
+}
+
+.login-btn:disabled {
+  background-color: #cbd5e0;
+  color: #718096;
+  cursor: not-allowed;
+}
+
+/* انیمیشن اسپینر کوچک داخل دکمه */
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+/* انیمیشن چرخش */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* استایل ورود خودکار ویندوزی */
+.windows-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: inherit;
+}
+
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #3182ce;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}

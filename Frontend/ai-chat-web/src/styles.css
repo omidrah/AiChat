@@ -36,6 +36,9 @@ body {
   font-family: 'Vazirmatn', Tahoma, 'Segoe UI', sans-serif;
   background: #f7f7f8;
 }
+body, html, button, input, select, textarea, span, p, div, label {
+  font-family: 'Vazirmatn', Tahoma, sans-serif !important;
+}
 
 * {
   box-sizing: border-box;

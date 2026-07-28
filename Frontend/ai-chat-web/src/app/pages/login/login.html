@@ -8,7 +8,14 @@
         لطفاً وارد حساب کاربری شوید
       </p>
 
-      <form (ngSubmit)="login()" #loginForm="ngForm">
+      <!-- جعبه خطای کلی -->
+      <div class="error-box" *ngIf="error">
+        {{ error }}
+      </div>
+
+      <form (ngSubmit)="loginForm.form.valid && login()" #loginForm="ngForm" novalidate>
+        
+        <!-- فیلد نام کاربری -->
         <div class="form-group">
           <label for="userName">نام کاربری</label>
           <input
@@ -17,9 +24,16 @@
             [(ngModel)]="userName"
             type="text"
             autocomplete="username"
+            required
+            #userNameModel="ngModel"
+            [class.invalid-field]="userNameModel.invalid && (userNameModel.dirty || userNameModel.touched)"
           />
+          <div class="field-error" *ngIf="userNameModel.invalid && (userNameModel.dirty || userNameModel.touched)">
+            نام کاربری الزامی است.
+          </div>
         </div>
 
+        <!-- فیلد رمز عبور -->
         <div class="form-group">
           <label for="password">رمز عبور</label>
           <input
@@ -28,30 +42,33 @@
             [(ngModel)]="password"
             type="password"
             autocomplete="current-password"
+            required
+            #passwordModel="ngModel"
+            [class.invalid-field]="passwordModel.invalid && (passwordModel.dirty || passwordModel.touched)"
           />
+          <div class="field-error" *ngIf="passwordModel.invalid && (passwordModel.dirty || passwordModel.touched)">
+            رمز عبور الزامی است.
+          </div>
         </div>
 
-        <!-- <div class="form-group">
-            <label for="provider">نوع ورود</label>
-            <select id="provider" name="provider" [(ngModel)]="provider">
-                <option value="Local">Local</option>
-                <option value="ActiveDirectory">Active Directory</option>
-            </select>
-        </div> -->
-
-        <button class="login-btn" type="submit">
-          ورود
+        <!-- دکمه ورود همراه با Spinner لودینگ -->
+        <button 
+          class="login-btn" 
+          type="submit" 
+          [disabled]="loginForm.invalid || isSubmitting"
+        >
+          <span class="btn-spinner" *ngIf="isSubmitting"></span>
+          <span>{{ isSubmitting ? 'در حال ورود...' : 'ورود' }}</span>
         </button>
+
       </form>
-
-      <div class="error" *ngIf="error">
-        {{ error }}
-      </div>
-
     </div>
   </div>
 </div>
 
-<div *ngIf="mode === 'windows'">
-  در حال ورود...
+<div *ngIf="mode === 'windows'" class="windows-loading">
+  <div class="spinner-container">
+    <div class="spinner"></div>
+    <p>در حال ورود خودکار سیستم...</p>
+  </div>
 </div>
