@@ -28,6 +28,7 @@ marked.use(
   templateUrl: './chat.html',
   styleUrl: './chat.css',
 })
+
 export class ChatComponent implements OnInit, OnDestroy {
 
   models = signal<{ id: string; label: string }[]>([]);
@@ -69,14 +70,16 @@ export class ChatComponent implements OnInit, OnDestroy {
         // فرض می‌کنیم پاسخ بک‌اند لیستی از مدل‌ها با فیلد name است
         const list = res.map(x => ({ id: x.name, label: x.name }));
         this.models.set(list);
+
         if (list.length > 0) {
           this.selectedModel = list[0].id;
         }
+
         this.modelsLoading.set(false);
       },
-      error: () => {
+      error: (err) => {
+       console.error('Error loading models:', err);
         this.models.set([]);
-        this.selectedModel = '';
         this.modelsLoading.set(false);
       }
     });
