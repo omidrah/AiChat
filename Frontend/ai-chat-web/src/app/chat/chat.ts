@@ -1,10 +1,10 @@
-import { Component, ElementRef, ViewChild, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal, OnInit, OnDestroy } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { SignalRService } from '../services/signalr.service';
 import { Message } from '../models/message';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { firstValueFrom, last } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
@@ -16,7 +16,6 @@ marked.use(
       if (lang && hljs.getLanguage(lang)) {
         return hljs.highlight(code, { language: lang }).value;
       }
-
       return hljs.highlightAuto(code).value;
     }
   })
@@ -29,18 +28,11 @@ marked.use(
   templateUrl: './chat.html',
   styleUrl: './chat.css',
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit, OnDestroy {
 
-  models = [
-    { id: 'deepseek-r1:7b', label: 'deepseek 7b' },
-    { id: 'qwen3-coder:30b', label: 'qwen3 30b'},
-    { id: 'llama3.1:8b', label: 'Llama 3.1 8B' },
-    { id: 'mistral:7b', label: 'Mistral 7B' },
-    { id: 'gemma2:9b', label: 'Gemma 2 9B' },
-  ];
-
-  selectedModel = this.models[0].id;
-
+  models = signal<{ id: string; label: string }[]>([]);
+  modelsLoading = signal(true);
+  selectedModel = ''; // نگهداری مدل انتخابی کاربر
 
   @ViewChild('scrollContainer')
   private scrollContainer!: ElementRef<HTMLDivElement>;
@@ -59,46 +51,56 @@ export class ChatComponent {
     private route: ActivatedRoute) { }
 
   ngOnInit() {
-
+    this.loadModels();
     this.route.paramMap.subscribe(async params => {
-
       const id = params.get('id');
       if (!id) return;
 
       await this.openConversation(id);
-
       this.registerSignalRHandlers();
-
       this.forceScrollToBottom();
     });
   }
 
-  // ویرایش متد ثبت هندلرهای سیگنال‌آر برای اتمام استریم
-  private registerSignalRHandlers() {
+  loadModels(): void {
+    this.modelsLoading.set(true);
+    this.api.getModels().subscribe({
+      next: (res) => {
+        // فرض می‌کنیم پاسخ بک‌اند لیستی از مدل‌ها با فیلد name است
+        const list = res.map(x => ({ id: x.name, label: x.name }));
+        this.models.set(list);
+        if (list.length > 0) {
+          this.selectedModel = list[0].id;
+        }
+        this.modelsLoading.set(false);
+      },
+      error: () => {
+        this.models.set([]);
+        this.selectedModel = '';
+        this.modelsLoading.set(false);
+      }
+    });
+  }
 
+  private registerSignalRHandlers() {
     this.signalr.onReceiveToken(token => {
       this.isThinking.set(false);
       const current = this.messages();
       const lastMessage = current[current.length - 1];
 
       if (!lastMessage || lastMessage.role.toLowerCase() !== 'assistant') {
-
         this.messages.update(list => [
           ...list,
           { role: 'assistant', content: token, createdAt: new Date() }
         ]);
-
         this.scrollToBottomIfNeeded();
-
         return;
       }
 
       const index = current.length - 1;
-
       this.messages.update(
         list => list.map((m, i) => i === index ? { ...m, content: m.content + token } : m)
       );
-
       this.scrollToBottomIfNeeded();
     });
 
@@ -119,22 +121,18 @@ export class ChatComponent {
     const result: any = await firstValueFrom(
       this.api.getMessages(this.conversationId)
     );
-
     const messagesfromApi = result.messages ?? [];
-
     this.messages.set(
-
       messagesfromApi.map((m: Message) => ({
         ...m,
         createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
-      })))
-
+      }))
+    );
     this.forceScrollToBottom();
   }
 
   send(textarea?: HTMLTextAreaElement) {
     const msg = this.input.trim();
-
     if (!msg) { return; }
 
     if (!this.isSignalRReady()) {
@@ -146,7 +144,7 @@ export class ChatComponent {
       role: 'user',
       content: msg,
       createdAt: new Date(),
-      model: this.selectedModel,
+      model: this.selectedModel, // ارسال مدل انتخابی کنونی
     };
 
     this.messages.update(list => [...list, userMessage]);
@@ -168,6 +166,11 @@ export class ChatComponent {
       },
       error: err => {
         this.resetSendingState();
+        this.messages.update(list => [...list, {
+          role: 'assistant',
+          content: `⚠️ خطا: ${err.error?.detail || 'عدم پاسخگویی سرور'}`,
+          createdAt: new Date()
+        }]);
         console.error(err);
       }
     });
@@ -175,33 +178,20 @@ export class ChatComponent {
 
   onMessagesScroll(): void {
     const element = this.scrollContainer?.nativeElement;
-
-    if (!element) {
-      return;
-    }
-
-    const distanceFromBottom =
-      element.scrollHeight - element.scrollTop - element.clientHeight;
-
+    if (!element) return;
+    const distanceFromBottom = element.scrollHeight - element.scrollTop - element.clientHeight;
     this.shouldAutoScroll = distanceFromBottom < 140;
   }
 
   scrollToBottomIfNeeded(): void {
-    if (!this.shouldAutoScroll) {
-      return;
-    }
-
+    if (!this.shouldAutoScroll) return;
     this.forceScrollToBottom();
   }
 
   forceScrollToBottom(): void {
     setTimeout(() => {
       const element = this.scrollContainer?.nativeElement;
-
-      if (!element) {
-        return;
-      }
-
+      if (!element) return;
       element.scrollTop = element.scrollHeight;
     }, 0);
   }
@@ -222,17 +212,10 @@ export class ChatComponent {
 
   handleEnter(event: Event): void {
     const keyboardEvent = event as KeyboardEvent;
-
-    if (keyboardEvent.key !== 'Enter') {
-      return;
-    }
-
-    if (keyboardEvent.shiftKey) {
-      return;
-    }
+    if (keyboardEvent.key !== 'Enter') return;
+    if (keyboardEvent.shiftKey) return;
 
     keyboardEvent.preventDefault();
-
     if (this.input?.trim() && !this.isSending()) {
       this.send();
     }
@@ -253,23 +236,18 @@ export class ChatComponent {
       },
       error: (err) => {
         console.error('خطا در لغو درخواست:', err);
-        // حتی در صورت خطای شبکه، رابط کاربری را آزاد می‌کنیم
         this.resetSendingState();
       }
     });
   }
 
-
   copyToClipboard(message: Message) {
     if (!message.content) return;
-
-    // کپی کردن متن در کلیپ‌بورد با استفاده از API استاندارد مرورگر
     navigator.clipboard.writeText(message.content).then(() => {
-      // ایجاد یک افکت بصری موقت برای دکمه کپی همان پیام
       message.copied = true;
       setTimeout(() => {
         message.copied = false;
-      }, 2000); // بعد از ۲ ثانیه آیکون به حالت قبل برمی‌گردد
+      }, 2000);
     }).catch(err => {
       console.error('Failed to copy text: ', err);
     });

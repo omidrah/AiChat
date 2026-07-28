@@ -56,6 +56,11 @@ export class ApiService {
 
   }
 
+  getModels() {
+    return this.http.get<{ name: string }[]>(`${this.baseUrl}/models`);
+  }
+
+
   // services/api.service.ts
   cancelMessage(conversationId: string) {
     return this.http.post(`${this.baseUrl}/conversations/${conversationId}/cancel`, {});

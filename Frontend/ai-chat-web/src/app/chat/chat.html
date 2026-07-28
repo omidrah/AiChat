@@ -57,15 +57,25 @@
   <div class="input-area">
     <div class="composer">
 
-      <select
+     <select
         class="model-select"
         [(ngModel)]="selectedModel"
-        [disabled]="isSending()"
+        [disabled]="isSending() || modelsLoading() || models().length === 0"
         aria-label="انتخاب مدل">
-        <option *ngFor="let model of models" [value]="model.id">
+        
+        <option *ngIf="modelsLoading()" disabled value="">
+          در حال دریافت مدل‌ها...
+        </option>
+        
+        <option *ngIf="!modelsLoading() && models().length === 0" disabled value="">
+          مدلی یافت نشد
+        </option>
+
+        <option *ngFor="let model of models()" [value]="model.id">
           {{ model.label }}
         </option>
       </select>
+
 
       <textarea 
         #messageInput 

@@ -136,6 +136,8 @@ builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 builder.Services.AddSingleton<IChatCancellationTracker, ChatCancellationTracker>();
+builder.Services.AddSingleton<IOllamaService, OllamaService>();
+
 // Add Global Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
