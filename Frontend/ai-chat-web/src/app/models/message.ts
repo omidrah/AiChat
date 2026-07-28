@@ -1,8 +1,9 @@
 export interface Message {
     id?: string
-    role: string
+    role: 'user' | 'assistant'; 
     content: string
     createdAt: string | Date
+    copied?: boolean
   }
   
 

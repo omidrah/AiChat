@@ -242,6 +242,22 @@ export class ChatComponent {
     });
   }
 
+
+  copyToClipboard(message: Message) {
+    if (!message.content) return;
+
+    // کپی کردن متن در کلیپ‌بورد با استفاده از API استاندارد مرورگر
+    navigator.clipboard.writeText(message.content).then(() => {
+      // ایجاد یک افکت بصری موقت برای دکمه کپی همان پیام
+      message.copied = true;
+      setTimeout(() => {
+        message.copied = false;
+      }, 2000); // بعد از ۲ ثانیه آیکون به حالت قبل برمی‌گردد
+    }).catch(err => {
+      console.error('Failed to copy text: ', err);
+    });
+  }
+
   ngOnDestroy() {
     this.signalr.offReceiveToken();
     this.signalr.offReceiveCompleted();
