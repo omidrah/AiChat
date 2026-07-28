@@ -136,6 +136,10 @@ builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 builder.Services.AddSingleton<IChatCancellationTracker, ChatCancellationTracker>();
+// Add Global Exception Handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+//
 
 builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddScoped<UpdateUserHandler>();
@@ -189,5 +193,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();
+app.UseExceptionHandler();
 
 app.Run();

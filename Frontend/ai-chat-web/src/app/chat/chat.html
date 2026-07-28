@@ -9,6 +9,11 @@
       </div>
 
       <div class="msg-body">
+
+        <div class="message-meta" *ngIf="m.model">
+          {{ m.model }}
+        </div>
+
         <!-- متن پیام -->
         <div class="message-content" [innerHTML]="render(m.content)"></div>
 
@@ -51,6 +56,17 @@
   <!-- بخش ورودی پیام -->
   <div class="input-area">
     <div class="composer">
+
+      <select
+        class="model-select"
+        [(ngModel)]="selectedModel"
+        [disabled]="isSending()"
+        aria-label="انتخاب مدل">
+        <option *ngFor="let model of models" [value]="model.id">
+          {{ model.label }}
+        </option>
+      </select>
+
       <textarea 
         #messageInput 
         class="message-input" 

@@ -22,11 +22,11 @@ namespace AiChat.Infrastructure.AI
             _client.BaseAddress = new Uri(_options.BaseUrl);
         }
 
-        public async Task<string> AskAsync(IEnumerable<MessageDto> messages, CancellationToken ct)
+        public async Task<string> AskAsync(IEnumerable<MessageDto> messages, string model, CancellationToken ct)
         {
             var newrequest = new OllamaChatRequest
             {
-                Model = _options.Model,
+                Model = !string.IsNullOrEmpty(model) ? model : _options.Model,
                 Messages = messages.ToList(),
             };
 
@@ -54,11 +54,11 @@ namespace AiChat.Infrastructure.AI
 
             return result?.Message.Content ?? "";
         }
-        public async Task StreamAsync(IEnumerable<MessageDto> messages, Func<string, Task> onChunk, CancellationToken ct)
+        public async Task StreamAsync(IEnumerable<MessageDto> messages, string? model, Func<string, Task> onChunk, CancellationToken ct)
         {
             var request = new
             {
-                model = _options.Model,
+                model = !string.IsNullOrEmpty(model) ? model : _options.Model,
                 messages = messages,
                 stream = true
             };

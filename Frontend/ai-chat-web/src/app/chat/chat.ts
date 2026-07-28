@@ -4,7 +4,7 @@ import { SignalRService } from '../services/signalr.service';
 import { Message } from '../models/message';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, last } from 'rxjs';
 import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
@@ -30,6 +30,17 @@ marked.use(
   styleUrl: './chat.css',
 })
 export class ChatComponent {
+
+  models = [
+    { id: 'deepseek-r1:7b', label: 'deepseek 7b' },
+    { id: 'qwen3-coder:30b', label: 'qwen3 30b'},
+    { id: 'llama3.1:8b', label: 'Llama 3.1 8B' },
+    { id: 'mistral:7b', label: 'Mistral 7B' },
+    { id: 'gemma2:9b', label: 'Gemma 2 9B' },
+  ];
+
+  selectedModel = this.models[0].id;
+
 
   @ViewChild('scrollContainer')
   private scrollContainer!: ElementRef<HTMLDivElement>;
@@ -131,10 +142,16 @@ export class ChatComponent {
       return;
     }
 
-    this.messages.update(list => [...list, { role: 'user', content: msg, createdAt: new Date() }]);
+    const userMessage: Message = {
+      role: 'user',
+      content: msg,
+      createdAt: new Date(),
+      model: this.selectedModel,
+    };
+
+    this.messages.update(list => [...list, userMessage]);
 
     this.input = '';
-
     this.isThinking.set(true);
     this.isSending.set(true);
     this.shouldAutoScroll = true;
@@ -145,7 +162,7 @@ export class ChatComponent {
 
     this.forceScrollToBottom();
 
-    this.api.sendMessage(this.conversationId, msg).subscribe({
+    this.api.sendMessage(this.conversationId, msg, this.selectedModel).subscribe({
       next: () => {
         console.log('Message sent');
       },

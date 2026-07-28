@@ -12,7 +12,7 @@ namespace AiChat.Infrastructure.AI
             _provider = provider;
         }
 
-        public async Task<string> GenerateTitleAsync(string firstMessage, CancellationToken ct=default)
+        public async Task<string> GenerateTitleAsync(string firstMessage, string model, CancellationToken ct=default)
         {
             var messages =
                 new List<MessageDto>
@@ -36,7 +36,7 @@ namespace AiChat.Infrastructure.AI
                 };
             try
             {
-                return await _provider.AskAsync(messages, ct);
+                return await _provider.AskAsync(messages, model, ct);
             }
             catch (Exception ex)
             {

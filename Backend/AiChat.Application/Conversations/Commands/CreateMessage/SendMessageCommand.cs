@@ -1,4 +1,4 @@
 ﻿namespace AiChat.Application.Conversations.Commands.CreateMessage
 {
-    public record SendMessageCommand(Guid ConversationId,Guid UserId, string Message);
+    public record SendMessageCommand(Guid ConversationId, Guid UserId, string Message, string Model);
 }

@@ -310,3 +310,39 @@
 .scroll-bottom-button:hover {
   background: #f3f4f6;
 }
+.model-select {
+  min-width: 170px;
+  height: 46px;
+  border: 1px solid #d9d9e3;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #202123;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 0 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.model-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.message-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.msg.user .message-meta {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.msg.ai .message-meta {
+  color: #6b7280;
+}

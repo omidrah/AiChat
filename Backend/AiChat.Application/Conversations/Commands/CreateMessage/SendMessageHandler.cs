@@ -35,13 +35,13 @@ public class SendMessageHandler
             throw new Exception("Conversation not found");
         }
 
-        conversation.AddMessage(command.Message, Domain.ValueObject.MessageRole.User); // insert user message
+        conversation.AddMessage(command.Message, command.Model, Domain.ValueObject.MessageRole.User); // insert user message
 
         //تولید خودکار عنوان Conversation
         if (conversation.Messages.Count == 1)
         {    
             var title =
-                await _titleGenerator.GenerateTitleAsync(command.Message, ct);
+                await _titleGenerator.GenerateTitleAsync(command.Message, command.Model, ct);
             if (!string.IsNullOrWhiteSpace(title))
             {
                 conversation.Rename(title);
@@ -49,7 +49,6 @@ public class SendMessageHandler
         }
         // ۱. بررسی اینکه قبل از ذخیره‌سازی ، عملیات کنسل نشده باشد
         ct.ThrowIfCancellationRequested();
-        await _repository.SaveChangesAsync(ct);
 
         await _repository.SaveChangesAsync(ct);
 
@@ -60,6 +59,7 @@ public class SendMessageHandler
                     {
                         Role = x.Role.ToString().ToLower(),
                         Content = x.Content,
+                        Model = x.Model ?? command.Model, // استفاده از مدلِ پیام یا مدل کامند جاری
                         Id = x.Id,  
                         CreatedAt = x.CreatedAt,
                     })
@@ -68,12 +68,11 @@ public class SendMessageHandler
         var answerBuilder = new StringBuilder();
         try
         {
-            await _aiStreamingProvider.StreamAsync(messages,
+            await _aiStreamingProvider.StreamAsync(messages,command.Model,
                  async chunk =>
                  {
                      // بررسی در هر تکه استریم شده که کاربر کنسل نکرده باشد ...
                      ct.ThrowIfCancellationRequested();
-
                      answerBuilder.Append(chunk);
                      await _notifier.SendChunkAsync(conversation.Id, command.UserId, chunk);
                  }, ct);
@@ -95,7 +94,7 @@ public class SendMessageHandler
         ct.ThrowIfCancellationRequested();
 
         var answer = answerBuilder.ToString();
-        conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);
+        conversation.AddMessage(answer, command.Model, Domain.ValueObject.MessageRole.Assistant);
         await _repository.SaveChangesAsync(ct);
         return answer;
     }

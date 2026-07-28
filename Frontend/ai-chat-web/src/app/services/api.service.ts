@@ -30,10 +30,10 @@ export class ApiService {
     return this.http.get<Message[]>(`${this.baseUrl}/conversations/${conversationId}`)
   }
 
-  sendMessage(conversationId: string, message: string) {
+  sendMessage(conversationId: string, message: string , model: string) {
     return this.http.post(
       `${this.baseUrl}/conversations/${conversationId}/messages`,
-      { message }
+      { message, model }
     );
   }
 

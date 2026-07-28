@@ -36,9 +36,9 @@ namespace AiChat.Domain.Entities
             return new Conversation(userId, userName,title);            
         }
 
-        public void AddMessage(string content,MessageRole role)
+        public void AddMessage(string content,string aiModel,MessageRole role)
         {
-            var message =Message.CreateMessage(Id, role, content);
+            var message =Message.CreateMessage(Id, role, content, aiModel);
             _messages.Add(message);
             UpdatedAt = DateTime.UtcNow;
         }

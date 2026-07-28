@@ -98,7 +98,7 @@ namespace AiChat.Api.Controllers
             {
                 var user = await userResolver.GetCurrentUserAsync(ct);
 
-                var command = new SendMessageCommand(conversationId, user.Id, request.Message);
+                var command = new SendMessageCommand(conversationId, user.Id, request.Message, request.Model);
 
                 var answer = await handler.HandleAsync(command, linkedCts.Token);
 

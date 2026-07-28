@@ -14,18 +14,21 @@ namespace AiChat.Domain.Entities
 
         public Guid ConversationId { get; private set; }
 
-        private Message(Guid conversationId, MessageRole role, string content)
+        public string? Model { get;  private set; }
+
+        private Message(Guid conversationId, MessageRole role, string content, string model)
         {
             Id = Guid.NewGuid();
             ConversationId = conversationId;
             Role = role;
             Content = content;
-            CreatedAt = DateTime.UtcNow;           
+            CreatedAt = DateTime.UtcNow;  
+            Model = model;
         }
 
-        public static Message CreateMessage(Guid conversationId, MessageRole role, string content)
+        public static Message CreateMessage(Guid conversationId, MessageRole role, string content, string aiModel)
         {
-           return new Message(conversationId,role, content);  
+           return new Message(conversationId,role, content, aiModel);  
         }
     }
 }
