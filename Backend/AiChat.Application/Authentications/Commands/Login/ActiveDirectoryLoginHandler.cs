@@ -41,6 +41,7 @@ public sealed class ActiveDirectoryLoginHandler
             (
                 adUser.UserName,
                 null,
+                adUser.DisplayName,
                 adUser.ExternalId,
                 "ActiveDirectory"
             );

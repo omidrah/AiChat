@@ -36,8 +36,9 @@ public class CreateUserHandler
         }
 
         var user = User.CreateUser(
-             request.UserName,
+             normalizedUserName,
             _hasher.Hash(request.Password),
+            request.DisplayName, 
             null,
             AuthenticationProviderEnum.Local.ToString());
 

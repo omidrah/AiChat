@@ -19,6 +19,7 @@ namespace AiChat.Infrastructure.Persistence
             (                
                 "admin",
                 hasher.Hash("123456"),
+                "Administrator",
                 null,
                 provider.ToString()
             );

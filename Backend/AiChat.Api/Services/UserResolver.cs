@@ -45,6 +45,7 @@ namespace AiChat.Api.Services
             user = User.CreateUser(
                 current.UserName,
                 null,
+                current.DisplayName,
                 current.ExternalId ?? null,
                 current.AuthProvider.ToString());
 

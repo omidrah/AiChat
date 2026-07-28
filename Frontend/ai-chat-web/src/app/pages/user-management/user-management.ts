@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { firstValueFrom } from 'rxjs';
@@ -16,18 +16,22 @@ export class UserManagement implements OnInit {
   users: any[] = [];
   searchTerm = '';
   error = '';
+  isLoading = false;
 
   showForm = false;
   editingUserId: string | null = null;
 
+  // تعریف ساختار فرم با فیلدهای جدید
   form = {
-    username: '',
+    userName: '',
     displayName: '',
     role: 'User',
-    password: ''
+    password: '',
+    isActive: true, // مقدار پیش‌فرض فعال
+    authProvider: 'Local' // مقدار پیش‌فرض سیستم محلی
   };
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService, private cd: ChangeDetectorRef) { }
 
   async ngOnInit() {
     await this.loadUsers();
@@ -35,10 +39,46 @@ export class UserManagement implements OnInit {
 
   async loadUsers() {
     try {
-      this.users = await firstValueFrom(this.api.getUsers());
+      this.isLoading = true;
+      this.error = '';
+      this.cd.detectChanges();
+
+      const response = await firstValueFrom(this.api.getUsers());
+      
+      this.users = (response || [])
+        .map(x => ({
+          ...x,
+          userName: x.userName || x.username || '',
+          displayName: x.displayName || '',
+          role: x.role || 'User',
+          authProvider: x.authProvider || 'Local',
+          isActive: x.isActive !== undefined ? x.isActive : true,
+          isSystemUser: (x.userName || x.username || '').toLowerCase() === 'administrator' || 
+                        (x.userName || x.username || '').toLowerCase() === 'admin'
+        }))
+        // یک فیلتر پشتیبان در فرانت برای اطمینان از عدم نمایش اکانت‌های ادمین اصلی
+        .filter(x => !x.isSystemUser);
+
     } catch (err: any) {
-      this.error = err?.error?.message || 'خطا در دریافت کاربران';
+      console.error('Load Error:', err);
+       // شناسایی قطع بودن سرور یا خطای شبکه
+        if (err.name === 'HttpErrorResponse' && err.status === 0) {
+          this.error = '⚠️ ارتباط با سرور برقرار نشد. لطفاً از اتصال اینترنت یا روشن بودن سرور مطمئن شوید.';
+        } else {
+          this.error = err?.error?.message || 'خطا در دریافت اطلاعات از سرور؛ مجدداً تلاش کنید.';
+        }      
+    } finally {
+      this.isLoading = false;
+      this.cd.detectChanges();
     }
+  }
+
+  canEdit(user: any) {
+    return !user.isSystemUser;
+  }
+
+  canDelete(user: any) {
+    return !user.isSystemUser;
   }
 
   filteredUsers() {
@@ -46,9 +86,9 @@ export class UserManagement implements OnInit {
     if (!term) return this.users;
 
     return this.users.filter(x =>
-      (x.username || '').toLowerCase().includes(term) ||
+      (x.userName || '').toLowerCase().includes(term) ||
       (x.displayName || '').toLowerCase().includes(term) ||
-      (x.role || '').toLowerCase().includes(term)
+      (x.authProvider || '').toLowerCase().includes(term)
     );
   }
 
@@ -57,10 +97,12 @@ export class UserManagement implements OnInit {
     this.editingUserId = null;
     this.error = '';
     this.form = {
-      username: '',
+      userName: '',
       displayName: '',
       role: 'User',
-      password: ''
+      password: '',
+      isActive: true,
+      authProvider: 'Local'
     };
   }
 
@@ -70,10 +112,12 @@ export class UserManagement implements OnInit {
     this.error = '';
 
     this.form = {
-      username: user.username || '',
+      userName: user.userName || '',
       displayName: user.displayName || '',
       role: user.role || 'User',
-      password: ''
+      password: '',
+      isActive: user.isActive,
+      authProvider: user.authProvider || 'Local'
     };
   }
 
@@ -87,6 +131,7 @@ export class UserManagement implements OnInit {
     try {
       this.error = '';
 
+      // ارسال شی فرم که حاوی isActive و authProvider جدید است
       if (this.editingUserId) {
         await firstValueFrom(this.api.updateUser(this.editingUserId, this.form));
       } else {
@@ -96,7 +141,15 @@ export class UserManagement implements OnInit {
       this.cancelForm();
       await this.loadUsers();
     } catch (err: any) {
-      this.error = err?.error?.message || err?.error?.title || 'خطا در ذخیره اطلاعات';
+      
+      // شناسایی قطع بودن سرور یا خطای شبکه
+      if (err.name === 'HttpErrorResponse' && err.status === 0) {
+        this.error = '⚠️ ارتباط با سرور برقرار نشد. لطفاً از اتصال اینترنت یا روشن بودن سرور مطمئن شوید.';
+      } else {
+        this.error = err?.error?.message || err?.error?.title || 'خطا در ذخیره اطلاعات';
+      }     
+
+      this.cd.detectChanges();
     }
   }
 
@@ -108,7 +161,15 @@ export class UserManagement implements OnInit {
       await firstValueFrom(this.api.deleteUser(id));
       await this.loadUsers();
     } catch (err: any) {
-      this.error = err?.error?.message || 'خطا در حذف کاربر';
+
+      // شناسایی قطع بودن سرور یا خطای شبکه
+        if (err.name === 'HttpErrorResponse' && err.status === 0) {
+          this.error = '⚠️ ارتباط با سرور برقرار نشد. لطفاً از اتصال اینترنت یا روشن بودن سرور مطمئن شوید.';
+        } else {
+          this.error = err?.error?.message || 'خطا در حذف کاربر';
+        }    
+      
+        this.cd.detectChanges();
     }
   }
 }

@@ -17,8 +17,8 @@ public sealed class GetUsersHandler
     public async Task<Result<List<UserDto>>> HandleAsync(CancellationToken ct = default)
     {
         var users = await _userRepository.GetAllAsync(ct);
-
-        var result = users
+        //کل کاربران بجز ادمین نمایش داده شوند.
+        var result = users.Where(u => u.UserName.ToLower() != "admin" && u.UserName.ToLower() != "administrator")
             .Select(x => new UserDto
             {
                 Id = x.Id,

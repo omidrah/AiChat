@@ -39,7 +39,7 @@ public class UsersController : ControllerBase
         [FromBody] CreateUserDto dto, 
         CancellationToken ct)
     {
-        var createUserCommand = new CreateUserCommand(dto.UserName, dto.Password);
+        var createUserCommand = new CreateUserCommand(dto.UserName, dto.Password, dto.DisplayName);
         var result =await createUserHandler.HandleAsync(createUserCommand, ct);
 
         if (result.IsFailure)
@@ -58,7 +58,8 @@ public class UsersController : ControllerBase
     {
         var command = new UpdateUserCommand(
             id,
-            dto.Password,
+            dto.Password!,
+            dto.DisplayName,
             dto.IsActive);
 
         var result = await handler.HandleAsync(command, ct);

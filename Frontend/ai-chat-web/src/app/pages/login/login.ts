@@ -21,6 +21,7 @@ export class LoginComponent {
      * form → برای Local و ActiveDirectory
      * windows → برای WindowsIntegrated  -> هنوز در نظر گرفته نشده است...
      */
+    // provider='';
     mode: 'form' | 'windows' = 'form';
 
     constructor(

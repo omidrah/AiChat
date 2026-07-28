@@ -28,6 +28,7 @@ public sealed class UpdateUserHandler
         }
 
         user.SetIsActive(command.IsActive);
+        user.SetDisplayName(command.DisplayName);   
 
         if (!string.IsNullOrWhiteSpace(command.Password))
         {

@@ -27,12 +27,12 @@
         {
         }
 
-        private User(string userName, string passwordHash, string? externalId, string authProvider)
+        private User(string userName, string passwordHash, string displayName, string? externalId, string authProvider)
         {
             Id = Guid.NewGuid();
             UserName = userName;
             PasswordHash = passwordHash;
-            DisplayName = "Mr." + userName;
+            DisplayName = displayName ?? "Mr." + userName;
             IsActive = true;
             AuthProvider = authProvider;
             ExternalId = externalId;
@@ -42,10 +42,11 @@
         public static User CreateUser(
             string userName,
             string passwordHash,
+            string displayName,
             string? externalId,
             string authProvider)
         {
-            return new User(userName, passwordHash, externalId, authProvider);
+            return new User(userName, passwordHash, displayName, externalId, authProvider);
         }
 
         public void SetIsActive(bool isActive)
