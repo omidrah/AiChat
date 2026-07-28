@@ -15,7 +15,7 @@
     </div>
 
     <button class="new-chat-btn" (click)="create()">
-      <span *ngIf="collapsed">＋</span>
+      <span *ngIf="collapsed">+</span>
       <span *ngIf="!collapsed"> + گفتگوی جدید </span>
     </button>
 
@@ -24,96 +24,86 @@
 
   <div class="conversation-list">
 
-    <div class="conversation-item" 
-      [class.active]="c.id === selectedId"
-      [class.editing]="editingId===c.id" 
-      *ngFor="let c of conversations();trackBy:trackConversation"    (click)="open(c.id)">
-      
+    <div class="conversation-item" [class.active]="c.id === selectedId" [class.editing]="editingId===c.id"
+      *ngFor="let c of conversations();trackBy:trackConversation" (click)="open(c.id)">
+
       <span class="icon">💬</span>
-      
-      <input
-          *ngIf="editingId === c.id"
-          class="rename-input"
-          [(ngModel)]="editingTitle"
-          (click)="$event.stopPropagation()"
-          (keydown.enter)="saveRename(c)"
-          (keydown.escape)="cancelRename()">
+
+      <input *ngIf="editingId === c.id" class="rename-input" [(ngModel)]="editingTitle"
+        (click)="$event.stopPropagation()" (keydown.enter)="saveRename(c)" (keydown.escape)="cancelRename()">
 
       <span *ngIf="editingId !== c.id && !collapsed" class="title">
-          {{ c.title }}
+        {{ c.title }}
       </span>
-      
+
       <div class="actions">
 
         <ng-container *ngIf="editingId===c.id">
-    
-            <button class="ok-btn" (click)="$event.stopPropagation();saveRename(c);">    
-                ✔    
-            </button>
-    
-            <button class="cancel-btn" (click)="cancelRename();$event.stopPropagation()">    
-                ✖    
-            </button>
-    
-        </ng-container>
-    
-        <ng-container *ngIf="editingId!==c.id">
-    
-            <button  (click)="rename(c,$event)">    
-                ✏️    
-            </button>
-    
-            <button (click)="showDelete(c);$event.stopPropagation()">    
-                🗑️    
-            </button>
-    
-        </ng-container>
-    
-    </div>
-      <div class="delete-popup" *ngIf="confirmDeleteId===c.id" (click)="$event.stopPropagation()">
-          <div>حذف گفتگو؟</div>
 
-          <div class="popup-buttons">
-              <button   class="cancel"   (click)="confirmDeleteId=''; $event.stopPropagation()">
-                  لغو
-              </button>
-              <button   class="delete"  (click)="delete(c); $event.stopPropagation()">
-                  حذف
-              </button>
-          </div>
+          <button class="ok-btn" (click)="$event.stopPropagation();saveRename(c);">
+            ✔
+          </button>
+
+          <button class="cancel-btn" (click)="cancelRename();$event.stopPropagation()">
+            ✖
+          </button>
+
+        </ng-container>
+
+        <ng-container *ngIf="editingId!==c.id">
+
+          <button (click)="rename(c,$event)">
+            ✏️
+          </button>
+
+          <button (click)="showDelete(c);$event.stopPropagation()">
+            🗑️
+          </button>
+
+        </ng-container>
+
+      </div>
+      <div class="delete-popup" *ngIf="confirmDeleteId===c.id" (click)="$event.stopPropagation()">
+        <div>حذف گفتگو؟</div>
+
+        <div class="popup-buttons">
+          <button class="cancel" (click)="confirmDeleteId=''; $event.stopPropagation()">
+            لغو
+          </button>
+          <button class="delete" (click)="delete(c); $event.stopPropagation()">
+            حذف
+          </button>
+        </div>
 
       </div>
     </div>
 
   </div>
 
-
-<!-- سایر بخش‌های هدر و لیست گفتگوها بدون تغییر باقی می‌مانند -->
-
-<div class="sidebar-footer">
-  <!-- باکس خوش‌آمدگویی و اطلاعات کاربر -->
-  <div class="user-profile-box" *ngIf="!collapsed">
-    <div class="avatar-circle">
-      {{ userName ? userName.substring(0, 2).toUpperCase() : 'US' }}
+  <div class="sidebar-footer">
+    <!-- باکس خوش‌آمدگویی و اطلاعات کاربر -->
+    <div class="user-profile-box" *ngIf="!collapsed">
+      <div class="avatar-circle">
+        {{ userName ? userName.substring(0, 2).toUpperCase() : 'US' }}
+      </div>
+      <div class="user-details">
+        <span class="welcome-text">خوش آمدید،</span>
+        <span class="user-display-name">{{ userName }}</span>
+      </div>
     </div>
-    <div class="user-details">
-      <span class="welcome-text">خوش آمدید،</span>
-      <span class="user-display-name">{{ userName }}</span>
+
+    <div class="user-profile-box collapsed-profile" *ngIf="collapsed" title="{{ userName }}">
+      <div class="avatar-circle">
+        {{ userName ? userName.substring(0, 2).toUpperCase() : 'US' }}
+      </div>
     </div>
+
+    <!-- دکمه خروج -->
+    <button class="logout-btn" (click)="logout()">
+      <span class="logout-icon">🚪</span>
+      <span *ngIf="!collapsed">خروج از حساب</span>
+    </button>
   </div>
-
-  <div class="user-profile-box collapsed-profile" *ngIf="collapsed" title="{{ userName }}">
-    <div class="avatar-circle">
-      {{ userName ? userName.substring(0, 2).toUpperCase() : 'US' }}
-    </div>
-  </div>
-
-  <!-- دکمه خروج -->
-  <button class="logout-btn" (click)="logout()">
-    <span class="logout-icon">🚪</span>
-    <span *ngIf="!collapsed">خروج از حساب</span>
-  </button>
-</div>
 
 
 </div>
