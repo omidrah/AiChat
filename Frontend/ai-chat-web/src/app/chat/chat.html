@@ -1,39 +1,22 @@
 <div class="chat-container">
 
-  <div
-    class="messages"
-    #scrollContainer
-    (scroll)="onMessagesScroll()"
-  >
+  <div class="messages" #scrollContainer (scroll)="onMessagesScroll()">
 
-    <div
-      *ngFor="let m of messages()"
-      class="msg"
-      [class.user]="m.role === 'user'"
-      [class.ai]="m.role === 'assistant'"
-    >
+    <div *ngFor="let m of messages()" class="msg" [class.user]="m.role === 'user'" [class.ai]="m.role === 'assistant'">
 
       <div class="msg-avatar">
         {{ m.role === 'user' ? 'شما' : 'AI' }}
       </div>
 
       <div class="msg-body">
-        <div
-          class="message-content"
-          [innerHTML]="render(m.content)"
-        ></div>
+        <div class="message-content" [innerHTML]="render(m.content)"></div>
       </div>
 
     </div>
 
   </div>
 
-  <button
-    *ngIf="!shouldAutoScroll"
-    class="scroll-bottom-button"
-    type="button"
-    (click)="enableAutoScrollAndGoBottom()"
-  >
+  <button *ngIf="!shouldAutoScroll" class="scroll-bottom-button" type="button" (click)="enableAutoScrollAndGoBottom()">
     رفتن به آخر گفتگو
   </button>
 
@@ -45,25 +28,18 @@
 
     <div class="composer">
 
-      <textarea
-        #messageInput
-        class="message-input"
-        [(ngModel)]="input"
-        rows="1"
-        [disabled]="isSending()"
+      <textarea #messageInput class="message-input" [(ngModel)]="input" rows="1"
         [placeholder]="isSending() ? 'منتظر پایان پاسخ بمانید...' : 'پیام خود را بنویسید...'"
-        (input)="autoResizeTextarea(messageInput)"
-        (keydown)="handleEnter($event)"
-      ></textarea>
+        (input)="autoResizeTextarea(messageInput)" (keydown)="handleEnter($event)"></textarea>
 
-      <button
-        class="send-button"
-        type="button"
-        [disabled]="!input.trim() || isSending()"
-        (click)="send(messageInput)"
-      >
+      <button *ngIf="!isSending()" class="send-button" type="button" [disabled]="!input.trim()"
+        (click)="send(messageInput)">
         ➤
       </button>
+      <button *ngIf="isSending()" class="stop-button" type="button" (click)="cancel()" title="توقف تولید پاسخ">
+        ■
+      </button>
+
 
     </div>
 

@@ -135,6 +135,7 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserResolver, UserResolver>();
+builder.Services.AddSingleton<IChatCancellationTracker, ChatCancellationTracker>();
 
 builder.Services.AddScoped<CreateUserHandler>();
 builder.Services.AddScoped<UpdateUserHandler>();

@@ -41,14 +41,17 @@ public class SendMessageHandler
         if (conversation.Messages.Count == 1)
         {    
             var title =
-                await _titleGenerator.GenerateTitleAsync(command.Message);
+                await _titleGenerator.GenerateTitleAsync(command.Message, ct);
             if (!string.IsNullOrWhiteSpace(title))
             {
                 conversation.Rename(title);
             }
         }
+        // ۱. بررسی اینکه قبل از ذخیره‌سازی ، عملیات کنسل نشده باشد
+        ct.ThrowIfCancellationRequested();
+        await _repository.SaveChangesAsync(ct);
 
-        await _repository.SaveChangesAsync();
+        await _repository.SaveChangesAsync(ct);
 
         var messages =
             conversation.Messages.TakeLast(20)
@@ -62,28 +65,38 @@ public class SendMessageHandler
                     })
                 .ToList();
 
-        // var answer = await _aiProvider.AskAsync(messages);
-        //conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant); // insert answer from AI provider 
-
         var answerBuilder = new StringBuilder();
         try
         {
             await _aiStreamingProvider.StreamAsync(messages,
                  async chunk =>
                  {
+                     // بررسی در هر تکه استریم شده که کاربر کنسل نکرده باشد ...
+                     ct.ThrowIfCancellationRequested();
+
                      answerBuilder.Append(chunk);
                      await _notifier.SendChunkAsync(conversation.Id, command.UserId, chunk);
                  }, ct);
         }
-        finally //این باعث می‌شود حتی اگر Ollama خطا بدهد، frontend برای همیشه قفل نماند.
+        catch (OperationCanceledException)
+        {
+            // در صورت لغو، به فرانت‌اند اطلاع می‌دهیم که استریم قطع شده است
+            await _notifier.CompleteAsync(command.ConversationId, command.UserId);
+            throw; // پرتاب مجدد استثنا برای متوقف شدن کامل متد
+        }
 
+        finally 
         {
             // بعد از اتمام پاسخ از سمت مدل هوش مصنوعی، از طریق سیگنال ار به فرانت اعلام میکنیم
             await _notifier.CompleteAsync(command.ConversationId, command.UserId);
         }
+
+        // ۳. بررسی نهایی؛ اگر در ثانیه‌های آخر استریم لغو شده باشد، در دیتابیس ذخیره نشود
+        ct.ThrowIfCancellationRequested();
+
         var answer = answerBuilder.ToString();
         conversation.AddMessage(answer, Domain.ValueObject.MessageRole.Assistant);
-        await _repository.SaveChangesAsync();
+        await _repository.SaveChangesAsync(ct);
         return answer;
     }
 }

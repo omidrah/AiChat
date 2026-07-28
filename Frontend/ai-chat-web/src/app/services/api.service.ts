@@ -56,6 +56,11 @@ export class ApiService {
 
   }
 
+  // services/api.service.ts
+  cancelMessage(conversationId: string) {
+    return this.http.post(`${this.baseUrl}/conversations/${conversationId}/cancel`, {});
+  }
+
 
   getUsers(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/users`);

@@ -18,15 +18,20 @@ namespace AiChat.Api.Controllers
     public class ConversationsController : ControllerBase
     {
         private readonly IUserResolver userResolver;
+        private readonly IChatCancellationTracker _cancellationTracker;
 
-        public ConversationsController(IUserResolver userResolver) => this.userResolver = userResolver;
+        public ConversationsController(IUserResolver userResolver, IChatCancellationTracker cancellationTracker)
+        {
+            this.userResolver = userResolver;
+            _cancellationTracker = cancellationTracker;
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromServices]CreateConversationHandler handler, CancellationToken ct)
+        public async Task<IActionResult> Create([FromServices] CreateConversationHandler handler, CancellationToken ct)
         {
             var user = await userResolver.GetCurrentUserAsync(ct);
-            var command = new CreateConversationCommand(user.Id, user.UserName,"New Chat");            
-            var id = await handler.HandleAsync(command);
+            var command = new CreateConversationCommand(user.Id, user.UserName, "New Chat");
+            var id = await handler.HandleAsync(command, ct);
             return Ok(id);
         }
 
@@ -41,16 +46,16 @@ namespace AiChat.Api.Controllers
 
             var getConversationListCommand = new GetConversationListQuery(user.Id);
 
-            var conversations = await getConversationListHandler.HandleAsync(getConversationListCommand);
+            var conversations = await getConversationListHandler.HandleAsync(getConversationListCommand, ct);
             return Ok(
                 conversations.Select(x =>
                     new ConversationListItemDto
                     {
-                            CreatedAt= x.CreatedAt,
-                            Id= x.Id,
-                            Title= x.Title
+                        CreatedAt = x.CreatedAt,
+                        Id = x.Id,
+                        Title = x.Title
                     })
-                );   
+                );
         }
         /// <summary>
         /// Get History of Converation 
@@ -62,8 +67,8 @@ namespace AiChat.Api.Controllers
         {
             var user = await userResolver.GetCurrentUserAsync(ct);
 
-            var getConversation = new GetConversationQuery(conversationId,user.Id);
-            var conversation = await getConversationHandler.HandleAsync(getConversation);
+            var getConversation = new GetConversationQuery(conversationId, user.Id);
+            var conversation = await getConversationHandler.HandleAsync(getConversation, ct);
 
             if (conversation is null)
                 return NotFound();
@@ -80,31 +85,58 @@ namespace AiChat.Api.Controllers
         /// <param name="handler"></param>
         /// <returns></returns>
         [HttpPost("{conversationId}/messages")]
-        public async Task<IActionResult> SendMessage(Guid conversationId, 
+        public async Task<IActionResult> SendMessage(Guid conversationId,
             [FromBody] SendMessageRequest request,
             [FromServices] SendMessageHandler handler,
             CancellationToken ct)
         {
-            var user = await userResolver.GetCurrentUserAsync(ct);
+            // ۱. ساخت و دریافت CancellationToken اختصاصی برای این مکالمه
+            var token = _cancellationTracker.Register(conversationId.ToString());
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, token);
 
-            var command = new SendMessageCommand(conversationId, user.Id, request.Message);
-
-            var answer = await handler.HandleAsync(command);
-
-            return Ok(new
+            try
             {
-                success = true
-            });
+                var user = await userResolver.GetCurrentUserAsync(ct);
+
+                var command = new SendMessageCommand(conversationId, user.Id, request.Message);
+
+                var answer = await handler.HandleAsync(command, linkedCts.Token);
+
+                return Ok(new
+                {
+                    success = true
+                });
+
+            }
+            catch (OperationCanceledException)
+            {
+                return StatusCode(499, "عملیات توسط کاربر متوقف شد.");
+            }
+            finally
+            {
+                // پس از اتمام موفق یا ناموفق، رکوردهای اضافی پاک شوند
+                _cancellationTracker.Remove(conversationId.ToString());
+            }
         }
+
+        [HttpPost("{conversationId}/cancel")]
+        public IActionResult CancelMessage(string conversationId)
+        {
+            // ۳. فراخوانی دستور لغو برای مکالمه جاری
+            _cancellationTracker.Cancel(conversationId);
+            return Ok(new { message = "درخواست لغو شد." });
+        }
+
+
 
         [HttpDelete("{conversationId}")]
         public async Task<IActionResult> Delete(Guid conversationId, [FromServices] DeleteConversationHandler handler, CancellationToken ct)
         {
             var user = await userResolver.GetCurrentUserAsync(ct);
 
-            var deleteConversation = new DeleteConversation(conversationId,user.Id);
+            var deleteConversation = new DeleteConversation(conversationId, user.Id);
 
-            var result = await handler.HandleAsync(deleteConversation);
+            var result = await handler.HandleAsync(deleteConversation, ct);
 
             if (!result)
                 return NotFound();
@@ -114,7 +146,7 @@ namespace AiChat.Api.Controllers
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Rename(
-            Guid id,
+             Guid id,
             [FromBody] RenameConversationRequest request,
             [FromServices] RenameConversationHandler handler,
             CancellationToken ct)

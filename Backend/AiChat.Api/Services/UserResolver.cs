@@ -18,11 +18,9 @@ namespace AiChat.Api.Services
             _userRepository = userRepository;
         }
 
-        public async Task<User> GetCurrentUserAsync(
-            CancellationToken ct = default)                
+        public async Task<User> GetCurrentUserAsync( CancellationToken ct = default)                
         {
-            var current =
-                _currentUserService.GetCurrentUser();
+            var current = _currentUserService.GetCurrentUser();
 
             if (current == null)
                 throw new UnauthorizedAccessException();

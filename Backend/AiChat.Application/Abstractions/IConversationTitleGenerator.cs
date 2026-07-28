@@ -3,6 +3,6 @@
     public interface IConversationTitleGenerator
     {
         Task<string> GenerateTitleAsync(
-            string firstMessage);
+            string firstMessage,CancellationToken ct);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Conversations.Dtos;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace AiChat.Infrastructure.AI
 {
@@ -13,7 +12,7 @@ namespace AiChat.Infrastructure.AI
             _provider = provider;
         }
 
-        public async Task<string> GenerateTitleAsync(string firstMessage)
+        public async Task<string> GenerateTitleAsync(string firstMessage, CancellationToken ct=default)
         {
             var messages =
                 new List<MessageDto>
@@ -37,7 +36,7 @@ namespace AiChat.Infrastructure.AI
                 };
             try
             {
-                return await _provider.AskAsync(messages);
+                return await _provider.AskAsync(messages, ct);
             }
             catch (Exception ex)
             {

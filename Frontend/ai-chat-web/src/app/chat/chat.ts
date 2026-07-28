@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild , signal} from '@angular/core';
+import { Component, ElementRef, ViewChild, signal } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { SignalRService } from '../services/signalr.service';
 import { Message } from '../models/message';
@@ -34,9 +34,9 @@ export class ChatComponent {
   @ViewChild('scrollContainer')
   private scrollContainer!: ElementRef<HTMLDivElement>;
 
-  isThinking =  signal(false);
-  isSending =  signal(false);
-  isSignalRReady =  signal(false);
+  isThinking = signal(false);
+  isSending = signal(false);
+  isSignalRReady = signal(false);
   input = '';
   conversationId!: string;
   shouldAutoScroll = true;
@@ -45,14 +45,14 @@ export class ChatComponent {
   constructor(
     private api: ApiService,
     private signalr: SignalRService,
-    private route: ActivatedRoute  ) {}
+    private route: ActivatedRoute) { }
 
   ngOnInit() {
-    
+
     this.route.paramMap.subscribe(async params => {
-      
+
       const id = params.get('id');
-      if (!id)  return;
+      if (!id) return;
 
       await this.openConversation(id);
 
@@ -62,9 +62,11 @@ export class ChatComponent {
     });
   }
 
+  // ویرایش متد ثبت هندلرهای سیگنال‌آر برای اتمام استریم
   private registerSignalRHandlers() {
 
     this.signalr.onReceiveToken(token => {
+      this.isThinking.set(false);
       const current = this.messages();
       const lastMessage = current[current.length - 1];
 
@@ -82,31 +84,20 @@ export class ChatComponent {
 
       const index = current.length - 1;
 
-      this.messages.update(list => list.map((m, i) => i === index
-
-        ? {
-          ...m,
-          content: m.content + token
-        }
-
-        : m
-
-      )
+      this.messages.update(
+        list => list.map((m, i) => i === index ? { ...m, content: m.content + token } : m)
       );
 
       this.scrollToBottomIfNeeded();
     });
 
     this.signalr.onReceiveCompleted(() => {
-
-      this.isSending.set(false);
-
-      this.isThinking.set(false);
+      this.resetSendingState();
     });
   }
 
-  private async openConversation(id:string){
-     this.conversationId = id;
+  private async openConversation(id: string) {
+    this.conversationId = id;
     await this.signalr.start();
     await this.signalr.joinConversation(id);
     this.isSignalRReady.set(true);
@@ -121,10 +112,10 @@ export class ChatComponent {
     const messagesfromApi = result.messages ?? [];
 
     this.messages.set(
-      
+
       messagesfromApi.map((m: Message) => ({
-      ...m,
-      createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
+        ...m,
+        createdAt: m.createdAt ? new Date(m.createdAt) : new Date()
       })))
 
     this.forceScrollToBottom();
@@ -133,30 +124,19 @@ export class ChatComponent {
   send(textarea?: HTMLTextAreaElement) {
     const msg = this.input.trim();
 
-    if (!msg) { return;}
+    if (!msg) { return; }
 
     if (!this.isSignalRReady()) {
       console.warn('SignalR is not ready yet');
       return;
     }
 
-    this.messages.update(list => [
-        ...list,
-
-        {
-          role:'user',
-          content:msg,
-          createdAt:new Date()
-        }
-
-    ]);
+    this.messages.update(list => [...list, { role: 'user', content: msg, createdAt: new Date() }]);
 
     this.input = '';
-    
+
     this.isThinking.set(true);
-
     this.isSending.set(true);
-
     this.shouldAutoScroll = true;
 
     if (textarea) {
@@ -170,10 +150,7 @@ export class ChatComponent {
         console.log('Message sent');
       },
       error: err => {
-        this.isThinking.set(false);
-
-        this.isSending.set(false);
-
+        this.resetSendingState();
         console.error(err);
       }
     });
@@ -242,6 +219,27 @@ export class ChatComponent {
     if (this.input?.trim() && !this.isSending()) {
       this.send();
     }
+  }
+
+  private resetSendingState() {
+    this.isSending.set(false);
+    this.isThinking.set(false);
+  }
+
+  cancel() {
+    if (!this.conversationId || !this.isSending()) return;
+
+    this.api.cancelMessage(this.conversationId).subscribe({
+      next: () => {
+        console.log('درخواست لغو با موفقیت به سرور ارسال شد.');
+        this.resetSendingState();
+      },
+      error: (err) => {
+        console.error('خطا در لغو درخواست:', err);
+        // حتی در صورت خطای شبکه، رابط کاربری را آزاد می‌کنیم
+        this.resetSendingState();
+      }
+    });
   }
 
   ngOnDestroy() {

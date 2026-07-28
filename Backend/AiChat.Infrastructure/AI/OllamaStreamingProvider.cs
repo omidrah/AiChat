@@ -22,7 +22,7 @@ namespace AiChat.Infrastructure.AI
             _client.BaseAddress = new Uri(_options.BaseUrl);
         }
 
-        public async Task<string> AskAsync(IEnumerable<MessageDto> messages)
+        public async Task<string> AskAsync(IEnumerable<MessageDto> messages, CancellationToken ct)
         {
             var newrequest = new OllamaChatRequest
             {
@@ -38,11 +38,11 @@ namespace AiChat.Infrastructure.AI
 
             //Console.WriteLine(json);
 
-            var response = await _client.PostAsJsonAsync("/api/chat", newrequest);
+            var response = await _client.PostAsJsonAsync("/api/chat", newrequest, ct);
 
             if (!response.IsSuccessStatusCode)
             {
-                var responseText = await response.Content.ReadAsStringAsync();
+                var responseText = await response.Content.ReadAsStringAsync(ct);
 
                 throw new Exception(
                     $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
@@ -50,7 +50,7 @@ namespace AiChat.Infrastructure.AI
             }
 
             var result =
-                await response.Content.ReadFromJsonAsync<OllamaChatResponse>();
+                await response.Content.ReadFromJsonAsync<OllamaChatResponse>(ct);
 
             return result?.Message.Content ?? "";
         }
@@ -77,13 +77,13 @@ namespace AiChat.Infrastructure.AI
                     $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
                 );
             }
-            await using var stream = await response.Content.ReadAsStreamAsync();
+            await using var stream = await response.Content.ReadAsStreamAsync(ct);
             using var reader = new StreamReader(stream);
 
             while (!reader.EndOfStream)
             {
                 var line =
-                    await reader.ReadLineAsync();
+                    await reader.ReadLineAsync(ct);
 
                 if (string.IsNullOrWhiteSpace(line))
                     continue;

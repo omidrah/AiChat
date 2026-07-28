@@ -226,3 +226,27 @@
   background: #c7c7c7;
   cursor: not-allowed;
 }
+/* دکمه توقف با رنگ قرمز یا نارنجی متمایز */
+.stop-button {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border: none;
+  border-radius: 50%;
+  background: #ef4444; /* رنگ قرمز متوقف‌کننده */
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  transition: 0.2s ease;
+}
+
+.stop-button:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+.stop-button:active {
+  transform: scale(0.95);
+}

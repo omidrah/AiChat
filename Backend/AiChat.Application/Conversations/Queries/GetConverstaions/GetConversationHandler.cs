@@ -12,9 +12,9 @@ namespace AiChat.Application.Conversations.Queries.GetConverstaions
             _repository = repository;
         }
 
-        public async Task<ConversationDetailsDto?>  HandleAsync(GetConversationQuery query)
+        public async Task<ConversationDetailsDto?>  HandleAsync(GetConversationQuery query, CancellationToken ct)
         {
-            var conversation = await _repository.GetAsync(query.ConversationId);
+            var conversation = await _repository.GetAsync(query.ConversationId, ct);
 
             if (conversation is null)
                 return null;
