@@ -88,14 +88,32 @@
   </div>
 
 
-  <div class="sidebar-footer">
-    <span *ngIf="collapsed">👤</span>
+<!-- سایر بخش‌های هدر و لیست گفتگوها بدون تغییر باقی می‌مانند -->
 
-    <span *ngIf="!collapsed">👤 {{userName}} </span>
-
-    <button class="logout-btn" (click)="logout()">
-      خروج
-    </button>
+<div class="sidebar-footer">
+  <!-- باکس خوش‌آمدگویی و اطلاعات کاربر -->
+  <div class="user-profile-box" *ngIf="!collapsed">
+    <div class="avatar-circle">
+      {{ userName ? userName.substring(0, 2).toUpperCase() : 'US' }}
+    </div>
+    <div class="user-details">
+      <span class="welcome-text">خوش آمدید،</span>
+      <span class="user-display-name">{{ userName }}</span>
+    </div>
   </div>
+
+  <div class="user-profile-box collapsed-profile" *ngIf="collapsed" title="{{ userName }}">
+    <div class="avatar-circle">
+      {{ userName ? userName.substring(0, 2).toUpperCase() : 'US' }}
+    </div>
+  </div>
+
+  <!-- دکمه خروج -->
+  <button class="logout-btn" (click)="logout()">
+    <span class="logout-icon">🚪</span>
+    <span *ngIf="!collapsed">خروج از حساب</span>
+  </button>
+</div>
+
 
 </div>
