@@ -8,7 +8,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -115,7 +117,7 @@ public class AiHealthService : IAiHealthService
                         details.Models.Add(new OllamaModelInfo
                         {
                             Name = modelNode?["name"]?.ToString() ?? "Unknown",
-                            Size = $"{gb:F2} GB",
+                            Size = (long)gb,
                             Format = detailsNode?["format"]?.ToString() ?? "Unknown",
                             Family = detailsNode?["family"]?.ToString() ?? "Unknown",
                             ParameterSize = detailsNode?["parameter_size"]?.ToString() ?? "Unknown"
@@ -137,8 +139,14 @@ public class AiHealthService : IAiHealthService
     {
         try
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                NumberHandling = JsonNumberHandling.AllowReadingFromString | JsonNumberHandling.WriteAsString
+            };
+
             var client = _httpClientFactory.CreateClient("OllamaClient");
-            var response = await client.GetFromJsonAsync<OllamaTagsResponse>("api/tags", cancellationToken);
+            var response = await client.GetFromJsonAsync<OllamaTagsResponse>("api/tags", options, cancellationToken);
 
             return response?.Models?
                 .Select(x => new ModelDto(x.Name))

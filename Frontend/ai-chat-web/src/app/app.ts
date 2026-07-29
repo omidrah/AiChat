@@ -38,6 +38,11 @@ export class App {
   usersRoute(){
     this.router.navigate(['/users']);
   }
+  
+  aiHealthRoute(){
+    this.router.navigate(['/ollama']);
+  }
+
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
