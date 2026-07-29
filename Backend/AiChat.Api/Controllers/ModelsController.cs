@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AiChat.Api.Controllers;
 
-
 [ApiController]
 [Route("api/models")]
 public class ModelsController : ControllerBase
