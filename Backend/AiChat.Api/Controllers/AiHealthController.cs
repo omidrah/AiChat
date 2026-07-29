@@ -34,7 +34,7 @@ public class AiHealthController : ControllerBase
         return Ok(details);
     }
 
-    [HttpGet]
+    [HttpGet("ai/models")]
     public async Task<ActionResult<List<ModelDto>>> GetModels(CancellationToken cancellationToken)
     {
         var models = await _aiHealthService.GetAvailableModelsAsync(cancellationToken);
