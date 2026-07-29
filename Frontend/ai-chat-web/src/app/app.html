@@ -13,7 +13,10 @@
 
             <div class="topbar-right">
                 <button class="theme-btn" (click)="toggleTheme()">🌙</button>
-                <button class="users-btn" (click)="usersRoute()"  *ngIf="isAdmin" >مدیریت کاربران</button>
+                <button class="users-btn" (click)="usersRoute()" *ngIf="isAdmin">مدیریت کاربران</button>
+                <a routerLink="/admin/ollama" class="nav-item" routerLinkActive="active-class">
+                    🔧 وضعیت سرور AI (Ollama)
+                </a>
             </div>
 
         </header>

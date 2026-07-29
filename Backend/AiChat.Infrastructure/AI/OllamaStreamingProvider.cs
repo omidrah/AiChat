@@ -1,6 +1,8 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Conversations.Dtos;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -13,11 +15,13 @@ namespace AiChat.Infrastructure.AI
     public class OllamaStreamingProvider : IAiStreamingProvider
     {
         private readonly HttpClient _client;
+        private readonly ILogger<OllamaStreamingProvider> logger;
         private readonly OllamaOptions _options;
 
-        public OllamaStreamingProvider(HttpClient client, IOptions<OllamaOptions> options)
+        public OllamaStreamingProvider(HttpClient client, IOptions<OllamaOptions> options, ILogger<OllamaStreamingProvider> logger)
         {
             _client = client;
+            this.logger = logger;
             _options = options.Value;
             _client.BaseAddress = new Uri(_options.BaseUrl);
         }
@@ -38,21 +42,31 @@ namespace AiChat.Infrastructure.AI
 
             //Console.WriteLine(json);
 
-            var response = await _client.PostAsJsonAsync("/api/chat", newrequest, ct);
-
-            if (!response.IsSuccessStatusCode)
+            try
             {
-                var responseText = await response.Content.ReadAsStringAsync(ct);
+                var response = await _client.PostAsJsonAsync("/api/chat", newrequest, ct);
 
-                throw new Exception(
-                    $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
-                );
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseText = await response.Content.ReadAsStringAsync(ct);
+
+                    throw new Exception(
+                        $"Ollama error. StatusCode: {(int)response.StatusCode} {response.StatusCode}. Body: {responseText}"
+                    );
+                }
+                var result =   await response.Content.ReadFromJsonAsync<OllamaChatResponse>(ct);
+
+                return result?.Message.Content ?? "";
             }
 
-            var result =
-                await response.Content.ReadFromJsonAsync<OllamaChatResponse>(ct);
+            catch (HttpRequestException ex)
+            {
+                logger.LogError(ex, "Failed to communicate with Ollama service after retries.");
 
-            return result?.Message.Content ?? "";
+                // پرتاب خطای استاندارد با استاتوس کد 503 جهت پردازش در GlobalExceptionHandler
+                throw new HttpRequestException("Ollama Service is currently unavailable.", ex, HttpStatusCode.ServiceUnavailable);
+            }
+           
         }
         public async Task StreamAsync(IEnumerable<MessageDto> messages, string? model, Func<string, Task> onChunk, CancellationToken ct)
         {

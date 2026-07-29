@@ -346,3 +346,43 @@
 .msg.ai .message-meta {
   color: #6b7280;
 }
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  &.online {
+    color: #2e7d32;
+    .status-dot { background-color: #4caf50; }
+  }
+
+  &.offline {
+    color: #c62828;
+    .status-dot { background-color: #f44336; }
+  }
+
+  &.reconnecting {
+    color: #ef6c00;
+    .status-dot { 
+      background-color: #ff9800; 
+      animation: pulse 1s infinite alternate;
+    }
+  }
+}
+
+@keyframes pulse {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}

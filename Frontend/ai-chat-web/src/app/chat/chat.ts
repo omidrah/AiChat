@@ -1,14 +1,19 @@
-import { Component, ElementRef, ViewChild, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { SignalRService } from '../services/signalr.service';
 import { Message } from '../models/message';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, interval, startWith, Subscription, switchMap } from 'rxjs';
 import { marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import hljs from 'highlight.js';
 import { ActivatedRoute } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { AiHealthStatus } from '../models/AiHealthStatus';
+
+type ConnectionState = 'ONLINE' | 'OFFLINE' | 'RECONNECTING';
+
 
 marked.use(
   markedHighlight({
@@ -31,6 +36,9 @@ marked.use(
 
 export class ChatComponent implements OnInit, OnDestroy {
 
+  aiStatus: ConnectionState = 'RECONNECTING';
+  private healthSub!: Subscription;
+
   models = signal<{ id: string; label: string }[]>([]);
   modelsLoading = signal(true);
   selectedModel = ''; // نگهداری مدل انتخابی کاربر
@@ -46,12 +54,17 @@ export class ChatComponent implements OnInit, OnDestroy {
   shouldAutoScroll = true;
   messages = signal<Message[]>([]);
 
-  constructor(
-    private api: ApiService,
-    private signalr: SignalRService,
-    private route: ActivatedRoute) { }
+    // تعریف متغیرها با استفاده از inject به جای Constructor
+
+  private api = inject(ApiService);
+  private snackBar = inject(MatSnackBar); 
+  private signalr = inject(SignalRService);
+  private route = inject(ActivatedRoute);
+
+  constructor() { }
 
   ngOnInit() {
+    this.checkAiHealthCheckEvery15Seconds();
     this.loadModels();
     this.route.paramMap.subscribe(async params => {
       const id = params.get('id');
@@ -62,6 +75,37 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.forceScrollToBottom();
     });
   }
+  
+  checkAiHealthCheckEvery15Seconds(){
+     // بررسی وضعیت به صورت دوره‌ای (هر 15 ثانیه)
+    this.healthSub = interval(15000).pipe(
+      startWith(0), // اولین بررسی بلافاصله در لود صفحه انجام شود
+      switchMap(() => {
+        if (this.aiStatus !== 'ONLINE') {
+          this.aiStatus = 'RECONNECTING';
+        }
+        return this.api.getAiHealth();
+      })
+    ).subscribe({
+      next: (status: AiHealthStatus) => {
+        const previousStatus = this.aiStatus;
+        this.aiStatus = status.isHealthy ? 'ONLINE' : 'OFFLINE';
+
+        // اگر وضعیت از سالم به ناسالم تغییر کرد، به کاربر هشدار داده شود
+        if (previousStatus === 'ONLINE' && this.aiStatus === 'OFFLINE') {
+          this.snackBar.open('ارتباط با سرور هوش مصنوعی قطع شد.', 'بستن', {
+            duration: 5000,
+            panelClass: ['warning-snackbar']
+          });
+        }
+      },
+      error: () => {
+        this.aiStatus = 'OFFLINE';
+      }
+    });
+
+  }
+
 
   loadModels(): void {
     this.modelsLoading.set(true);
@@ -135,8 +179,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   send(textarea?: HTMLTextAreaElement) {
+
+     if (this.aiStatus !== 'ONLINE' || this.isSending() || !this.input.trim()) {
+        return;     
+     }
+
     const msg = this.input.trim();
-    if (!msg) { return; }
 
     if (!this.isSignalRReady()) {
       console.warn('SignalR is not ready yet');
@@ -259,5 +307,8 @@ export class ChatComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.signalr.offReceiveToken();
     this.signalr.offReceiveCompleted();
+     if (this.healthSub) {
+      this.healthSub.unsubscribe();
+    }
   }
 }

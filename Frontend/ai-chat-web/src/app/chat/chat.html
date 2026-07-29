@@ -1,5 +1,15 @@
 <div class="chat-container">
 
+  <div class="chat-header">    
+    <div class="status-indicator" [ngClass]="aiStatus.toLowerCase()">
+      <span class="status-dot"></span>
+      <span class="status-text">
+        {{ aiStatus === 'ONLINE' ? 'هوش مصنوعی آنلاین' : 
+           aiStatus === 'OFFLINE' ? 'هوش مصنوعی آفلاین' : 'درحال اتصال مجدد...' }}
+      </span>
+    </div>
+  </div>
+
   <div class="messages" #scrollContainer (scroll)="onMessagesScroll()">
 
     <div *ngFor="let m of messages()" class="msg" [class.user]="m.role === 'user'" [class.ai]="m.role === 'assistant'">
@@ -93,7 +103,7 @@
         *ngIf="!isSending()" 
         class="send-button" 
         type="button" 
-        [disabled]="!input.trim()"
+        [disabled]="!input.trim() || aiStatus !== 'ONLINE' || isSending()"
         (click)="send(messageInput)">
         ➤
       </button>

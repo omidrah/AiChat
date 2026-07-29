@@ -1,9 +1,10 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { Observable } from 'rxjs'
+import { catchError, Observable, of } from 'rxjs'
 import { Conversation } from '../models/conversation'
 import { Message } from '../models/message'
 import { environment } from '../../environments/environment'
+import { AiHealthStatus, OllamaServerDetails } from '../models/AiHealthStatus'
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -56,11 +57,6 @@ export class ApiService {
 
   }
 
-  getModels() {
-    return this.http.get<{ name: string }[]>(`${this.baseUrl}/models`);
-  }
-
-
   // services/api.service.ts
   cancelMessage(conversationId: string) {
     return this.http.post(`${this.baseUrl}/conversations/${conversationId}/cancel`, {});
@@ -82,5 +78,29 @@ export class ApiService {
   deleteUser(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/users/${id}`);
   }
+
+ //متد دریافت وضعیت سلامت
+ //سرویس هوش مصنوعی
+  getAiHealth(): Observable<AiHealthStatus> {
+    return this.http.get<AiHealthStatus>(`${this.baseUrl}/health/ai`).pipe(
+      catchError((error) => {
+        // در صورت گرفتن خطای 503 یا قطع بودن ارتباط، وضعیت unhealthy بازگردانده شود
+        return of({
+          isHealthy: false,
+          message: error.error?.message || 'AI Service is down',
+          checkedAt: new Date().toISOString()
+        } as AiHealthStatus);
+      })
+    );
+  }
+
+  getOllamaDetails() {
+    return this.http.get<OllamaServerDetails>(`${this.baseUrl}/api/health/ai/details`);
+  }
+
+    getModels() {
+    return this.http.get<{ name: string }[]>(`${this.baseUrl}/health/ai/models`);
+  }
+
 
 }

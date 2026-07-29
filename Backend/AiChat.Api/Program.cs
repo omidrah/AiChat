@@ -15,8 +15,8 @@ using AiChat.Infrastructure.Persistence;
 using AiChat.Infrastructure.Persistence.Repositories;
 using AiChat.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -107,13 +107,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
-
+builder.Services.AddMemoryCache(); //use in ai HealthCheck then Register In-Memory Caching in DI
 
 builder.Services.AddHttpClient<IAiProvider, OllamaProvider>((client) => {
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
 builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((client)=> { 
     client.Timeout = Timeout.InfiniteTimeSpan;
+});
+
+//use ollamClient in AiHealthCheck
+builder.Services.AddHttpClient("OllamaClient", (sp, client) =>
+{
+    var ollamaOptions = sp.GetRequiredService<IOptions<OllamaOptions>>().Value;
+    client.BaseAddress = new Uri(ollamaOptions.BaseUrl);
 });
 
 builder.Services.AddApplicationHandler();
@@ -137,6 +144,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 builder.Services.AddSingleton<IChatCancellationTracker, ChatCancellationTracker>();
 builder.Services.AddSingleton<IOllamaService, OllamaService>();
+builder.Services.AddScoped<IAiHealthService, AiHealthService>();    
 
 // Add Global Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

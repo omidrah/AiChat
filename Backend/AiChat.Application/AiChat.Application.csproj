@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Common\Entities\" />
     <Folder Include="Users\Queries\GetUser\" />
   </ItemGroup>
 
