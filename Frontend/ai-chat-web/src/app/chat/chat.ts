@@ -54,10 +54,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   shouldAutoScroll = true;
   messages = signal<Message[]>([]);
 
-    // تعریف متغیرها با استفاده از inject به جای Constructor
+  // تعریف متغیرها با استفاده از inject به جای Constructor
 
   private api = inject(ApiService);
-  private snackBar = inject(MatSnackBar); 
+  private snackBar = inject(MatSnackBar);
   private signalr = inject(SignalRService);
   private route = inject(ActivatedRoute);
 
@@ -75,9 +75,9 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.forceScrollToBottom();
     });
   }
-  
-  checkAiHealthCheckEvery15Seconds(){
-     // بررسی وضعیت به صورت دوره‌ای (هر 15 ثانیه)
+
+  checkAiHealthCheckEvery15Seconds() {
+    // بررسی وضعیت به صورت دوره‌ای (هر 15 ثانیه)
     this.healthSub = interval(15000).pipe(
       startWith(0), // اولین بررسی بلافاصله در لود صفحه انجام شود
       switchMap(() => {
@@ -122,7 +122,7 @@ export class ChatComponent implements OnInit, OnDestroy {
         this.modelsLoading.set(false);
       },
       error: (err) => {
-       console.error('Error loading models:', err);
+        console.error('Error loading models:', err);
         this.models.set([]);
         this.modelsLoading.set(false);
       }
@@ -180,9 +180,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   send(textarea?: HTMLTextAreaElement) {
 
-     if (this.aiStatus !== 'ONLINE' || this.isSending() || !this.input.trim()) {
-        return;     
-     }
+    if (this.aiStatus !== 'ONLINE' || this.isSending() || !this.input.trim()) {
+      return;
+    }
 
     const msg = this.input.trim();
 
@@ -292,22 +292,66 @@ export class ChatComponent implements OnInit, OnDestroy {
     });
   }
 
+
+
   copyToClipboard(message: Message) {
     if (!message.content) return;
-    navigator.clipboard.writeText(message.content).then(() => {
-      message.copied = true;
-      setTimeout(() => {
-        message.copied = false;
-      }, 2000);
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-    });
+
+    const textToCopy = message.content;
+
+    // بررسی اینکه آیا Clipboard API در دسترس است (فقط در HTTPS یا localhost)
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        this.handleCopySuccess(message);
+      }).catch(err => {
+        console.error('Clipboard API Error: ', err);
+        this.fallbackCopyTextToClipboard(textToCopy, message);
+      });
+    } else {
+      // استفاده از متد قدیمی برای HTTP و IP
+      this.fallbackCopyTextToClipboard(textToCopy, message);
+    }
   }
+
+  private fallbackCopyTextToClipboard(text: string, message: Message) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+
+    // خارج کردن از دید کاربر
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+
+    textArea.focus();
+    textArea.select();
+
+    try {
+      const successful = document.execCommand('copy');
+      if (successful) {
+        this.handleCopySuccess(message);
+      } else {
+        console.error('Fallback: Copying text command was unsuccessful');
+      }
+    } catch (err) {
+      console.error('Fallback: Oops, unable to copy', err);
+    }
+
+    document.body.removeChild(textArea);
+  }
+
+  private handleCopySuccess(message: Message) {
+    message.copied = true;
+    setTimeout(() => {
+      message.copied = false;
+    }, 2000);
+  }
+
 
   ngOnDestroy() {
     this.signalr.offReceiveToken();
     this.signalr.offReceiveCompleted();
-     if (this.healthSub) {
+    if (this.healthSub) {
       this.healthSub.unsubscribe();
     }
   }
