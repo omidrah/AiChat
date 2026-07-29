@@ -14,7 +14,7 @@
             <div class="topbar-right">
                 <button class="theme-btn" (click)="toggleTheme()">🌙</button>
                 <button class="users-btn" (click)="usersRoute()" *ngIf="isAdmin">مدیریت کاربران</button>
-                <button routerLink="aiHealthRoute()" class="users-btn"   *ngIf="isAdmin">
+                <button (click)="aiHealthRoute()" class="users-btn"   *ngIf="isAdmin">
                     🔧 وضعیت سرور AI (Ollama)
                 </button>
             </div>

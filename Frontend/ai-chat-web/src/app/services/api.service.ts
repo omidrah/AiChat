@@ -95,7 +95,7 @@ export class ApiService {
   }
 
   getOllamaDetails() {
-    return this.http.get<OllamaServerDetails>(`${this.baseUrl}/api/health/ai/details`);
+    return this.http.get<OllamaServerDetails>(`${this.baseUrl}/health/ai/details`);
   }
 
     getModels() {
