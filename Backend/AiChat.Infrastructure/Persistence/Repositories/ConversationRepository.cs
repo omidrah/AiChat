@@ -57,7 +57,7 @@ namespace AiChat.Infrastructure.Persistence.Repositories
         public async Task<Conversation?> GetConversationForUserAsync(Guid conversationId, Guid userId, CancellationToken ct)
         {
             return await _dbContext.Conversations.Include(x => x.Messages)
-                   .FirstOrDefaultAsync(x =>   x.Id == conversationId &&   x.UserId == userId, ct);
+                   .FirstOrDefaultAsync(x => x.Id == conversationId &&  x.UserId == userId, ct);
         }
 
         public async Task<List<Conversation>> GetAllConversationsForUserAsync(Guid userId, CancellationToken ct)

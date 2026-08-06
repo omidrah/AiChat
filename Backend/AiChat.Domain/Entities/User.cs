@@ -4,7 +4,7 @@
     {
         public Guid Id { get; private set; }
 
-        public string PasswordHash { get; private set; } = string.Empty;
+        public string? PasswordHash { get; private set; } = string.Empty;
 
         public string UserName { get; private set; } = string.Empty;
 

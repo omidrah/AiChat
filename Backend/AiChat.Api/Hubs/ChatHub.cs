@@ -16,11 +16,11 @@ public class ChatHub : Hub
 
     public override async Task OnConnectedAsync()
     {
+        Console.WriteLine("***********************Hub Connection*****************************");
         Console.WriteLine($"SignalR connected: {Context.ConnectionId}");
-        Console.WriteLine(Context.UserIdentifier);
-
-        Console.WriteLine(Context.User?.Identity?.Name);
-
+        Console.WriteLine($"Context.UserIdentifier: {Context.UserIdentifier}");
+        Console.WriteLine($"Context.User?.Identity?.Name: {Context.User?.Identity?.Name}");
+        Console.WriteLine("*****************************************************************");
         await base.OnConnectedAsync();
     }
 
@@ -33,12 +33,14 @@ public class ChatHub : Hub
 
     public async Task JoinConversation(Guid conversationId)
     {
-        // Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
+         Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
         
         var userIdClaim =
                Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
                Context.User?.FindFirst("sub")?.Value ??
                Context.User?.FindFirst("userId")?.Value;
+
+        Console.WriteLine($"userIdClaim: {userIdClaim}");
 
         if (!Guid.TryParse(userIdClaim, out var userId))
             throw new HubException("Unauthorized");

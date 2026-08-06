@@ -2,8 +2,8 @@
 
 using AiChat.Application.Abstractions;
 using AiChat.Application.Authentications.Dtos;
+using AiChat.Application.Common.Enums;
 using AiChat.Domain.Entities;
-
 public sealed class ActiveDirectoryLoginHandler
 {
     private readonly IActiveDirectoryAuthService _adAuth;
@@ -31,7 +31,7 @@ public sealed class ActiveDirectoryLoginHandler
             return null;
 
         var user = await _users.FindByExternalIdAsync(
-            AiChat.Application.Common.Enums.AuthenticationProviderEnum.ActiveDirectory,
+            AuthenticationProviderEnum.ActiveDirectory,
             adUser.ExternalId,
             ct);
 
@@ -40,10 +40,10 @@ public sealed class ActiveDirectoryLoginHandler
             user = User.CreateUser
             (
                 adUser.UserName,
-                null,
+                string.Empty,
                 adUser.DisplayName,
                 adUser.ExternalId,
-                "ActiveDirectory"
+                AuthenticationProviderEnum.ActiveDirectory.ToString()
             );
 
             _users.Add(user);

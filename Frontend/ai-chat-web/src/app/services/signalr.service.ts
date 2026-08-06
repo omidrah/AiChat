@@ -30,7 +30,7 @@ export class SignalRService {
             }
           return;
         }
-    }
+      }
 
     this.hub = new signalR.HubConnectionBuilder()
       .withUrl(environment.hubUrl,  {  

@@ -27,6 +27,11 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
             ? _options.Servers
             : [_options.Domain];
 
+        //var isUpn = userName.Contains('@', StringComparison.Ordinal);
+        //var identityType = isUpn
+        //    ? IdentityType.UserPrincipalName
+        //    : IdentityType.SamAccountName;
+
         foreach (var server in servers)
         {
             ct.ThrowIfCancellationRequested();
@@ -39,76 +44,45 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
                     server);
 
                 using var context = string.IsNullOrWhiteSpace(_options.Container)
-                    ? new PrincipalContext(
-                        ContextType.Domain,
-                        server)
-                    : new PrincipalContext(
-                        ContextType.Domain,
-                        server,
-                        _options.Container);
+                    ? new PrincipalContext(ContextType.Domain, server)
+                    : new PrincipalContext(ContextType.Domain, server, _options.Container);
 
-                var isValid = context.ValidateCredentials(
-                    userName,
-                    password,
-                    ContextOptions.Negotiate);
+                var isValid = context.ValidateCredentials(userName, password, ContextOptions.Negotiate);
 
                 if (!isValid)
                 {
-                    _logger.LogWarning(
-                        "AD credentials rejected for {UserName} by {Server}",
-                        userName,
-                        server);
-
+                    _logger.LogWarning("AD credentials rejected for {UserName} by {Server}", userName, server);
                     continue;
                 }
 
-                using var adUser = UserPrincipal.FindByIdentity(
-                    context,
-                    IdentityType.SamAccountName,
-                    userName);
+                var normalizedUserame = userName.Contains('@')
+                    ? userName.Split('@')[0]
+                    : userName;
 
-                if (adUser is null)
-                {
-                    _logger.LogWarning(
-                        "AD authenticated {UserName}, but its user object was not found on {Server}",
-                        userName,
-                        server);
-
-                    continue;
-                }
-
-                var samAccountName = adUser.SamAccountName ?? userName;
+                _logger.LogInformation($"Ad on {server} by {normalizedUserame}");
 
                 return Task.FromResult<ActiveDirectoryUserInfo?>(
                     new ActiveDirectoryUserInfo
                     {
-                        UserName = samAccountName,
-                        DisplayName = adUser.DisplayName ?? samAccountName,
-                        ExternalId = $"{_options.Domain}\\{samAccountName}"
+                        UserName = normalizedUserame,
+                        DisplayName = normalizedUserame,
+                        ExternalId = $"{_options.Domain}\\{normalizedUserame}"
                     });
             }
             catch (PrincipalServerDownException ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Cannot connect to AD server {Server}",
-                    server);
+                _logger.LogError(ex, "Cannot connect to AD server {Server}", server);
             }
             catch (PrincipalOperationException ex)
             {
-                _logger.LogError(
-                    ex,
-                    "AD operation failed on {Server} for {UserName}",
-                    server,
-                    userName);
+                _logger.LogWarning(ex,
+                   "AD authentication succeeded but user lookup failed for {UserName} on {Server}",
+                   userName,
+                   server);
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "Unexpected AD error on {Server} for {UserName}",
-                    server,
-                    userName);
+                _logger.LogError(ex, "Unexpected AD error on {Server} for {UserName}", server, userName);
             }
         }
 
