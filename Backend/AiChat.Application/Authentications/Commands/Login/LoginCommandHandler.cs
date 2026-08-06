@@ -31,43 +31,71 @@ namespace AiChat.Application.Authentications.Commands.Login
         {
 
             User? user = null;
-            if (isActiveDirectoryEnabled)
+            /*
+             * مرحله اول:
+             * ابتدا کاربر را از دیتابیس پیدا می‌کنیم.
+             * این کار باعث می‌شود کاربر Local درگیر تأخیر AD نشود.
+             */
+            var existingUser = await _users.GetByUserNameAsync(command.UserName, ct);
+            if (existingUser is not null)
+            {
+                /*
+                 * کاربران Local باید PasswordHash داشته باشند.
+                 * کاربران AD که به‌صورت خودکار ساخته شده‌اند،
+                 * معمولاً PasswordHash خالی دارند.
+                 */
+                if (!string.IsNullOrWhiteSpace(existingUser.PasswordHash))
+                {
+                    var isLocalPasswordValid = _passwordHasher.Verify(
+                        command.Password,
+                        existingUser.PasswordHash);
+
+                    if (isLocalPasswordValid)
+                    {
+                        user = existingUser;
+                    }
+                    else
+                    {
+                        /*
+                         * کاربر Local است اما رمز اشتباه است.
+                         * برای جلوگیری از احراز هویت ناخواسته با AD،
+                         * دیگر سراغ AD نمی‌رویم.
+                         */
+                        return null;
+                    }
+                }
+            }
+            /*
+             * اگر کاربر Local با رمز صحیح پیدا نشد،
+             * فقط در صورت فعال بودن AD، آن را بررسی می‌کنیم.
+             */
+
+            if (user is null && isActiveDirectoryEnabled)
             {
                 var adUser = await _adAuth.ValidateAsync(command.UserName, command.Password, ct);
 
-                if (adUser is null)
-                    return null;
-
-                 user = await _users.FindByExternalIdAsync(
-                    AuthenticationProviderEnum.ActiveDirectory,
-                    adUser.ExternalId,
-                    ct);
-
-                if (user is null)
+                if (adUser is not null)
                 {
-                    user = User.CreateUser
-                    (
-                        adUser.UserName,
-                        string.Empty,
-                        adUser.DisplayName,
-                        adUser.ExternalId,
-                        AuthenticationProviderEnum.ActiveDirectory.ToString()
-                    );
 
-                    _users.Add(user);
-                    await _users.SaveChangesAsync(ct);
-                }
+                    user = await _users.FindByExternalIdAsync(
+                       AuthenticationProviderEnum.ActiveDirectory,
+                       adUser.ExternalId,
+                       ct);
 
-            }
-            if (user is null)
-            {
-                var localUser = await _users.GetByUserNameAsync(command.UserName, ct);
+                    if (user is null)
+                    {
+                        user = User.CreateUser
+                        (
+                            adUser.UserName,
+                            string.Empty,
+                            adUser.DisplayName,
+                            adUser.ExternalId,
+                            AuthenticationProviderEnum.ActiveDirectory.ToString()
+                        );
 
-                var isValidPassword = _passwordHasher.Verify(command.Password, localUser.PasswordHash);
-
-                if (isValidPassword)
-                {
-                    user = localUser;
+                        _users.Add(user);
+                        await _users.SaveChangesAsync(ct);
+                    }
                 }
             }
 
@@ -75,8 +103,13 @@ namespace AiChat.Application.Authentications.Commands.Login
             if (user is null)
                 return null;
 
+            return await CreateLoginResultAsync(user, ct);
+        }
+
+        private async Task<LoginResultDto?> CreateLoginResultAsync(User user, CancellationToken ct)
+        {
             var (accessToken, accessTokenExpiresAt) = _tokenService.GenerateAccessToken(user, user.Roles);
-            var (refreshToken, refreshTokenExpiresAt) =  _tokenService.GenerateRefreshToken();
+            var (refreshToken, refreshTokenExpiresAt) = _tokenService.GenerateRefreshToken();
 
             var refreshTokenHash = _tokenService.HashRefreshToken(refreshToken);
 
