@@ -43,6 +43,10 @@ export class App {
     this.router.navigate(['/ollama']);
   }
 
+  activeDirectoryRoute(){
+    this.router.navigate(['/active-directory']);
+  }
+
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }

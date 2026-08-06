@@ -137,3 +137,26 @@ app-root{
   transform: translateY(-1px);
   box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
 }
+
+.users-btn {
+  height: 42px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+}
+
+.btn-outline-danger {
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid #fecdd3;
+}
+
+.btn-outline-danger:hover {
+  background: #ffe4e6;
+  color: #9f1239;
+  border-color: #fda4af;
+}

@@ -14,8 +14,12 @@
             <div class="topbar-right">
                 <button class="theme-btn" (click)="toggleTheme()">🌙</button>
                 <button class="users-btn" (click)="usersRoute()" *ngIf="isAdmin">مدیریت کاربران</button>
-                <button (click)="aiHealthRoute()" class="users-btn"   *ngIf="isAdmin">
+                <button (click)="aiHealthRoute()" class="users-btn "   *ngIf="isAdmin">
                     🔧 وضعیت سرور AI (Ollama)
+                </button>
+
+                <button (click)="activeDirectoryRoute()" class=" users-btn btn-outline-danger"   *ngIf="isAdmin">
+                    🔧 تنظیمات Active Direcotry
                 </button>
             </div>
 
