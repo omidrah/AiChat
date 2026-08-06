@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 [Route("api/[controller]")]
 [Authorize]
 public class UsersController : ControllerBase
-{  
+{
     public UsersController()
     {
     }
@@ -35,12 +35,12 @@ public class UsersController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<UserDto>> Create(
-        [FromServices]CreateUserHandler createUserHandler, 
-        [FromBody] CreateUserDto dto, 
+        [FromServices] CreateUserHandler createUserHandler,
+        [FromBody] CreateUserDto dto,
         CancellationToken ct)
     {
         var createUserCommand = new CreateUserCommand(dto.UserName, dto.Password, dto.DisplayName);
-        var result =await createUserHandler.HandleAsync(createUserCommand, ct);
+        var result = await createUserHandler.HandleAsync(createUserCommand, ct);
 
         if (result.IsFailure)
             return BadRequest(result.Error);

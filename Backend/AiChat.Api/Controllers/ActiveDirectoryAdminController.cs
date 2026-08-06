@@ -2,7 +2,6 @@
 using AiChat.Application.Common.Options;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
 
 namespace AiChat.Api.Controllers
 {
@@ -34,8 +33,8 @@ namespace AiChat.Api.Controllers
                 Enabled = settings.Enabled,
                 Domain = settings.Domain,
                 Container = settings.Container,
-                Server = settings.Server,
-                Servers = settings.Servers,
+                Server = settings.PrimaryServer,
+                Servers = settings.FallbackServers,
                 UseSsl = settings.UseSsl
             });
         }
@@ -50,8 +49,8 @@ namespace AiChat.Api.Controllers
                Enabled = request.Enabled,
                Domain = request.Domain.Trim(),
                Container = request.Container.Trim(),
-               Server = request.Server.Trim(),
-               Servers = request.Servers
+               PrimaryServer = request.Server.Trim(),
+               FallbackServers = request.Servers
                    .Where(x => !string.IsNullOrWhiteSpace(x))
                    .Select(x => x.Trim())
                    .Distinct(StringComparer.OrdinalIgnoreCase)

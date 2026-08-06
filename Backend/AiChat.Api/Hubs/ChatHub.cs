@@ -33,8 +33,8 @@ public class ChatHub : Hub
 
     public async Task JoinConversation(Guid conversationId)
     {
-         Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
-        
+        Console.WriteLine($"JoinConversation called. Connection: {Context.ConnectionId}, Conversation: {conversationId}");
+
         var userIdClaim =
                Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
                Context.User?.FindFirst("sub")?.Value ??

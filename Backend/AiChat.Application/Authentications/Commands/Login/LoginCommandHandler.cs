@@ -1,5 +1,6 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Authentications.Dtos;
+using AiChat.Application.Common.Enums;
 using AiChat.Domain.Entities;
 
 namespace AiChat.Application.Authentications.Commands.Login
@@ -10,29 +11,68 @@ namespace AiChat.Application.Authentications.Commands.Login
         private readonly IRefreshTokenRepository _refreshTokens;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher _passwordHasher;
+        private readonly IActiveDirectoryAuthService _adAuth;
 
         public LoginCommandHandler(
             IUserRepository users,
             IRefreshTokenRepository refreshTokens,
             ITokenService tokenService,
-            IPasswordHasher passwordHasher)
+            IPasswordHasher passwordHasher,
+            IActiveDirectoryAuthService adAuth)
         {
             _users = users;
             _refreshTokens = refreshTokens;
             _tokenService = tokenService;
             _passwordHasher = passwordHasher;
+            _adAuth = adAuth;
         }
 
-        public async Task<LoginResultDto?> HandleAsync(LoginCommand command, CancellationToken ct)
+        public async Task<LoginResultDto?> HandleAsync(LoginCommand command, bool isActiveDirectoryEnabled, CancellationToken ct)
         {
-            var user = await _users.GetByUserNameAsync(command.UserName,ct);
 
+            User? user = null;
+            if (isActiveDirectoryEnabled)
+            {
+                var adUser = await _adAuth.ValidateAsync(command.UserName, command.Password, ct);
+
+                if (adUser is null)
+                    return null;
+
+                 user = await _users.FindByExternalIdAsync(
+                    AuthenticationProviderEnum.ActiveDirectory,
+                    adUser.ExternalId,
+                    ct);
+
+                if (user is null)
+                {
+                    user = User.CreateUser
+                    (
+                        adUser.UserName,
+                        string.Empty,
+                        adUser.DisplayName,
+                        adUser.ExternalId,
+                        AuthenticationProviderEnum.ActiveDirectory.ToString()
+                    );
+
+                    _users.Add(user);
+                    await _users.SaveChangesAsync(ct);
+                }
+
+            }
             if (user is null)
-                return null;
+            {
+                var localUser = await _users.GetByUserNameAsync(command.UserName, ct);
 
-             var isValid = _passwordHasher.Verify(command.Password, user.PasswordHash);
+                var isValidPassword = _passwordHasher.Verify(command.Password, localUser.PasswordHash);
 
-            if (!isValid)
+                if (isValidPassword)
+                {
+                    user = localUser;
+                }
+            }
+
+            // اگر در هیچ‌کدام از روش‌ها احراز هویت با موفقیت انجام نشد
+            if (user is null)
                 return null;
 
             var (accessToken, accessTokenExpiresAt) = _tokenService.GenerateAccessToken(user, user.Roles);

@@ -6,7 +6,6 @@ using AiChat.Application;
 using AiChat.Application.Abstractions;
 using AiChat.Application.Common.Auth;
 using AiChat.Application.Common.Options;
-using AiChat.Application.Conversations.Dtos;
 using AiChat.Application.Users.Commands.CreateUser;
 using AiChat.Application.Users.Commands.DeleteUser;
 using AiChat.Application.Users.Commands.UpdateUser;
@@ -95,7 +94,7 @@ builder.Services
             }
         };
     });
-  //  .AddNegotiate();
+//  .AddNegotiate();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -117,10 +116,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddMemoryCache(); //use in ai HealthCheck then Register In-Memory Caching in DI
 
-builder.Services.AddHttpClient<IAiProvider, OllamaProvider>((client) => {
+builder.Services.AddHttpClient<IAiProvider, OllamaProvider>((client) =>
+{
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
-builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((client)=> { 
+builder.Services.AddHttpClient<IAiStreamingProvider, OllamaStreamingProvider>((client) =>
+{
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
 
@@ -144,14 +145,14 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 });
 builder.Services.AddScoped<IChatStreamNotifier, SignalRChatNotifier>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
-builder.Services.AddScoped<IConversationTitleGenerator,OllamaConversationTitleGenerator>();
+builder.Services.AddScoped<IConversationTitleGenerator, OllamaConversationTitleGenerator>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenService, JwtTokenService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserResolver, UserResolver>();
 builder.Services.AddSingleton<IChatCancellationTracker, ChatCancellationTracker>();
-builder.Services.AddScoped<IAiHealthService, AiHealthService>();    
+builder.Services.AddScoped<IAiHealthService, AiHealthService>();
 
 // Add Global Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -196,8 +197,8 @@ app.UseCors("AngularClient");
 
 //if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 //{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 //}
 
 //if (app.Environment.IsDevelopment())

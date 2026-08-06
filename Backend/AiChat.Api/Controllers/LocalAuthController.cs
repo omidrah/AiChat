@@ -1,5 +1,4 @@
 ﻿using AiChat.Application.Authentications.Commands.Login;
-using AiChat.Application.Authentications.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,16 +18,14 @@ namespace AiChat.Api.Controllers
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(
-            [FromServices] ActiveDirectoryLoginHandler adHandler,
-            [FromServices]LoginCommandHandler handler,
-            [FromBody]LoginCommand command,
+            [FromServices] LoginCommandHandler handler,
+            [FromBody] LoginCommand command,
             CancellationToken ct)
         {
-            var mode = _configuration["Authentication:Mode"] ?? "Local";
+            // ۱. بررسی فعال بودن Active Directory از روی تنظیمات سیستمی
+            var isAdEnabled = _configuration.GetValue<bool>("Authentication:ActiveDirectory:Enabled");
 
-            LoginResultDto? result = mode.Equals("ActiveDirectory", StringComparison.OrdinalIgnoreCase)
-            ? await adHandler.HandleAsync(command, ct)
-            : await handler.HandleAsync(command, ct);
+            var result = await handler.HandleAsync(command, isAdEnabled, ct);
 
             if (result is null)
                 return Unauthorized();

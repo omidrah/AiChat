@@ -17,9 +17,9 @@ namespace AiChat.Api.Controllers
 
         [Authorize(Policy = "UserPolicy")]
         [HttpGet("me")]
-        public async Task<IActionResult> Me([FromServices] GetCurrentUserQueryHandler handler , CancellationToken ct)
+        public async Task<IActionResult> Me([FromServices] GetCurrentUserQueryHandler handler, CancellationToken ct)
         {
-            var user =await handler.HandleAsync(new GetCurrentUserQuery(),ct);
+            var user = await handler.HandleAsync(new GetCurrentUserQuery(), ct);
 
             if (user is null)
                 return Unauthorized();

@@ -50,7 +50,16 @@ public sealed class ActiveDirectorySettingsService : IActiveDirectorySettingsSer
             var root = JsonNode.Parse(json)?.AsObject()
                        ?? throw new InvalidOperationException("Invalid appsettings.Runtime.json.");
 
-            root["Authentication:ActiveDirectory"] = JsonSerializer.SerializeToNode(
+            root.Remove("Authentication:ActiveDirectory");
+
+            var authentication = root["Authentication"] as JsonObject;
+
+            if (authentication is null)
+            {
+                authentication = new JsonObject();
+                root["Authentication"] = authentication;
+            }
+            authentication["ActiveDirectory"] = JsonSerializer.SerializeToNode(
                 options,
                 new JsonSerializerOptions
                 {
@@ -78,7 +87,7 @@ public sealed class ActiveDirectorySettingsService : IActiveDirectorySettingsSer
             _logger.LogWarning(
                 "Active Directory settings were updated by an administrator. Domain: {Domain}, Server: {Server}",
                 options.Domain,
-                options.Servers);
+                options.FallbackServers);
         }
         finally
         {
@@ -94,10 +103,10 @@ public sealed class ActiveDirectorySettingsService : IActiveDirectorySettingsSer
         if (string.IsNullOrWhiteSpace(options.Domain))
             throw new ArgumentException("Domain is required.");
 
-        if (string.IsNullOrWhiteSpace(options.Server))
+        if (string.IsNullOrWhiteSpace(options.PrimaryServer))
             throw new ArgumentException("Primary Server is required.");
 
-        if (!AdInputValidator.IsValidHost(options.Server))
+        if (!AdInputValidator.IsValidHost(options.PrimaryServer))
             throw new ArgumentException("Server format is invalid.");
 
         if (!AdInputValidator.IsValidDomain(options.Domain))
@@ -110,7 +119,7 @@ public sealed class ActiveDirectorySettingsService : IActiveDirectorySettingsSer
                 "Container must be a valid LDAP Distinguished Name. Example: DC=omid,DC=ir");
         }
 
-        foreach (var server in options.Servers.Where(x => !string.IsNullOrWhiteSpace(x)))
+        foreach (var server in options.FallbackServers.Where(x => !string.IsNullOrWhiteSpace(x)))
         {
             if (!AdInputValidator.IsValidHost(server))
                 throw new ArgumentException($"Invalid server: {server}");

@@ -25,7 +25,7 @@ namespace AiChat.Api.Contracts.Admin
             var domain = request.Domain?.Trim();
 
             server = string.IsNullOrWhiteSpace(server)
-                ? settings.Server
+                ? settings.PrimaryServer
                 : server;
 
             domain = string.IsNullOrWhiteSpace(domain)

@@ -22,8 +22,6 @@ public static class DependencyInjection
         services.AddScoped<RenameConversationHandler>();
         services.AddScoped<GetCurrentUserQueryHandler>();
         services.AddScoped<LoginCommandHandler>();
-        services.AddScoped<ActiveDirectoryLoginHandler>();
-
         return services;
     }
 }

@@ -28,12 +28,15 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
             return Task.FromResult<ActiveDirectoryUserInfo?>(null);
         }
 
-        var servers = _adOptionsMonitor.Servers is { Count: > 0 }
-            ? _adOptionsMonitor.Servers
-            : [_adOptionsMonitor.Domain];
+        var targets = BuildTargets(_adOptionsMonitor);
+        if (targets.Count == 0)
+        {
+            _logger.LogWarning("AD is enabled but no Server/Servers/Domain is configured.");
+            return Task.FromResult<ActiveDirectoryUserInfo?>(null);
+        }
 
-      
-        foreach (var server in servers)
+
+        foreach (var server in targets)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -56,18 +59,18 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
                     continue;
                 }
 
-                var normalizedUserame = userName.Contains('@')
-                    ? userName.Split('@')[0]
-                    : userName;
+                var normalizedUserame = NormalizeUserName(userName);
 
                 _logger.LogInformation($"Ad on {server} by {normalizedUserame}");
+
+                var domainPart = !string.IsNullOrWhiteSpace(_adOptionsMonitor.Domain) ? _adOptionsMonitor.Domain : server;
 
                 return Task.FromResult<ActiveDirectoryUserInfo?>(
                     new ActiveDirectoryUserInfo
                     {
                         UserName = normalizedUserame,
                         DisplayName = normalizedUserame,
-                        ExternalId = $"{_adOptionsMonitor.Domain}\\{normalizedUserame}"
+                        ExternalId = $"{domainPart}\\{normalizedUserame}"
                     });
             }
             catch (PrincipalServerDownException ex)
@@ -88,5 +91,38 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
         }
 
         return Task.FromResult<ActiveDirectoryUserInfo?>(null);
+    }
+    private static List<string> BuildTargets(ActiveDirectoryOptions opt)
+    {
+        // اولویت: Server (Primary) -> Servers (Fallback) -> Domain (آخرین fallback)
+        var list = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(opt.PrimaryServer))
+            list.Add(opt.PrimaryServer.Trim());
+
+        if (opt.FallbackServers is { Count: > 0 })
+            list.AddRange(opt.FallbackServers.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()));
+
+        if (!string.IsNullOrWhiteSpace(opt.Domain))
+            list.Add(opt.Domain.Trim());
+
+        // حذف تکراری‌ها (case-insensitive)
+        return list
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+    }
+    private static string NormalizeUserName(string userName)
+    {
+        // user@domain => user
+        // domain\user => user
+        if (string.IsNullOrWhiteSpace(userName)) return string.Empty;
+
+        if (userName.Contains('\\'))
+            return userName.Split('\\', 2)[1];
+
+        if (userName.Contains('@'))
+            return userName.Split('@', 2)[0];
+
+        return userName;
     }
 }

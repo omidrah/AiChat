@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace AiChat.Api.Contracts
 {
-    public class SignalRChatNotifier: IChatStreamNotifier
+    public class SignalRChatNotifier : IChatStreamNotifier
     {
         private readonly IHubContext<ChatHub> _hub;
 

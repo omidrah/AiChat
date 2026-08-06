@@ -12,12 +12,12 @@ namespace AiChat.Api.Services
         {
             _httpContextAccessor = httpContextAccessor;
         }
-        private ClaimsPrincipal? Principal =>  _httpContextAccessor.HttpContext?.User; 
+        private ClaimsPrincipal? Principal => _httpContextAccessor.HttpContext?.User;
 
-        public bool IsAuthenticated =>  Principal?.Identity?.IsAuthenticated == true;
+        public bool IsAuthenticated => Principal?.Identity?.IsAuthenticated == true;
 
         public CurrentUser? GetCurrentUser()
-        {   
+        {
             var principal = Principal;
 
             if (principal?.Identity?.IsAuthenticated != true)
@@ -54,14 +54,14 @@ namespace AiChat.Api.Services
                     principal.FindFirstValue("userId") ??
                     throw new UnauthorizedAccessException("JWT does not contain user id.");
 
-                if(!Guid.TryParse(userIdInClaim, out var parsedUserId))
+                if (!Guid.TryParse(userIdInClaim, out var parsedUserId))
                     throw new UnauthorizedAccessException("JWT user id is invalid.");
                 userId = parsedUserId;
             }
             else
             {
                 // Active Dirctory Authentication
-                externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows Active Dirctory identity name was not found."); 
+                externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows Active Dirctory identity name was not found.");
             }
 
             var roles = principal.Claims

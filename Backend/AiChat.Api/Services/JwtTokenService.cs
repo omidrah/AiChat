@@ -7,7 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
 using System.Text;
 
 namespace AiChat.Api.Services;
@@ -73,7 +72,7 @@ public sealed class JwtTokenService : ITokenService
         var expires = DateTime.UtcNow
             .AddDays(_options.RefreshTokenDays);
 
-        return (token,expires);
+        return (token, expires);
     }
 
     // ✅ HASH REFRESH TOKEN قبل از ذخیره در DB
