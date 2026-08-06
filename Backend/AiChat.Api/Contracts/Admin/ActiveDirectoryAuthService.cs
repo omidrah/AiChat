@@ -1,37 +1,38 @@
-﻿namespace AiChat.Api.Services;
+﻿namespace AiChat.Api.Contracts.Admin;
 
 using AiChat.Application.Abstractions;
+using AiChat.Application.Common.Options;
 using AiChat.Application.Conversations.Dtos;
 using Microsoft.Extensions.Options;
 using System.DirectoryServices.AccountManagement;
 
 public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
 {
-    private readonly ActiveDirectoryOptions _options;
+    private readonly ActiveDirectoryOptions _adOptionsMonitor;
     private readonly ILogger<ActiveDirectoryAuthService> _logger;
 
     public ActiveDirectoryAuthService(
         IOptions<ActiveDirectoryOptions> options,
         ILogger<ActiveDirectoryAuthService> logger)
     {
-        _options = options.Value;
+        _adOptionsMonitor = options.Value;
         _logger = logger;
     }
 
-    public Task<ActiveDirectoryUserInfo?> ValidateAsync(
-        string userName,
-        string password,
-        CancellationToken ct = default)
+    public Task<ActiveDirectoryUserInfo?> ValidateAsync(string userName, string password, CancellationToken ct = default)
     {
-        var servers = _options.Servers is { Length: > 0 }
-            ? _options.Servers
-            : [_options.Domain];
 
-        //var isUpn = userName.Contains('@', StringComparison.Ordinal);
-        //var identityType = isUpn
-        //    ? IdentityType.UserPrincipalName
-        //    : IdentityType.SamAccountName;
+        if (!_adOptionsMonitor.Enabled)
+        {
+            _logger.LogWarning("Active Directory authentication is disabled.");
+            return Task.FromResult<ActiveDirectoryUserInfo?>(null);
+        }
 
+        var servers = _adOptionsMonitor.Servers is { Count: > 0 }
+            ? _adOptionsMonitor.Servers
+            : [_adOptionsMonitor.Domain];
+
+      
         foreach (var server in servers)
         {
             ct.ThrowIfCancellationRequested();
@@ -43,9 +44,9 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
                     userName,
                     server);
 
-                using var context = string.IsNullOrWhiteSpace(_options.Container)
+                using var context = string.IsNullOrWhiteSpace(_adOptionsMonitor.Container)
                     ? new PrincipalContext(ContextType.Domain, server)
-                    : new PrincipalContext(ContextType.Domain, server, _options.Container);
+                    : new PrincipalContext(ContextType.Domain, server, _adOptionsMonitor.Container);
 
                 var isValid = context.ValidateCredentials(userName, password, ContextOptions.Negotiate);
 
@@ -66,7 +67,7 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
                     {
                         UserName = normalizedUserame,
                         DisplayName = normalizedUserame,
-                        ExternalId = $"{_options.Domain}\\{normalizedUserame}"
+                        ExternalId = $"{_adOptionsMonitor.Domain}\\{normalizedUserame}"
                     });
             }
             catch (PrincipalServerDownException ex)

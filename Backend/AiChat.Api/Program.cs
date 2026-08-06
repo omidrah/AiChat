@@ -1,4 +1,5 @@
 using AiChat.Api.Contracts;
+using AiChat.Api.Contracts.Admin;
 using AiChat.Api.Hubs;
 using AiChat.Api.Services;
 using AiChat.Application;
@@ -23,10 +24,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile(
+    "appsettings.Runtime.json",
+    optional: true,
+    reloadOnChange: true);
+
 
 var authMode = builder.Configuration["Authentication:Mode"] ?? "Local";
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Authentication:Jwt"));
-builder.Services.Configure<ActiveDirectoryOptions>(  builder.Configuration.GetSection("Authentication:ActiveDirectory"));
+builder.Services.Configure<ActiveDirectoryOptions>(builder.Configuration.GetSection("Authentication:ActiveDirectory"));
 
 builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection("Ollama"));
 
@@ -34,6 +40,8 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IActiveDirectoryAuthService, ActiveDirectoryAuthService>();
+builder.Services.AddSingleton<IActiveDirectorySettingsService, ActiveDirectorySettingsService>();
+builder.Services.AddScoped<IActiveDirectoryDiagnosticService, ActiveDirectoryDiagnosticService>();
 
 builder.Services
     .AddAuthentication(options =>

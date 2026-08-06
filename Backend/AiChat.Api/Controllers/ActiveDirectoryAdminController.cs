@@ -1,0 +1,77 @@
+﻿using AiChat.Api.Contracts.Admin;
+using AiChat.Application.Common.Options;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading;
+
+namespace AiChat.Api.Controllers
+{
+    [ApiController]
+    [Route("api/active-directory")]
+    //[Authorize(Roles = "Admin")]
+    [Authorize]
+    public class ActiveDirectoryAdminController : Controller
+    {
+        private readonly IActiveDirectorySettingsService _settingsService;
+        private readonly IActiveDirectoryDiagnosticService _diagnosticService;
+
+        public ActiveDirectoryAdminController(
+            IActiveDirectorySettingsService settingsService,
+            IActiveDirectoryDiagnosticService diagnosticService)
+        {
+            _settingsService = settingsService;
+            _diagnosticService = diagnosticService;
+        }
+
+        [HttpGet("settings")]
+        [ProducesResponseType(typeof(ActiveDirectorySettingsDto), StatusCodes.Status200OK)]
+        public ActionResult<ActiveDirectorySettingsDto> GetSettings()
+        {
+            var settings = _settingsService.Get();
+
+            return Ok(new ActiveDirectorySettingsDto
+            {
+                Enabled = settings.Enabled,
+                Domain = settings.Domain,
+                Container = settings.Container,
+                Server = settings.Server,
+                Servers = settings.Servers,
+                UseSsl = settings.UseSsl
+            });
+        }
+
+        [HttpPut("settings")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> UpdateSettings([FromBody] ActiveDirectorySettingsDto request, CancellationToken ct)
+        {
+            await _settingsService.SaveAsync(
+           new ActiveDirectoryOptions
+           {
+               Enabled = request.Enabled,
+               Domain = request.Domain.Trim(),
+               Container = request.Container.Trim(),
+               Server = request.Server.Trim(),
+               Servers = request.Servers
+                   .Where(x => !string.IsNullOrWhiteSpace(x))
+                   .Select(x => x.Trim())
+                   .Distinct(StringComparer.OrdinalIgnoreCase)
+                   .ToList(),
+               UseSsl = request.UseSsl
+           },
+           ct);
+
+            return NoContent();
+        }
+
+        [HttpPost("diagnostics")]
+        [ProducesResponseType(typeof(ActiveDirectoryDiagnosticResultDto), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ActiveDirectoryDiagnosticResultDto>> RunDiagnostic(
+        [FromBody] ActiveDirectoryDiagnosticRequest request,
+        CancellationToken ct)
+        {
+            var result = await _diagnosticService.RunAsync(request, ct);
+
+            return Ok(result);
+        }
+    }
+}

@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Common\Entities\**" />
+    <EmbeddedResource Remove="Common\Entities\**" />
+    <None Remove="Common\Entities\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Conversations\Commands\DeleteConversaion\DeleteConversation.cs" />
   </ItemGroup>
 
@@ -23,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Entities\" />
     <Folder Include="Users\Queries\GetUser\" />
   </ItemGroup>
 

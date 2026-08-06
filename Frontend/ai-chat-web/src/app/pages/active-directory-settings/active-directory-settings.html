@@ -1,0 +1,215 @@
+<section class="ad-settings-page">
+  <header class="page-header">
+    <div>
+      <h2>تنظیمات Active Directory</h2>
+      <p>
+        تنظیم سرور و بررسی دسترسی شبکه و LDAP.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="saving || loading"
+      (click)="save()">
+      {{ saving ? 'در حال ذخیره...' : 'ذخیره تنظیمات' }}
+    </button>
+  </header>
+
+  @if (successMessage) {
+    <div class="alert alert-success">{{ successMessage }}</div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert alert-danger">{{ errorMessage }}</div>
+  }
+
+  @if (loading) {
+    <p>در حال دریافت تنظیمات...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="save()">
+
+      <div class="card">
+        <div class="card-header">
+          <h3>پیکربندی اتصال به سرور ActiveDirectory</h3>
+        </div>
+
+        <div class="card-body">
+          <label class="toggle-row">
+            <input type="checkbox" formControlName="enabled">
+            <span>احراز هویت Active Directory فعال باشد</span>
+          </label>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="domain">Domain</label>
+              <input
+                id="domain"
+                type="text"
+                class="form-control"
+                formControlName="domain"
+                placeholder="omid.ir">
+
+              <small>نمونه: <code>omid.ir</code></small>
+            </div>
+
+            <div class="form-group">
+              <label for="server">Primary Domain Controller</label>
+              <input
+                id="server"
+                type="text"
+                class="form-control"
+                formControlName="server"
+                placeholder="IP یا FQDN سرور اصلی AD">
+
+              <small>132.168.250.185 یا dc01.omid.ir</small>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="container">LDAP Container / Search Base</label>
+              <input
+                id="container"
+                type="text"
+                class="form-control"
+                formControlName="container"
+                placeholder="DC=omid,DC=ir">
+
+              <small>
+                اختیاری؛ نمونه:
+                <code>OU=Users,DC=omid,DC=ir</code>
+                یا
+                <code>DC=omid,DC=ir</code>
+              </small>
+            </div>
+          </div>
+
+          <label class="toggle-row">
+            <input type="checkbox" formControlName="useSsl">
+            <span>استفاده از SSL / LDAPS</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header servers-header">
+          <h3>سرورهای جایگزین Domain Controller</h3>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary btn-sm"
+            (click)="addServer()">
+            + افزودن سرور
+          </button>
+        </div>
+
+        <div class="card-body" formArrayName="servers">
+          @for (control of servers.controls; track $index) {
+            <div class="server-row">
+              <input
+                class="form-control"
+                [formControlName]="$index"
+                placeholder="dc02.omid.ir یا 132.168.250.162">
+
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                (click)="removeServer($index)">
+                حذف
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>ابزار بررسی اتصال Active Directory</h3>
+      </div>
+
+      <div class="card-body">
+        <p class="help-text">
+          تست‌ها روی سروری اجرا می‌شوند که Backend .NET روی آن مستقر است.
+        </p>
+
+        <div class="diagnostic-actions">
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="testing"
+            (click)="runTest(diagnosticType.Ldap389)">
+            Test-NetConnection LDAP (389)
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="testing"
+            (click)="runTest(diagnosticType.Kerberos88)">
+            Test-NetConnection Kerberos (88)
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="testing"
+            (click)="runTest(diagnosticType.Dns53)">
+            Test-NetConnection DNS (53)
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="testing"
+            (click)="runTest(diagnosticType.DomainControllerDiscovery)">
+            nltest /dsgetdc
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="testing"
+            (click)="runTest(diagnosticType.LdapSrvLookup)">
+            LDAP SRV Lookup
+          </button>
+        </div>
+
+        @if (testing) {
+          <div class="diagnostic-loading">
+            در حال اجرای تست روی سرور...
+          </div>
+        }
+
+        @if (result) {
+          <div
+            class="diagnostic-result"
+            [class.result-success]="result.success"
+            [class.result-failure]="!result.success">
+
+            <div class="result-header">
+              <strong>{{ result.testName }}</strong>
+
+              <span>
+                {{ result.success ? 'موفق' : 'ناموفق' }}
+                — {{ result.durationMs }} ms
+              </span>
+            </div>
+
+            <div class="command-line">
+              <span>Command:</span>
+              <code>{{ result.command }}</code>
+            </div>
+
+            @if (result.error) {
+              <div class="error-output">
+                {{ result.error }}
+              </div>
+            }
+
+            <pre>{{ result.output }}</pre>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>
