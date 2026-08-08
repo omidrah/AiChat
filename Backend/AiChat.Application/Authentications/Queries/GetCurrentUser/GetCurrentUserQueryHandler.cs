@@ -1,5 +1,5 @@
-﻿using AiChat.Application.Authentications.Dtos;
-using AiChat.Application.Common.Auth;
+﻿using AiChat.Application.Abstractions;
+using AiChat.Application.Authentications.Dtos;
 
 namespace AiChat.Application.Authentications.Queries.GetCurrentUser
 {

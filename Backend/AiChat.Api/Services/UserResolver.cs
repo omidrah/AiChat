@@ -1,6 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Auth;
-using AiChat.Application.Common.Enums;
+using AiChat.Application.Authentications.Dtos;
 using AiChat.Domain.Entities;
 
 namespace AiChat.Api.Services
@@ -35,21 +34,13 @@ namespace AiChat.Api.Services
                 return localUser;
             }
 
+            if (string.IsNullOrWhiteSpace(current.ExternalId))
+                throw new UnauthorizedAccessException("ExternalId is missing.");
+
             var user = await _userRepository.FindByExternalIdAsync(current.AuthProvider, current.ExternalId!, ct);
 
-            if (user != null)
-                return user;
-
-            user = User.CreateUser(
-                current.UserName,
-                null,
-                current.DisplayName,
-                current.ExternalId ?? null,
-                current.AuthProvider.ToString());
-
-            _userRepository.Add(user);
-
-            await _userRepository.SaveChangesAsync(ct);
+            if (user is null)
+                throw new UnauthorizedAccessException("AD user was not found.");
 
             return user;
         }

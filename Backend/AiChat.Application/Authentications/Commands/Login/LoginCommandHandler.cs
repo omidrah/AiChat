@@ -1,7 +1,7 @@
 ﻿using AiChat.Application.Abstractions;
 using AiChat.Application.Authentications.Dtos;
-using AiChat.Application.Common.Enums;
 using AiChat.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace AiChat.Application.Authentications.Commands.Login
 {
@@ -12,23 +12,29 @@ namespace AiChat.Application.Authentications.Commands.Login
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IActiveDirectoryAuthService _adAuth;
-
+        private readonly ILogger<LoginCommandHandler> _logger;
         public LoginCommandHandler(
             IUserRepository users,
             IRefreshTokenRepository refreshTokens,
             ITokenService tokenService,
             IPasswordHasher passwordHasher,
-            IActiveDirectoryAuthService adAuth)
+            IActiveDirectoryAuthService adAuth,
+            ILogger<LoginCommandHandler> logger)
         {
             _users = users;
             _refreshTokens = refreshTokens;
             _tokenService = tokenService;
             _passwordHasher = passwordHasher;
             _adAuth = adAuth;
+            _logger = logger;
         }
 
         public async Task<LoginResultDto?> HandleAsync(LoginCommand command, bool isActiveDirectoryEnabled, CancellationToken ct)
         {
+            // ۱. نرمال‌سازی نام کاربری در بدو ورود
+            var normalizedUserName = Utility.NormalizeUserName(command.UserName);
+            if (string.IsNullOrEmpty(normalizedUserName))
+                return null;
 
             User? user = null;
             /*
@@ -36,7 +42,7 @@ namespace AiChat.Application.Authentications.Commands.Login
              * ابتدا کاربر را از دیتابیس پیدا می‌کنیم.
              * این کار باعث می‌شود کاربر Local درگیر تأخیر AD نشود.
              */
-            var existingUser = await _users.GetByUserNameAsync(command.UserName, ct);
+            var existingUser = await _users.GetByUserNameAsync(normalizedUserName, ct);
             if (existingUser is not null)
             {
                 /*
@@ -46,9 +52,7 @@ namespace AiChat.Application.Authentications.Commands.Login
                  */
                 if (!string.IsNullOrWhiteSpace(existingUser.PasswordHash))
                 {
-                    var isLocalPasswordValid = _passwordHasher.Verify(
-                        command.Password,
-                        existingUser.PasswordHash);
+                    var isLocalPasswordValid = _passwordHasher.Verify(command.Password, existingUser.PasswordHash);
 
                     if (isLocalPasswordValid)
                     {
@@ -64,6 +68,14 @@ namespace AiChat.Application.Authentications.Commands.Login
                         return null;
                     }
                 }
+                if (isActiveDirectoryEnabled)
+                {
+                    var adUser = await _adAuth.ValidateAsync(normalizedUserName, command.Password, ct);
+                    if (adUser is not null)
+                    {
+                        user = existingUser;
+                    }
+                }
             }
             /*
              * اگر کاربر Local با رمز صحیح پیدا نشد،
@@ -72,14 +84,13 @@ namespace AiChat.Application.Authentications.Commands.Login
 
             if (user is null && isActiveDirectoryEnabled)
             {
-                var adUser = await _adAuth.ValidateAsync(command.UserName, command.Password, ct);
-
+                var adUser = await _adAuth.ValidateAsync(normalizedUserName, command.Password, ct);
                 if (adUser is not null)
                 {
 
                     user = await _users.FindByExternalIdAsync(
                        AuthenticationProviderEnum.ActiveDirectory,
-                       adUser.ExternalId,
+                       adUser.ExternalId.ToLowerInvariant(),
                        ct);
 
                     if (user is null)
@@ -89,7 +100,7 @@ namespace AiChat.Application.Authentications.Commands.Login
                             adUser.UserName,
                             string.Empty,
                             adUser.DisplayName,
-                            adUser.ExternalId,
+                            adUser.ExternalId.ToLowerInvariant(),
                             AuthenticationProviderEnum.ActiveDirectory.ToString()
                         );
 

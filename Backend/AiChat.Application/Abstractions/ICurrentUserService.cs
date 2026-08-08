@@ -1,4 +1,6 @@
-﻿namespace AiChat.Application.Common.Auth
+﻿using AiChat.Application.Common;
+
+namespace AiChat.Application.Abstractions
 {
     public interface ICurrentUserService
     {

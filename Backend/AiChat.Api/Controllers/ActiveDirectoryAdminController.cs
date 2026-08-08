@@ -1,5 +1,5 @@
 ﻿using AiChat.Api.Contracts.Admin;
-using AiChat.Application.Common.Options;
+using AiChat.Application.Authentications.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

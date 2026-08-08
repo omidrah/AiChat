@@ -1,6 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Enums;
-using AiChat.Application.Common.Options;
+using AiChat.Application.Authentications.Dtos;
 using AiChat.Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -31,7 +30,9 @@ public sealed class JwtTokenService : ITokenService
             // استاندارد JWT
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("auth_provider", user.AuthProvider!.ToString() ?? AuthenticationProviderEnum.Local.ToString())
+            new Claim("auth_provider", user.AuthProvider!.ToString() ?? AuthenticationProviderEnum.Local.ToString()),
+            new Claim("external_id", user.ExternalId ?? string.Empty),
+
         };
 
         foreach (var role in roles)

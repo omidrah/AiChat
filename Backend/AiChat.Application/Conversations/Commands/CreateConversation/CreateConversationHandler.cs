@@ -1,5 +1,4 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Auth;
 using AiChat.Domain.Entities;
 
 namespace AiChat.Application.Conversations.Commands.CreateConversation

@@ -1,6 +1,6 @@
-﻿using AiChat.Application.Common.Enums;
+﻿using AiChat.Application.Authentications.Dtos;
 
-namespace AiChat.Application.Common.Auth
+namespace AiChat.Application.Common
 {
     public sealed class CurrentUser
     {

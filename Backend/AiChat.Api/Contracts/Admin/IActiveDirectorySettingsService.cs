@@ -1,4 +1,4 @@
-﻿using AiChat.Application.Common.Options;
+﻿using AiChat.Application.Authentications.Dtos;
 
 namespace AiChat.Api.Contracts.Admin
 {

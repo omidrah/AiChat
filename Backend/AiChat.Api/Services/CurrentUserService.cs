@@ -1,5 +1,6 @@
-﻿using AiChat.Application.Common.Auth;
-using AiChat.Application.Common.Enums;
+﻿using AiChat.Application.Abstractions;
+using AiChat.Application.Authentications.Dtos;
+using AiChat.Application.Common;
 using System.Security.Claims;
 
 namespace AiChat.Api.Services
@@ -61,7 +62,8 @@ namespace AiChat.Api.Services
             else
             {
                 // Active Dirctory Authentication
-                externalId = identity.Name! ?? throw new UnauthorizedAccessException("Windows Active Dirctory identity name was not found.");
+                externalId = principal.FindFirstValue("external_id")
+                    ?? throw new UnauthorizedAccessException("ExternalId claim was not found.");
             }
 
             var roles = principal.Claims

@@ -1,4 +1,4 @@
-﻿namespace AiChat.Application.Common.Options;
+﻿namespace AiChat.Application.Authentications.Dtos;
 
 public sealed class ActiveDirectoryOptions
 {

@@ -1,5 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Enums;
+using AiChat.Application.Authentications.Dtos;
 using AiChat.Application.Users.Dtos;
 using AiChat.Domain.Entities;
 using Shared;

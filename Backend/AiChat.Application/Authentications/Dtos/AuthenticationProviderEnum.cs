@@ -1,5 +1,4 @@
-﻿
-namespace AiChat.Application.Common.Enums
+﻿namespace AiChat.Application.Authentications.Dtos
 {
     public enum AuthenticationProviderEnum
     {

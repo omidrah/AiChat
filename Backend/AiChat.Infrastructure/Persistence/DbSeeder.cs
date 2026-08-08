@@ -1,5 +1,5 @@
 ﻿using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Enums;
+using AiChat.Application.Authentications.Dtos;
 using AiChat.Domain.Entities;
 
 namespace AiChat.Infrastructure.Persistence

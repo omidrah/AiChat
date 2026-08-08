@@ -1,5 +1,5 @@
 ﻿using AiChat.Api.Contracts.Admin;
-using AiChat.Application.Common.Options;
+using AiChat.Application.Authentications.Dtos;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 

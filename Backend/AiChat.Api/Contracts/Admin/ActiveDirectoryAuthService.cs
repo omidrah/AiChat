@@ -1,7 +1,7 @@
 ﻿namespace AiChat.Api.Contracts.Admin;
 
 using AiChat.Application.Abstractions;
-using AiChat.Application.Common.Options;
+using AiChat.Application.Authentications.Dtos;
 using AiChat.Application.Conversations.Dtos;
 using Microsoft.Extensions.Options;
 using System.DirectoryServices.AccountManagement;
@@ -42,10 +42,8 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
 
             try
             {
-                _logger.LogInformation(
-                    "Validating AD user {UserName} against {Server}",
-                    userName,
-                    server);
+
+                _logger.LogInformation("Validating AD user {UserName} against {Server} started", userName, server);
 
                 using var context = string.IsNullOrWhiteSpace(_adOptionsMonitor.Container)
                     ? new PrincipalContext(ContextType.Domain, server)
@@ -58,19 +56,20 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
                     _logger.LogWarning("AD credentials rejected for {UserName} by {Server}", userName, server);
                     continue;
                 }
+                _logger.LogInformation("Validated AD user {UserName} on {Server}", userName, server);
 
-                var normalizedUserame = NormalizeUserName(userName);
+                // استفاده اولویت‌دار از دامنه‌ی متنی بجای آی‌پی برای پایدار بودن ExternalId
+                var domainPart = !string.IsNullOrWhiteSpace(_adOptionsMonitor.Domain)
+                    ? _adOptionsMonitor.Domain
+                    : (_adOptionsMonitor.PrimaryServer ?? server);
 
-                _logger.LogInformation($"Ad on {server} by {normalizedUserame}");
-
-                var domainPart = !string.IsNullOrWhiteSpace(_adOptionsMonitor.Domain) ? _adOptionsMonitor.Domain : server;
 
                 return Task.FromResult<ActiveDirectoryUserInfo?>(
                     new ActiveDirectoryUserInfo
                     {
-                        UserName = normalizedUserame,
-                        DisplayName = normalizedUserame,
-                        ExternalId = $"{domainPart}\\{normalizedUserame}"
+                        UserName = userName,
+                        DisplayName = userName,
+                        ExternalId = $"{domainPart.Trim().ToLowerInvariant()}\\{userName.ToLowerInvariant()}"
                     });
             }
             catch (PrincipalServerDownException ex)
@@ -110,19 +109,5 @@ public sealed class ActiveDirectoryAuthService : IActiveDirectoryAuthService
         return list
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-    }
-    private static string NormalizeUserName(string userName)
-    {
-        // user@domain => user
-        // domain\user => user
-        if (string.IsNullOrWhiteSpace(userName)) return string.Empty;
-
-        if (userName.Contains('\\'))
-            return userName.Split('\\', 2)[1];
-
-        if (userName.Contains('@'))
-            return userName.Split('@', 2)[0];
-
-        return userName;
     }
 }
