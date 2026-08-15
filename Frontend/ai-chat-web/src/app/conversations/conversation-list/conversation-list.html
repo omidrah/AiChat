@@ -5,18 +5,18 @@
     <div class="logo">
 
       <span *ngIf="!collapsed">
-        🤖 دستیار هوش مصنوعی
+        <i class="fa-solid fa-robot"></i> دستیار هوش مصنوعی
       </span>
 
       <span *ngIf="collapsed">
-        🤖
+        <i class="fa-solid fa-robot"></i>
       </span>
 
     </div>
 
     <button class="new-chat-btn" (click)="create()">
-      <span *ngIf="collapsed">+</span>
-      <span *ngIf="!collapsed"> + گفتگوی جدید </span>
+      <span *ngIf="collapsed"><i class="fa-solid fa-plus"></i></span>
+      <span *ngIf="!collapsed"><i class="fa-solid fa-plus"></i> گفتگوی جدید</span>
     </button>
 
   </div>
@@ -27,7 +27,7 @@
     <div class="conversation-item" [class.active]="c.id === selectedId" [class.editing]="editingId===c.id"
       *ngFor="let c of conversations();trackBy:trackConversation" (click)="open(c.id)">
 
-      <span class="icon">💬</span>
+      <span class="icon"><i class="fa-regular fa-comments"></i></span>
 
       <input *ngIf="editingId === c.id" class="rename-input" [(ngModel)]="editingTitle"
         (click)="$event.stopPropagation()" (keydown.enter)="saveRename(c)" (keydown.escape)="cancelRename()">
@@ -41,23 +41,23 @@
         <ng-container *ngIf="editingId===c.id">
 
           <button class="ok-btn" (click)="$event.stopPropagation();saveRename(c);">
-            ✔
+            <i class="fa-solid fa-check"></i>
           </button>
 
           <button class="cancel-btn" (click)="cancelRename();$event.stopPropagation()">
-            ✖
+            <i class="fa-solid fa-xmark"></i>
           </button>
 
         </ng-container>
 
         <ng-container *ngIf="editingId!==c.id">
 
-          <button (click)="rename(c,$event)">
-            ✏️
+          <button (click)="rename(c,$event)" title="تغییر نام">
+            <i class="fa-solid fa-pen"></i>
           </button>
 
-          <button (click)="showDelete(c);$event.stopPropagation()">
-            🗑️
+          <button (click)="showDelete(c);$event.stopPropagation()" title="حذف">
+            <i class="fa-solid fa-trash"></i>
           </button>
 
         </ng-container>
@@ -100,7 +100,7 @@
 
     <!-- دکمه خروج -->
     <button class="logout-btn" (click)="logout()">
-      <span class="logout-icon">🚪</span>
+      <span class="logout-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
       <span *ngIf="!collapsed">خروج از حساب</span>
     </button>
   </div>

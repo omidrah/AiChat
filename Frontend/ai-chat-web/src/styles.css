@@ -26,6 +26,74 @@
   font-display: swap;
 }
 
+/* ============================================================
+   Design tokens
+   ============================================================ */
+:root {
+  --primary: #6366f1;
+  --primary-strong: #4f46e5;
+  --primary-soft: #eef2ff;
+  --accent: #8b5cf6;
+  --grad-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --grad-primary-strong: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+
+  --bg: #f4f5f9;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --border: #e5e7eb;
+  --border-strong: #d1d5db;
+  --text: #0f172a;
+  --muted: #64748b;
+
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+
+  --sidebar-bg: linear-gradient(180deg, #1f2430 0%, #181c26 100%);
+  --sidebar-text: #ffffff;
+  --sidebar-muted: #9e9eb4;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+
+  --code-bg: #f1f5f9;
+  --code-text: #111827;
+  --pre-bg: #111827;
+
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+/* ============================================================
+   Dark theme
+   ============================================================ */
+body.dark {
+  --primary-soft: #2a2f4a;
+
+  --bg: #0f1117;
+  --surface: #1b1f2a;
+  --surface-2: #222736;
+  --surface-3: #2a3040;
+  --border: #2e3546;
+  --border-strong: #3a4256;
+  --text: #e7eaf0;
+  --muted: #9aa3b5;
+
+  --sidebar-bg: linear-gradient(180deg, #141821 0%, #0e1118 100%);
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+
+  --code-bg: #2a3040;
+  --code-text: #e7eaf0;
+  --pre-bg: #0a0c12;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
 html,
 body {
   margin: 0;
@@ -34,7 +102,10 @@ body {
   overflow: hidden;
   direction: rtl;
   font-family: 'Vazirmatn', Tahoma, 'Segoe UI', sans-serif;
-  background: #f7f7f8;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 body, html, button, input, select, textarea, span, p, div, label {
   font-family: 'Vazirmatn', Tahoma, sans-serif !important;
@@ -44,48 +115,22 @@ body, html, button, input, select, textarea, span, p, div, label {
   box-sizing: border-box;
 }
 
-body.dark .chat-container {
-  background: #212121;
-  color: #ececec;
+/* Modern, subtle scrollbars */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.55);
+  background-clip: content-box;
 }
 
-body.dark .msg.ai .msg-body {
-  background: #2f2f2f;
-  color: #ececec;
-  border-color: #3a3a3a;
-}
 
-body.dark .msg.ai .msg-avatar {
-  background: #3a3a3a;
-  color: #ececec;
-}
-
-body.dark .input-area {
-  background: linear-gradient(to top, #212121 78%, rgba(33, 33, 33, 0));
-}
-
-body.dark .composer {
-  background: #2f2f2f;
-  border-color: #4a4a4a;
-}
-
-body.dark .message-input {
-  color: #ececec;
-}
-
-body.dark .message-input::placeholder {
-  color: #9ca3af;
-}
-
-body.dark .scroll-bottom-button {
-  background: #2f2f2f;
-  border-color: #4a4a4a;
-  color: #ececec;
-}
-
-body.dark .message-content :not(pre) > code {
-  background: #40414f;
-  color: #f9fafb;
-}
 
   

@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { ConversationList } from './conversations/conversation-list/conversation-list';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './services/AuthService';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -15,9 +16,11 @@ import { AuthService } from './services/AuthService';
 export class App {
 
   protected readonly title = signal('ai-chat-web');
-  
+
+  private themeService = inject(ThemeService);
+  readonly isDark = this.themeService.theme.asReadonly();
+
   sidebarCollapsed = false;
-  dark = false;
   constructor(private router: Router, private auth: AuthService) {}
   
   // تبدیل به Getter برای بررسی و بروزرسانی لحظه‌ای وضعیت ادمین پس از لاگین
@@ -27,12 +30,7 @@ export class App {
   }
 
   toggleTheme() {
-    this.dark = !this.dark;
-
-    if (this.dark)
-      document.body.classList.add("dark");
-    else
-      document.body.classList.remove("dark");
+    this.themeService.toggle();
   }
   
   usersRoute(){

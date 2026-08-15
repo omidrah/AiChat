@@ -1,47 +1,54 @@
-<div class="ollama-container" style="direction: rtl; padding: 20px; font-family: Vazir, Tahoma, sans-serif;">
-  <div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<div class="ollama-container">
+  <div class="header">
     <h2>وضعیت سرور هوش مصنوعی (Ollama)</h2>
-    <button (click)="fetchDetails()" class="btn btn-primary" style="padding: 8px 16px; cursor: pointer;">بروزرسانی وضعیت</button>
+    <button (click)="fetchDetails()" class="btn btn-primary">
+      <i class="fa-solid fa-rotate"></i> بروزرسانی وضعیت
+    </button>
   </div>
 
   @if (loading()) {
-    <div style="text-align: center; padding: 40px;">در حال دریافت اطلاعات...</div>
+    <div class="loading">در حال دریافت اطلاعات...</div>
   } @else if (details()) {
-    <div class="status-card" [style.border-color]="details()?.isConnected ? '#4caf50' : '#f44336'" style="border: 2px solid; padding: 20px; border-radius: 8px; margin-bottom: 20px; background: #fafafa;">
-      <p>وضعیت اتصال: 
-        <strong [style.color]="details()?.isConnected ? '#4caf50' : '#f44336'">
-          {{ details()?.isConnected ? 'متصل ✅' : 'قطع ❌' }}
+    <div class="status-card" [class.connected]="details()?.isConnected">
+      <p>
+        وضعیت اتصال:
+        <strong>
+          <i class="fa-solid" [class.fa-circle-check]="details()?.isConnected" [class.fa-circle-xmark]="!details()?.isConnected"></i>
+          {{ details()?.isConnected ? 'متصل' : 'قطع' }}
         </strong>
       </p>
       <p>نسخه Ollama: <strong>{{ details()?.version }}</strong></p>
     </div>
 
     <h3>مدل‌های نصب شده ({{ details()?.models?.length || 0 }})</h3>
-    <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
-      <thead>
-        <tr style="background-color: #f2f2f2; text-align: right;">
-          <th style="padding: 12px; border: 1px solid #ddd;">نام مدل</th>
-          <th style="padding: 12px; border: 1px solid #ddd;">حجم فایل (GB)</th>
-          <th style="padding: 12px; border: 1px solid #ddd;">فرمت</th>
-          <th style="padding: 12px; border: 1px solid #ddd;">خانواده (Architecture)</th>
-          <th style="padding: 12px; border: 1px solid #ddd;">تعداد پارامترها</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (model of details()?.models; track model.name) {
-          <tr style="border-bottom: 1px solid #ddd;">
-            <td style="padding: 12px; font-weight: bold;">{{ model.name }}</td>
-            <td style="padding: 12px; direction: ltr; text-align: right;">{{ model.size }}</td>
-            <td style="padding: 12px;">{{ model.format }}</td>
-            <td style="padding: 12px;">{{ model.family }}</td>
-            <td style="padding: 12px; direction: ltr; text-align: right;">{{ model.parameterSize }}</td>
-          </tr>
-        } @empty {
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
           <tr>
-            <td colspan="5" style="padding: 20px; text-align: center;">هیچ مدلی روی سرور یافت نشد.</td>
+            <th>نام مدل</th>
+            <th>حجم فایل (GB)</th>
+            <th>فرمت</th>
+            <th>خانواده (Architecture)</th>
+            <th>تعداد پارامترها</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (model of details()?.models; track model.name) {
+            <tr>
+              <td class="model-name">{{ model.name }}</td>
+              <td class="ltr">{{ model.size }}</td>
+              <td>{{ model.format }}</td>
+              <td>{{ model.family }}</td>
+              <td class="ltr">{{ model.parameterSize }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="empty">هیچ مدلی روی سرور یافت نشد.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

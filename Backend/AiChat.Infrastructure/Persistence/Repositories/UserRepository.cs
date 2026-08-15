@@ -14,7 +14,7 @@ namespace AiChat.Infrastructure.Persistence.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<User?> GetByIdAsync(Guid id,CancellationToken ct = default)
+        public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             return await _dbContext.Users
                 .FirstOrDefaultAsync(x => x.Id == id, ct);
@@ -28,8 +28,8 @@ namespace AiChat.Infrastructure.Persistence.Repositories
         }
 
         public async Task<User?> GetByUserNameAsync(string userName, CancellationToken ct = default)
-        {   
-            return await _dbContext.Users.FirstOrDefaultAsync(x => x.UserName == userName && x.IsActive,ct);
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(x => x.UserName == userName && x.IsActive, ct);
         }
 
         public async Task<User?> FindByExternalIdAsync(

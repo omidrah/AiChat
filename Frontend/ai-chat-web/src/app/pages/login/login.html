@@ -1,33 +1,61 @@
-<div *ngIf="mode === 'form'">
-  <div class="login-page">
-    <div class="login-card">
+<div *ngIf="mode === 'form'" class="auth-shell">
+  <aside class="auth-brand">
+    <div class="brand-inner">
+      <div class="brand-logo">
+        <i class="fa-solid fa-robot"></i>
+      </div>
 
-      <h1> 🤖 دستیار هوش مصنوعی </h1>
-
-      <p class="subtitle">
-        لطفاً وارد حساب کاربری شوید
+      <h1>دستیار هوش مصنوعی</h1>
+      <p class="brand-tagline">
+        گفتگو، خلاقیت و بهره‌وری با مدل‌های هوش مصنوعی، در یک مکان امن و ساده.
       </p>
+
+      <ul class="brand-features">
+        <li><span class="feat-dot"><i class="fa-solid fa-bolt"></i></span><span>پاسخ لحظه‌ای و استریم زنده</span></li>
+        <li><span class="feat-dot"><i class="fa-solid fa-shield-halved"></i></span><span>ورود امن (محلی / Active Directory)</span></li>
+        <li><span class="feat-dot"><i class="fa-solid fa-brain"></i></span><span>پشتیبانی از مدل‌های مختلف Ollama</span></li>
+      </ul>
+    </div>
+
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+  </aside>
+
+  <main class="auth-form">
+    <div class="auth-card">
+      <div class="card-head">
+        <h2>خوش آمدید</h2>
+        <p class="subtitle">لطفاً وارد حساب کاربری خود شوید</p>
+      </div>
 
       <!-- جعبه خطای کلی -->
       <div class="error-box" *ngIf="error">
-        {{ error }}
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
       </div>
 
       <form (ngSubmit)="loginForm.form.valid && login()" #loginForm="ngForm" novalidate>
-        
+
         <!-- فیلد نام کاربری -->
         <div class="form-group">
           <label for="userName">نام کاربری</label>
-          <input
-            id="userName"
-            name="userName"
-            [(ngModel)]="userName"
-            type="text"
-            autocomplete="username"
-            required
-            #userNameModel="ngModel"
-            [class.invalid-field]="userNameModel.invalid && (userNameModel.dirty || userNameModel.touched)"
-          />
+          <div class="field">
+            <span class="field-icon">
+              <i class="fa-solid fa-user"></i>
+            </span>
+            <input
+              id="userName"
+              name="userName"
+              [(ngModel)]="userName"
+              type="text"
+              autocomplete="username"
+              placeholder="مثلاً admin"
+              required
+              #userNameModel="ngModel"
+              [class.invalid-field]="userNameModel.invalid && (userNameModel.dirty || userNameModel.touched)"
+            />
+          </div>
           <div class="field-error" *ngIf="userNameModel.invalid && (userNameModel.dirty || userNameModel.touched)">
             نام کاربری الزامی است.
           </div>
@@ -36,25 +64,31 @@
         <!-- فیلد رمز عبور -->
         <div class="form-group">
           <label for="password">رمز عبور</label>
-          <input
-            id="password"
-            name="password"
-            [(ngModel)]="password"
-            type="password"
-            autocomplete="current-password"
-            required
-            #passwordModel="ngModel"
-            [class.invalid-field]="passwordModel.invalid && (passwordModel.dirty || passwordModel.touched)"
-          />
+          <div class="field">
+            <span class="field-icon">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              required
+              #passwordModel="ngModel"
+              [class.invalid-field]="passwordModel.invalid && (passwordModel.dirty || passwordModel.touched)"
+            />
+          </div>
           <div class="field-error" *ngIf="passwordModel.invalid && (passwordModel.dirty || passwordModel.touched)">
             رمز عبور الزامی است.
           </div>
         </div>
 
         <!-- دکمه ورود همراه با Spinner لودینگ -->
-        <button 
-          class="login-btn" 
-          type="submit" 
+        <button
+          class="login-btn"
+          type="submit"
           [disabled]="loginForm.invalid || isSubmitting"
         >
           <span class="btn-spinner" *ngIf="isSubmitting"></span>
@@ -62,8 +96,10 @@
         </button>
 
       </form>
+
+      <p class="auth-footer">AiChat · احراز هویت امن <i class="fa-solid fa-lock"></i></p>
     </div>
-  </div>
+  </main>
 </div>
 
 <div *ngIf="mode === 'windows'" class="windows-loading">

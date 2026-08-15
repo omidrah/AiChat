@@ -6,20 +6,24 @@
     <div class="content">
         <header class="topbar">
             <div class="topbar-left">
-                <button class="menu-btn" (click)="toggleSidebar()">
-                    ☰
+                <button class="menu-btn" (click)="toggleSidebar()" aria-label="باز/بستن منو">
+                    <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
 
             <div class="topbar-right">
-                <button class="theme-btn" (click)="toggleTheme()">🌙</button>
-                <button class="users-btn" (click)="usersRoute()" *ngIf="isAdmin">مدیریت کاربران</button>
-                <button (click)="aiHealthRoute()" class="users-btn "   *ngIf="isAdmin">
-                    🔧 وضعیت سرور AI (Ollama)
+                <button class="theme-btn" (click)="toggleTheme()" aria-label="تغییر تم">
+                    <i class="fa-solid" [class.fa-sun]="isDark()" [class.fa-moon]="!isDark()"></i>
+                </button>
+                <button class="users-btn" (click)="usersRoute()" *ngIf="isAdmin">
+                    <i class="fa-solid fa-users"></i> مدیریت کاربران
+                </button>
+                <button (click)="aiHealthRoute()" class="users-btn" *ngIf="isAdmin">
+                    <i class="fa-solid fa-microchip"></i> وضعیت سرور AI (Ollama)
                 </button>
 
-                <button (click)="activeDirectoryRoute()" class=" users-btn btn-outline-danger"   *ngIf="isAdmin">
-                    🔧 تنظیمات Active Direcotry
+                <button (click)="activeDirectoryRoute()" class="users-btn btn-outline-danger" *ngIf="isAdmin">
+                    <i class="fa-solid fa-building"></i> تنظیمات Active Directory
                 </button>
             </div>
 
