@@ -4,7 +4,6 @@ export interface AiHealthStatus {
   checkedAt: string;
 }
 
-
 export interface OllamaModelInfo {
   name: string;
   size: string;
@@ -12,7 +11,6 @@ export interface OllamaModelInfo {
   family: string;
   parameterSize: string;
 }
-
 
 export interface OllamaServerDetails {
   version: string;
