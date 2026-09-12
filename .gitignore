@@ -89,3 +89,11 @@ connect.lock
 *.db
 *.db-shm
 *.db-wal
+
+# ---- Impeccable / AI tooling (local only) ----
+.agents/
+.github/agents/
+.github/skills/
+.github/workflows/
+.impeccable/
+skills-lock.json
