@@ -22,6 +22,7 @@ namespace AiChat.Infrastructure.AI
                         Role = "system",
                         Content =
                             """
+                            you are mentor.
                             Generate a short title.
                             Maximum 5 words.
                             No quotes.
